@@ -601,11 +601,30 @@
                 const customFileName = `${songTitle} - ${artistName}${fileExtension}`;
                 const renamedFile = new File([file], customFileName, { type: file.type });
 
+                // Step 1: Create a custom folder with name "song name - artist(s)"
+                const folderRes = await fetch('https://api.gofile.io/contents/createFolder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        parentFolderId: serverData.data.servers[0].rootFolder || serverData.data.rootFolder || serverData.data.servers[0].name,
+                        folderName: `${songTitle} - ${artistName}`,
+                        public: true
+                    })
+                });
+
+                let uploadFolderId = "";
+                const folderResult = await folderRes.json();
+                if (folderResult.status === 'ok' && folderResult.data && folderResult.data.id) {
+                    uploadFolderId = folderResult.data.id;
+                }
+
                 const formData = new FormData();
                 formData.append('file', renamedFile);
-                // Tells GoFile to name the folder after your song and artist instead of random characters
-                formData.append('folderName', `${songTitle} - ${artistName}`);
+                if (uploadFolderId) {
+                    formData.append('folderId', uploadFolderId);
+                }
 
+                // Step 2: Upload the renamed file directly into that custom folder ID
                 const fileUploadResponse = await fetch(`https://${uploadServer}.gofile.io/contents/uploadfile`, {
                     method: 'POST',
                     body: formData
