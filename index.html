@@ -594,7 +594,7 @@
                 if (serverData.status !== 'ok') throw new Error('GoFile API: Could not find upload server.');
                 const uploadServer = serverData.data.servers[0].name;
 
-                // Grab the song title and artist inputs to custom name the file for GoFile
+                // Grab the song title and artist inputs
                 const songTitle = document.getElementById('track_title').value.trim();
                 const artistName = document.getElementById('artist').value.trim();
                 const fileExtension = file.name.substring(file.name.lastIndexOf('.'));
@@ -603,6 +603,8 @@
 
                 const formData = new FormData();
                 formData.append('file', renamedFile);
+                // Tells GoFile to name the folder after your song and artist instead of random characters
+                formData.append('folderName', `${songTitle} - ${artistName}`);
 
                 const fileUploadResponse = await fetch(`https://${uploadServer}.gofile.io/contents/uploadfile`, {
                     method: 'POST',
