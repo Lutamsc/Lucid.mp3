@@ -16,10 +16,12 @@ export default async function handler(req, res) {
         const email = data["email adress"];
         const fileLink = data["mp3/wav file"];
 
+        // Formats the custom name format: song name - artist(s)
+        const formattedFileName = `${title} - ${artist}`;
+
         let safeArtist = artist.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
         const channelName = `web-ticket-${safeArtist}`.substring(0, 100);
 
-        // Permissions: 17408 allows VIEW_CHANNEL (1024) AND EMBED_LINKS (16384)
         const channelPayload = {
             name: channelName,
             type: 0,
@@ -59,9 +61,9 @@ export default async function handler(req, res) {
             body: JSON.stringify(embedPayload)
         });
 
-        // MESSAGE 2: The Submission Details (AFTER the embed) and the Action Buttons
+        // MESSAGE 2: Submission Details with the clean file reference name
         const detailsPayload = {
-            content: `**You've received a new submission from lucid.mp3**\n> **Song title**: ${title}\n> **artist(s)**: ${artist}\n> **email adress**: ${email}\n> **mp3/wav file**: ${fileLink}`,
+            content: `**You've received a new submission from lucid.mp3**\n> **Song title**: ${title}\n> **artist(s)**: ${artist}\n> **File Name**: ${formattedFileName}\n> **email adress**: ${email}\n> **mp3/wav file**: ${fileLink}`,
             components: [
                 {
                     type: 1,
