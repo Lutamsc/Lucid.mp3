@@ -1,5 +1,5 @@
-import { verifyKey } from 'discord-interactions';
-import nodemailer from 'nodemailer';
+const { verifyKey } = require('discord-interactions');
+const nodemailer = require('nodemailer');
 
 export const config = { api: { bodyParser: false } };
 
@@ -19,18 +19,21 @@ export default async function handler(req, res) {
     const PUBLIC_KEY = process.env.DISCORD_PUBLIC_KEY;
 
     if (!signature || !timestamp || !PUBLIC_KEY) {
+        console.error("ERROR: Missing Signature or Vercel Environment Variable");
         return res.status(401).send('Missing headers or public key in Vercel');
     }
 
     const rawBody = await getRawBody(req);
 
-    // Use Discord's official package to verify the security handshake
     const isValidRequest = verifyKey(rawBody, signature, timestamp, PUBLIC_KEY);
-    if (!isValidRequest) return res.status(401).send('Invalid request signature');
+    if (!isValidRequest) {
+        console.error("ERROR: Discord signature verification failed");
+        return res.status(401).send('Invalid request signature');
+    }
 
     const interaction = JSON.parse(rawBody);
 
-    // 1. Initial Ping Verification (This allows you to save the URL in Discord!)
+    // 1. Initial Ping Verification
     if (interaction.type === 1) {
         return res.status(200).json({ type: 1 });
     }
@@ -67,7 +70,6 @@ export default async function handler(req, res) {
         const channelId = interaction.channel.id;
         const token = process.env.DISCORD_BOT_TOKEN;
 
-        // Fetch channel messages to find the email
         const msgRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?limit=10`, {
             headers: { 'Authorization': `Bot ${token}` }
         });
