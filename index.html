@@ -456,6 +456,14 @@
 
                 if (widgetData.members && widgetData.members.length > 0) {
                     
+                    // Filter out bots like Invite Tracker, Tickets v2, VoiceMaster, etc.
+                    const botNames = ['invite tracker', 'tickets v2', 'voicemaster', 'tickets'];
+                    const cleanWidgetMembers = widgetData.members.filter(member => {
+                        const name = member.username.toLowerCase();
+                        if (member.bot) return false;
+                        return !botNames.some(b => name.includes(b));
+                    });
+
                     // 2. Fetch the actual Roles from your Netlify Backend
                     let memberRoles = [];
                     try {
@@ -475,14 +483,14 @@
                         });
                     }
 
-                    // 3. Group the online members by matching their backend roles
+                    // 3. Group the filtered online members by matching their backend roles
                     const groupedMembers = {
                         "Founders & Staff": [],
                         "Label Artists": [],
                         "Online Members": [] 
                     };
 
-                    widgetData.members.forEach(member => {
+                    cleanWidgetMembers.forEach(member => {
                         const username = member.username.toLowerCase();
                         const userBackendRoles = roleDict[username] || [];
                         
