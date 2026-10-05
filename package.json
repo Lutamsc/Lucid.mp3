@@ -1,5 +1,7 @@
 {
+  "type": "module",
   "dependencies": {
+    "cookie": "^0.6.0",
     "discord-interactions": "^3.4.0",
     "nodemailer": "^6.9.13"
   }

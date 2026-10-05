@@ -6,8 +6,14 @@ export default async function handler(req, res) {
     const ROLE_1 = '1556218488425812079'; 
     const ROLE_2 = '1556249102444925039'; 
     const TOKEN = process.env.DISCORD_BOT_TOKEN;
+    
+    // Upstash DB Keys
+    const UPSTASH_URL = process.env.UPSTASH_URL;
+    const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
 
-    if (!TOKEN) return res.status(500).send('FATAL ERROR: Bot Token is missing.');
+    if (!TOKEN || !UPSTASH_URL || !UPSTASH_TOKEN) {
+        return res.status(500).send('FATAL ERROR: Missing Bot Token or Upstash DB keys.');
+    }
 
     try {
         const data = req.body;
@@ -16,9 +22,38 @@ export default async function handler(req, res) {
         const email = data["email adress"];
         const fileLink = data["mp3/wav file"];
 
-        // Formats the custom name format: song name - artist(s)
-        const formattedFileName = `${title} - ${artist}`;
+        // 1. Ask Upstash to safely increment our global counter by 1
+        const countRes = await fetch(`${UPSTASH_URL}/incr/submission_counter`, {
+            headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+        });
+        const countData = await countRes.json();
+        const nextCount = countData.result; 
 
+        // Format to lcd-demo-0001
+        const paddedCount = String(nextCount).padStart(4, '0');
+        const submissionId = `lcd-demo-${paddedCount}`;
+
+        // 2. Save the full track record permanently to Upstash
+        const record = {
+            submissionId,
+            title,
+            artist,
+            email,
+            fileLink,
+            timestamp: new Date().toISOString()
+        };
+
+        await fetch(`${UPSTASH_URL}/set/submission:${submissionId}`, {
+            method: 'POST',
+            headers: { 
+                Authorization: `Bearer ${UPSTASH_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(record)
+        });
+
+        // Continue with Discord Ticket Creation...
+        const formattedFileName = `${title} - ${artist}`;
         let safeArtist = artist.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
         const channelName = `web-ticket-${safeArtist}`.substring(0, 100);
 
@@ -42,13 +77,12 @@ export default async function handler(req, res) {
         if (!createChannelRes.ok) return res.status(500).send(`Discord API Error`);
         const channelData = await createChannelRes.json();
 
-        // MESSAGE 1: The Pings and the Embed
         const embedPayload = {
             content: `<@&${ROLE_1}> <@&${ROLE_2}>`,
             embeds: [
                 {
                     title: "Wait for Demo review",
-                    description: "Thank you for opening a ticket! A member of our team will be with you shortly.",
+                    description: `Thank you for opening a ticket! Submission ID: **${submissionId}**`,
                     color: 0x2b2d31,
                     footer: { text: "Powered by Lucid.Mp3" } 
                 }
@@ -61,9 +95,8 @@ export default async function handler(req, res) {
             body: JSON.stringify(embedPayload)
         });
 
-        // MESSAGE 2: Submission Details with the clean file reference name
         const detailsPayload = {
-            content: `**You've received a new submission from lucid.mp3**\n> **Song title**: ${title}\n> **artist(s)**: ${artist}\n> **File Name**: ${formattedFileName}\n> **email adress**: ${email}\n> **mp3/wav file**: ${fileLink}`,
+            content: `**New Submission (ID: ${submissionId})**\n> **Song title**: ${title}\n> **artist(s)**: ${artist}\n> **File Name**: ${formattedFileName}\n> **email(s)**: ${email}\n> **mp3/wav file**: ${fileLink}`,
             components: [
                 {
                     type: 1,
@@ -81,7 +114,7 @@ export default async function handler(req, res) {
             body: JSON.stringify(detailsPayload)
         });
 
-        return res.status(200).send('Ticket generated successfully');
+        return res.status(200).json({ success: true, submissionId });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
