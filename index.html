@@ -383,44 +383,56 @@
             </div>
             
             <div class="lg:col-span-8 fade-up delay-100">
-                <!-- Custom JavaScript Form to handle automated File-to-Link generation via GoFile -->
-                <form id="automatedSubmitForm" class="flex flex-col gap-10">
-                    
-                    <div class="flex flex-col">
-                        <label for="track_title" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Song Title</label>
-                        <input type="text" id="track_title" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="Track Name">
-                    </div>
+                
+                <!-- LOGIN PROMPT (Visible by default until auth check passes) -->
+                <div id="loginPromptContainer" class="flex flex-col items-center justify-center border border-[#222] bg-[#050505] p-12 sm:p-20 text-center">
+                    <h3 class="font-oswald text-2xl sm:text-3xl uppercase tracking-tighter mb-4 text-white">Authentication Required</h3>
+                    <p class="text-xs sm:text-sm text-gray-500 uppercase tracking-widest mb-8 leading-relaxed">
+                        You must connect your Discord account to submit a demo.<br>This allows us to instantly link your track to your profile.
+                    </p>
+                    <a href="/api/auth/discord" class="font-oswald text-lg uppercase tracking-widest border border-white px-10 py-4 clean-invert">
+                        Login with Discord
+                    </a>
+                </div>
 
-                    <div class="flex flex-col">
-                        <label for="artist" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Artist(s)</label>
-                        <input type="text" id="artist" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="Enter Artist Name(s)">
-                    </div>
+                <!-- DEMO FORM (Hidden by default, shown via JS if logged in) -->
+                <div id="demoFormContainer" class="hidden">
+                    <form id="automatedSubmitForm" class="flex flex-col gap-10">
+                        <div class="flex flex-col">
+                            <label for="track_title" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Song Title</label>
+                            <input type="text" id="track_title" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="Track Name">
+                        </div>
 
-                    <div class="flex flex-col">
-                        <label for="email" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Email Address(es)</label>
-                        <input type="text" id="email" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="artist@gmail.com, secondary@gmail.com">
-                        <span class="text-[10px] text-gray-500 mt-2">You can enter multiple email addresses separated by commas.</span>
-                    </div>
+                        <div class="flex flex-col">
+                            <label for="artist" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Artist(s)</label>
+                            <input type="text" id="artist" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="Enter Artist Name(s)">
+                        </div>
 
-                    <div class="flex flex-col">
-                        <label for="track_file" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">MP3 / WAV File (MAX 25MB)</label>
-                        <input type="file" id="track_file" accept=".mp3,.wav" required 
-                               class="clean-input pb-3 text-sm sm:text-base w-full text-gray-400 file:mr-5 file:py-3 file:px-6 file:border file:border-[#333] file:text-xs file:font-bold file:uppercase file:tracking-widest file:bg-transparent file:text-white hover:file:bg-white hover:file:text-black hover:file:border-white file:transition-colors file:cursor-pointer">
-                    </div>
+                        <div class="flex flex-col">
+                            <label for="email" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Email Address(es)</label>
+                            <input type="text" id="email" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="artist@gmail.com, secondary@gmail.com">
+                            <span class="text-[10px] text-gray-500 mt-2">You can enter multiple email addresses separated by commas.</span>
+                        </div>
 
-                    <button type="submit" id="submitBtn" class="self-start font-oswald text-xl sm:text-2xl uppercase tracking-widest border border-white px-10 py-5 mt-4 clean-invert">
-                        Submit Track
-                    </button>
-                    
-                </form>
+                        <div class="flex flex-col">
+                            <label for="track_file" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">MP3 / WAV File (MAX 25MB)</label>
+                            <input type="file" id="track_file" accept=".mp3,.wav" required 
+                                   class="clean-input pb-3 text-sm sm:text-base w-full text-gray-400 file:mr-5 file:py-3 file:px-6 file:border file:border-[#333] file:text-xs file:font-bold file:uppercase file:tracking-widest file:bg-transparent file:text-white hover:file:bg-white hover:file:text-black hover:file:border-white file:transition-colors file:cursor-pointer">
+                        </div>
 
-                <!-- Success Submission ID Result Box -->
-                <div id="submissionResultBox" class="hidden mt-8 border border-green-500/50 bg-green-950/10 p-6">
-                    <h3 class="text-green-400 font-oswald text-xl uppercase tracking-wider mb-2">Track Submitted Successfully!</h3>
-                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-4">Note this Submission ID down! You will need it when opening a ticket in Discord.</p>
-                    <div class="flex items-center gap-4 bg-black border border-[#333] p-4">
-                        <span id="displaySubmissionId" class="text-white font-mono text-sm tracking-widest select-all"></span>
-                        <button type="button" id="copyIdBtn" class="text-xs uppercase tracking-widest border border-white px-4 py-2 clean-invert ml-auto">Copy ID</button>
+                        <button type="submit" id="submitBtn" class="self-start font-oswald text-xl sm:text-2xl uppercase tracking-widest border border-white px-10 py-5 mt-4 clean-invert">
+                            Submit Track
+                        </button>
+                    </form>
+
+                    <!-- Success Submission ID Result Box -->
+                    <div id="submissionResultBox" class="hidden mt-8 border border-green-500/50 bg-green-950/10 p-6">
+                        <h3 class="text-green-400 font-oswald text-xl uppercase tracking-wider mb-2">Track Submitted Successfully!</h3>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-4">Note this Submission ID down! You will need it when opening a ticket in Discord.</p>
+                        <div class="flex items-center gap-4 bg-black border border-[#333] p-4">
+                            <span id="displaySubmissionId" class="text-white font-mono text-sm tracking-widest select-all"></span>
+                            <button type="button" id="copyIdBtn" class="text-xs uppercase tracking-widest border border-white px-4 py-2 clean-invert ml-auto">Copy ID</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -442,7 +454,7 @@
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Submission Lookup Search</h3>
                     
                     <div class="flex flex-col sm:flex-row gap-4 mb-6">
-                        <input type="text" id="adminSearchInput" class="clean-input pb-3 text-sm sm:text-base flex-1" placeholder="Enter Submission ID (e.g. lcd-demo-a8f3b)">
+                        <input type="text" id="adminSearchInput" class="clean-input pb-3 text-sm sm:text-base flex-1" placeholder="Enter Submission ID (e.g. lcd-demo-0001)">
                         <button type="button" id="adminSearchBtn" class="font-oswald text-sm uppercase tracking-widest border border-white px-6 py-3 clean-invert">Search ID</button>
                     </div>
 
@@ -486,10 +498,14 @@
                         : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
                     document.getElementById('discordUserContent').innerHTML = `
-                        <img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-[#333]" alt="pfp">
+                        <img src="${escapeHtml(avatarUrl)}" class="w-8 h-8 rounded-full border border-[#333]" alt="pfp">
                         <span class="text-white font-semibold">${escapeHtml(user.username)}</span>
                         <a href="/api/auth/logout" class="text-[10px] text-gray-500 hover:text-white underline ml-2">Logout</a>
                     `;
+
+                    // SHOW FORM, HIDE LOGIN PROMPT
+                    document.getElementById('loginPromptContainer').classList.add('hidden');
+                    document.getElementById('demoFormContainer').classList.remove('hidden');
 
                     // Check if authorized admin
                     if (ADMIN_IDS.includes(user.id)) {
@@ -619,6 +635,7 @@
             }
         }
 
+        // --- SUBMISSION SYSTEM ---
         document.getElementById('automatedSubmitForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -939,7 +956,7 @@
             counter.textContent = `${ARTISTS.length} ARTIST${ARTISTS.length === 1 ? "" : "S"}`;
             grid.innerHTML = `<article class="catalog-item flex items-center justify-center border-dashed border-[#444]"><div class="p-12 text-center"><h3 class="font-oswald text-xl text-gray-500 uppercase tracking-tight">Loading...</h3></div></article>`;
 
-            const results = await Promise.allSettled(ARTISTS.map(artist => getSpotifyArtistData(artist)));
+            const results = await Promise.allSettled(ARTISTS.name ? ARTISTS.map(artist => getSpotifyArtistData(artist)) : []);
             const artistsData = results.map((result, i) => result.status === "fulfilled" ? result.value : { spotify: ARTISTS[i].spotify, name: ARTISTS[i].name || "Unknown Artist", image: "", listeners: ARTISTS[i].listeners || "TBA" });
 
             grid.innerHTML = "";
