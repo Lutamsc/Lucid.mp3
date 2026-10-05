@@ -1,3 +1,5 @@
+import cookie from 'cookie';
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
@@ -7,12 +9,21 @@ export default async function handler(req, res) {
     const ROLE_2 = '1556249102444925039'; 
     const TOKEN = process.env.DISCORD_BOT_TOKEN;
     
-    // Upstash DB Keys
     const UPSTASH_URL = process.env.UPSTASH_URL;
     const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
 
     if (!TOKEN || !UPSTASH_URL || !UPSTASH_TOKEN) {
         return res.status(500).send('FATAL ERROR: Missing Bot Token or Upstash DB keys.');
+    }
+
+    // See if the user is currently logged in via Discord (to log their ID in the database)
+    const cookies = cookie.parse(req.headers.cookie || '');
+    let loggedInUserId = null;
+    if (cookies.discord_user) {
+        try {
+            const user = JSON.parse(cookies.discord_user);
+            loggedInUserId = user.id;
+        } catch(e) {}
     }
 
     try {
@@ -22,24 +33,22 @@ export default async function handler(req, res) {
         const email = data["email adress"];
         const fileLink = data["mp3/wav file"];
 
-        // 1. Ask Upstash to safely increment our global counter by 1
         const countRes = await fetch(`${UPSTASH_URL}/incr/submission_counter`, {
             headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
         });
         const countData = await countRes.json();
         const nextCount = countData.result; 
 
-        // Format to lcd-demo-0001
         const paddedCount = String(nextCount).padStart(4, '0');
         const submissionId = `lcd-demo-${paddedCount}`;
 
-        // 2. Save the full track record permanently to Upstash
         const record = {
             submissionId,
             title,
             artist,
             email,
             fileLink,
+            discordId: loggedInUserId || "Guest",
             timestamp: new Date().toISOString()
         };
 
@@ -52,11 +61,11 @@ export default async function handler(req, res) {
             body: JSON.stringify(record)
         });
 
-        // Continue with Discord Ticket Creation...
         const formattedFileName = `${title} - ${artist}`;
         let safeArtist = artist.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
         const channelName = `web-ticket-${safeArtist}`.substring(0, 100);
 
+        // ONLY Staff and Guild have permissions, User is NOT added to the ticket
         const channelPayload = {
             name: channelName,
             type: 0,
@@ -77,6 +86,7 @@ export default async function handler(req, res) {
         if (!createChannelRes.ok) return res.status(500).send(`Discord API Error`);
         const channelData = await createChannelRes.json();
 
+        // Tag the staff ONLY
         const embedPayload = {
             content: `<@&${ROLE_1}> <@&${ROLE_2}>`,
             embeds: [

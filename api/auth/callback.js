@@ -6,9 +6,13 @@ export default async function handler(req, res) {
 
     const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
     const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://' + req.headers.host}/api/auth/callback`;
+    const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+    const GUILD_ID = '1554157703067336875'; // Your Server ID
+    
+    const redirectUri = 'https://lucidmp3-eight.vercel.app/api/auth/callback';
 
     try {
+        // 1. Get the user's access token
         const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -22,15 +26,29 @@ export default async function handler(req, res) {
         });
 
         const tokenData = await tokenRes.json();
-        if (!tokenData.access_token) return res.status(400).send('Failed to obtain access token from Discord');
+        if (!tokenData.access_token) return res.status(400).send('Failed to obtain access token');
 
+        // 2. Get the user's Discord profile data
         const userRes = await fetch('https://discord.com/api/users/@me', {
             headers: { Authorization: `Bearer ${tokenData.access_token}` },
         });
-
         const userData = await userRes.json();
+
+        // 3. AUTOMATICALLY ADD THEM TO YOUR SERVER!
+        if (BOT_TOKEN) {
+            await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userData.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bot ${BOT_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    access_token: tokenData.access_token
+                })
+            });
+        }
         
-        // Save user session in an encrypted secure cookie
+        // 4. Save their session cookie
         res.setHeader('Set-Cookie', cookie.serialize('discord_user', JSON.stringify({
             id: userData.id,
             username: userData.username,
