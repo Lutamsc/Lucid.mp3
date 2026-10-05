@@ -1,8 +1,6 @@
 export default function handler(req, res) {
-    const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-    const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://' + req.headers.host}/api/auth/callback`;
-    
-    const discordLoginUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify`;
+    // Paste the EXACT URL you just copied from Discord between the quotes below:
+    const discordLoginUrl = "https://discord.com/oauth2/authorize?client_id=1556227335634817054&response_type=code&redirect_uri=https%3A%2F%2Flucidmp3-eight.vercel.app%2Fapi%2Fauth%2Fcallback&scope=identify";
     
     res.redirect(discordLoginUrl);
 }
