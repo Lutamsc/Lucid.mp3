@@ -1,4 +1,17 @@
+import mongoose from 'mongoose';
 import cookie from 'cookie';
+
+// MongoDB Blueprint (Replaces Upstash)
+const submissionSchema = new mongoose.Schema({
+    submissionId: String,
+    title: String,
+    artist: String,
+    email: String,
+    fileLink: String,
+    discordId: String,
+    timestamp: { type: Date, default: Date.now }
+});
+const Submission = mongoose.models.Submission || mongoose.model('Submission', submissionSchema);
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
@@ -9,11 +22,8 @@ export default async function handler(req, res) {
     const ROLE_2 = '1556249102444925039'; 
     const TOKEN = process.env.DISCORD_BOT_TOKEN;
     
-    const UPSTASH_URL = process.env.UPSTASH_URL;
-    const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
-
-    if (!TOKEN || !UPSTASH_URL || !UPSTASH_TOKEN) {
-        return res.status(500).send('FATAL ERROR: Missing Bot Token or Upstash DB keys.');
+    if (!TOKEN) {
+        return res.status(500).send('FATAL ERROR: Missing Bot Token.');
     }
 
     // See if the user is currently logged in via Discord (to log their ID in the database)
@@ -33,34 +43,28 @@ export default async function handler(req, res) {
         const email = data["email adress"];
         const fileLink = data["mp3/wav file"];
 
-        const countRes = await fetch(`${UPSTASH_URL}/incr/submission_counter`, {
-            headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-        });
-        const countData = await countRes.json();
-        const nextCount = countData.result; 
+        // 1. Connect to MongoDB 
+        if (mongoose.connection.readyState === 0) {
+            await mongoose.connect(process.env.MONGO_URI);
+        }
 
-        const paddedCount = String(nextCount).padStart(4, '0');
-        const submissionId = `lcd-demo-${paddedCount}`;
+        // 2. Generate ID (Using random hex to replace Upstash counter)
+        const uniqueHex = Math.random().toString(16).substring(2, 6).toUpperCase();
+        const submissionId = `LCD-DEMO-${uniqueHex}`;
 
-        const record = {
+        // 3. Save to MongoDB
+        await Submission.create({
             submissionId,
             title,
             artist,
             email,
             fileLink,
-            discordId: loggedInUserId || "Guest",
-            timestamp: new Date().toISOString()
-        };
-
-        await fetch(`${UPSTASH_URL}/set/submission:${submissionId}`, {
-            method: 'POST',
-            headers: { 
-                Authorization: `Bearer ${UPSTASH_TOKEN}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(record)
+            discordId: loggedInUserId || "Guest"
         });
 
+        // ==========================================
+        // DISCORD TICKET CREATION (YOUR ORIGINAL CODE)
+        // ==========================================
         const formattedFileName = `${title} - ${artist}`;
         let safeArtist = artist.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
         const channelName = `web-ticket-${safeArtist}`.substring(0, 100);

@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -240,8 +241,8 @@
                 </span>
                 <div class="socials-dropdown text-xs tracking-widest uppercase">
                     <a href="https://discord.gg/XsDG79fwbc" target="_blank">Discord</a>
-                    <a href="#" target="_blank">TikTok</a>
-                    <a href="#" target="_blank">YouTube</a>
+                    <a href="https://www.tiktok.com/@lucid.mp3tt?is_from_webapp=1&sender_device=pc" target="_blank">TikTok</a>
+                    <a href="https://www.youtube.com/channel/UCPiNF_ItgAVyEgFiJ7o4Z4A" target="_blank">YouTube</a>
                 </div>
             </div>
 
@@ -384,19 +385,8 @@
             
             <div class="lg:col-span-8 fade-up delay-100">
                 
-                <!-- LOGIN PROMPT (Visible by default until auth check passes) -->
-                <div id="loginPromptContainer" class="flex flex-col items-center justify-center border border-[#222] bg-[#050505] p-12 sm:p-20 text-center">
-                    <h3 class="font-oswald text-2xl sm:text-3xl uppercase tracking-tighter mb-4 text-white">Authentication Required</h3>
-                    <p class="text-xs sm:text-sm text-gray-500 uppercase tracking-widest mb-8 leading-relaxed">
-                        You must connect your Discord account to submit a demo.<br>This allows us to instantly link your track to your profile.
-                    </p>
-                    <a href="/api/auth/discord" class="font-oswald text-lg uppercase tracking-widest border border-white px-10 py-4 clean-invert">
-                        Login with Discord
-                    </a>
-                </div>
-
-                <!-- DEMO FORM (Hidden by default, shown via JS if logged in) -->
-                <div id="demoFormContainer" class="hidden">
+                <!-- DEMO FORM (Always Visible) -->
+                <div id="demoFormContainer">
                     <form id="automatedSubmitForm" class="flex flex-col gap-10">
                         <div class="flex flex-col">
                             <label for="track_title" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Song Title</label>
@@ -409,9 +399,8 @@
                         </div>
 
                         <div class="flex flex-col">
-                            <label for="email" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Email Address(es)</label>
-                            <input type="text" id="email" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="artist@gmail.com, secondary@gmail.com">
-                            <span class="text-[10px] text-gray-500 mt-2">You can enter multiple email addresses separated by commas.</span>
+                            <label for="email" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Discord or Email</label>
+                            <input type="text" id="email" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="Username or Contact Address">
                         </div>
 
                         <div class="flex flex-col">
@@ -449,7 +438,8 @@
                 </p>
             </div>
             
-            <div class="lg:col-span-8 fade-up delay-100">
+            <div class="lg:col-span-8 fade-up delay-100 flex flex-col gap-8">
+                <!-- Search Submissions -->
                 <div class="border border-[#222] bg-[#050505] p-6 sm:p-8">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Submission Lookup Search</h3>
                     
@@ -460,6 +450,28 @@
 
                     <div id="adminSearchResult" class="border border-[#222] bg-black p-6 text-xs text-gray-400 tracking-wider">
                         Enter a unique submission ID above to pull up track details, artist emails, and download links.
+                    </div>
+                </div>
+
+                <!-- Global Site Management -->
+                <div class="border border-[#222] bg-[#050505] p-6 sm:p-8">
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Global Site Management</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <form id="addReleaseForm" class="flex flex-col gap-4">
+                            <h4 class="font-oswald text-xl uppercase tracking-widest text-white">Add Release</h4>
+                            <input type="text" id="releaseSpotify" required class="clean-input pb-2 text-sm" placeholder="Spotify Track URL">
+                            <input type="text" id="releaseArtist" required class="clean-input pb-2 text-sm" placeholder="Artist Name(s) Display">
+                            <button type="submit" class="font-oswald text-sm uppercase tracking-widest border border-white px-4 py-2 mt-2 clean-invert self-start">Publish Release</button>
+                        </form>
+
+                        <form id="addArtistForm" class="flex flex-col gap-4">
+                            <h4 class="font-oswald text-xl uppercase tracking-widest text-white">Add Artist</h4>
+                            <input type="text" id="artistSpotify" required class="clean-input pb-2 text-sm" placeholder="Spotify Artist URL">
+                            <input type="text" id="artistName" required class="clean-input pb-2 text-sm" placeholder="Artist Name">
+                            <input type="text" id="artistListeners" required class="clean-input pb-2 text-sm" placeholder="Monthly Listeners (e.g. 7,000,000)">
+                            <button type="submit" class="font-oswald text-sm uppercase tracking-widest border border-white px-4 py-2 mt-2 clean-invert self-start">Publish Artist</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -473,9 +485,9 @@
 
         <div class="flex flex-wrap justify-center gap-8">
             <a href="mailto:contact@lucid.mp3" class="strike-hover hover:text-white transition-colors duration-300">contact@lucid.mp3</a>
-            <a href="https://discord.gg/XsDG79fwbc" target="_blank" class="strike-hover hover:text-white transition-colors duration-300">Discord</a>
-            <a href="#" target="_blank" class="strike-hover hover:text-white transition-colors duration-300">TikTok</a>
-            <a href="#" target="_blank" class="strike-hover hover:text-white transition-colors duration-300">YouTube</a>
+            <a href="https://discord.gg/XsDG79fwbc" target="_blank" class="social-icon strike-hover hover:text-white transition-colors duration-300"><i class="fa-brands fa-discord fa-lg"></i></a>
+            <a href="https://www.tiktok.com/@lucid.mp3tt?is_from_webapp=1&sender_device=pc" target="_blank" class="social-icon strike-hover hover:text-white transition-colors duration-300"><i class="fa-brands fa-tiktok fa-lg"></i></a>
+            <a href="https://www.youtube.com/channel/UCPiNF_ItgAVyEgFiJ7o4Z4A" target="_blank" class="social-icon strike-hover hover:text-white transition-colors duration-300"><i class="fa-brands fa-youtube fa-lg"></i></a>
         </div>
     </footer>
 
@@ -484,6 +496,28 @@
 
         // Authorized Admin IDs
         const ADMIN_IDS = ["1533492771556692229", "1248704737243697265"];
+
+        // Dynamic Database Arrays
+        let CATALOG = [];
+        let ARTISTS = [];
+
+        // Fetch Global Data on Load
+        async function loadGlobalData() {
+            try {
+                const catRes = await fetch('/api/catalog');
+                if (catRes.ok) CATALOG = await catRes.json();
+                
+                const artRes = await fetch('/api/artists');
+                if (artRes.ok) ARTISTS = await artRes.json();
+                
+                renderCatalog();
+                renderArtists();
+            } catch (err) {
+                console.error("Database connection missing for global catalog.");
+                renderCatalog();
+                renderArtists();
+            }
+        }
 
         // Check login state on load
         async function checkAuthSession() {
@@ -502,10 +536,6 @@
                         <span class="text-white font-semibold">${escapeHtml(user.username)}</span>
                         <a href="/api/auth/logout" class="text-[10px] text-gray-500 hover:text-white underline ml-2">Logout</a>
                     `;
-
-                    // SHOW FORM, HIDE LOGIN PROMPT
-                    document.getElementById('loginPromptContainer').classList.add('hidden');
-                    document.getElementById('demoFormContainer').classList.remove('hidden');
 
                     // Check if authorized admin
                     if (ADMIN_IDS.includes(user.id)) {
@@ -815,34 +845,55 @@
             }
         });
 
-        const CATALOG = [
-            {
-                spotify: "https://open.spotify.com/track/11hPrFyqyyHN960ty30mT7",
-                artist: "DJ Nexus8, DJ ADIMA, -Prey, MC K3"
-            },
-            {
-                spotify: "https://open.spotify.com/track/0EBwsFvKM726xls3dBhOrB",
-                artist: "DJ Nexus8, DJ ADIMA, -Prey"
-            }
-        ];
+        // --- ADMIN POST TO DB LOGIC ---
+        document.getElementById('addReleaseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'SAVING...';
+            
+            try {
+                const res = await fetch('/api/catalog', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        spotify: document.getElementById('releaseSpotify').value,
+                        artist: document.getElementById('releaseArtist').value
+                    })
+                });
+                if (res.ok) {
+                    btn.innerText = 'SAVED GLOBALLY!';
+                    this.reset();
+                    loadGlobalData(); 
+                }
+            } catch (err) {}
+            setTimeout(() => btn.innerText = originalText, 3000);
+        });
 
-        const ARTISTS = [
-            {
-                spotify: "https://open.spotify.com/artist/3uA4unR7LBOcqjpbOeCs0Y",
-                name: "Prey",
-                listeners: "7,000,000"
-            },
-            { 
-                spotify: "https://open.spotify.com/artist/4rG1Y4L7JEDb0w23N5Y4R5", 
-                name: "LURK",
-                listeners: "3,000,000" 
-            },
-            { 
-                spotify: "https://open.spotify.com/artist/12Chz98pHFMEvdxLgHhe1y", 
-                name: "SCYTHERMANE",
-                listeners: "10,000,000" 
-            }
-        ];
+        document.getElementById('addArtistForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'SAVING...';
+            
+            try {
+                const res = await fetch('/api/artists', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        spotify: document.getElementById('artistSpotify').value,
+                        name: document.getElementById('artistName').value,
+                        listeners: document.getElementById('artistListeners').value
+                    })
+                });
+                if (res.ok) {
+                    btn.innerText = 'SAVED GLOBALLY!';
+                    this.reset();
+                    loadGlobalData(); 
+                }
+            } catch (err) {}
+            setTimeout(() => btn.innerText = originalText, 3000);
+        });
 
         function escapeHtml(value){
             return String(value).replace(/[&<>'"]/g, char => ({
@@ -984,8 +1035,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderCatalog();
-            renderArtists();
+            loadGlobalData();
             renderDiscordWidget(); 
 
             const observerOptions = {

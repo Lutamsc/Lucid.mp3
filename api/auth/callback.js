@@ -6,8 +6,6 @@ export default async function handler(req, res) {
 
     const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
     const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-    const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-    const GUILD_ID = '1554157703067336875'; // Your Server ID
     
     const redirectUri = 'https://lucidmp3-eight.vercel.app/api/auth/callback';
 
@@ -33,22 +31,8 @@ export default async function handler(req, res) {
             headers: { Authorization: `Bearer ${tokenData.access_token}` },
         });
         const userData = await userRes.json();
-
-        // 3. AUTOMATICALLY ADD THEM TO YOUR SERVER!
-        if (BOT_TOKEN) {
-            await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userData.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bot ${BOT_TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    access_token: tokenData.access_token
-                })
-            });
-        }
         
-        // 4. Save their session cookie
+        // 3. Save their session cookie
         res.setHeader('Set-Cookie', cookie.serialize('discord_user', JSON.stringify({
             id: userData.id,
             username: userData.username,
