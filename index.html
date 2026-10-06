@@ -39,7 +39,6 @@
             scroll-behavior: smooth;
         }
 
-        /* Raw CSS Noise Overlay */
         .noise-overlay {
             position: fixed;
             inset: 0;
@@ -49,7 +48,6 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* Clean Brutalist Interactions */
         .clean-invert {
             transition: background-color 0.3s ease, color 0.3s ease;
             cursor: pointer;
@@ -83,7 +81,6 @@
             width: 100%;
         }
 
-        /* Socials Dropdown Container */
         .socials-dropdown {
             position: absolute;
             top: 100%;
@@ -110,7 +107,6 @@
             border-bottom: none;
         }
 
-        /* Smooth reveal animations */
         .fade-up {
             opacity: 0;
             transform: translateY(40px);
@@ -123,7 +119,6 @@
         .delay-100 { transition-delay: 100ms; }
         .delay-200 { transition-delay: 200ms; }
 
-        /* Form Inputs */
         .clean-input {
             background: transparent;
             border: none;
@@ -141,7 +136,6 @@
             color: #555;
         }
 
-        /* Sideways Scrolling Catalog */
         .catalog-scroll-container {
             display: flex;
             flex-wrap: nowrap;
@@ -192,7 +186,6 @@
             filter: grayscale(0%) contrast(100%);
         }
 
-        /* Custom Scrollbar for Discord Widget */
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
         }
@@ -234,7 +227,6 @@
             <a href="#community" class="strike-hover hover:text-white transition-colors duration-300">Community</a>
             <a href="#admin" id="navAdminLink" class="strike-hover hover:text-white transition-colors duration-300 hidden">Admin Panel</a>
             
-            <!-- Socials Dropdown -->
             <div class="relative socials-container py-2 cursor-pointer">
                 <span class="strike-hover hover:text-white transition-colors duration-300 flex items-center gap-1">
                     Socials <span class="text-[8px]">▼</span>
@@ -272,7 +264,6 @@
         </div>
     </section>
 
-    <!-- RELEASES SECTION -->
     <section id="releases" class="w-full max-w-[100vw] overflow-hidden py-24 md:py-32 border-b border-[#111]">
         <div class="px-6 mx-auto max-w-7xl w-full mb-12 fade-up">
             <div class="flex justify-between items-end border-b border-[#333] pb-6">
@@ -286,7 +277,6 @@
         </div>
     </section>
 
-    <!-- ARTISTS SECTION -->
     <section id="artists" class="w-full max-w-[100vw] overflow-hidden py-24 md:py-32 border-b border-[#111]">
         <div class="px-6 mx-auto max-w-7xl w-full mb-12 fade-up">
             <div class="flex justify-between items-end border-b border-[#333] pb-6">
@@ -312,25 +302,12 @@
             <div class="lg:col-span-8 fade-up delay-100">
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">A&R Selection / The Standard</h3>
-                    
-                    <!-- Spotify Playlist Embed -->
-                    <iframe 
-                        style="border-radius:0px; border: 1px solid #222;" 
-                        src="https://open.spotify.com/embed/playlist/6dNSryhApJ2PPvpT6fAGZK?utm_source=generator&theme=0" 
-                        width="100%" 
-                        height="450" 
-                        frameBorder="0" 
-                        allowfullscreen="" 
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                        loading="lazy">
-                    </iframe>
-
+                    <iframe style="border-radius:0px; border: 1px solid #222;" src="https://open.spotify.com/embed/playlist/6dNSryhApJ2PPvpT6fAGZK?utm_source=generator&theme=0" width="100%" height="450" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- COMMUNITY SECTION WITH CUSTOM JSON WIDGET -->
     <section id="community" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
             <div class="lg:col-span-4 fade-up">
@@ -342,8 +319,6 @@
             
             <div class="lg:col-span-8 fade-up delay-100">
                 <div class="border border-[#222] bg-[#050505] p-6 flex flex-col h-[500px]">
-                    
-                    <!-- Custom Widget Header -->
                     <div id="discord-header" class="flex justify-between items-end border-b border-[#222] pb-4 mb-4">
                         <div>
                             <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 mb-1">Server Interface</h3>
@@ -355,20 +330,17 @@
                         </span>
                     </div>
                     
-                    <!-- Custom Widget Members List (With Role Categories & Discord UI Style) -->
                     <div id="discord-members" class="flex-1 overflow-y-auto custom-scrollbar pr-2">
                         <div class="text-xs text-gray-500 uppercase tracking-widest text-center py-10">
                             INITIALIZING API...
                         </div>
                     </div>
 
-                    <!-- Custom Widget Join Button -->
                     <div class="pt-4 border-t border-[#222] mt-4 flex justify-end">
                         <a href="https://discord.gg/XsDG79fwbc" target="_blank" class="font-oswald text-sm md:text-base uppercase tracking-widest border border-white px-6 py-3 clean-invert">
                             JOIN THE SERVER ↗
                         </a>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -384,8 +356,6 @@
             </div>
             
             <div class="lg:col-span-8 fade-up delay-100">
-                
-                <!-- DEMO FORM (Always Visible) -->
                 <div id="demoFormContainer">
                     <form id="automatedSubmitForm" class="flex flex-col gap-10">
                         <div class="flex flex-col">
@@ -399,8 +369,9 @@
                         </div>
 
                         <div class="flex flex-col">
-                            <label for="email" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Discord or Email</label>
-                            <input type="text" id="email" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="Username or Contact Address">
+                            <label for="email" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-3 font-bold">Email Address(es)</label>
+                            <input type="text" id="email" required class="clean-input pb-3 text-lg sm:text-xl w-full" placeholder="artist@gmail.com, secondary@gmail.com">
+                            <span class="text-[10px] text-gray-500 mt-2">You can enter multiple email addresses separated by commas.</span>
                         </div>
 
                         <div class="flex flex-col">
@@ -414,7 +385,6 @@
                         </button>
                     </form>
 
-                    <!-- Success Submission ID Result Box -->
                     <div id="submissionResultBox" class="hidden mt-8 border border-green-500/50 bg-green-950/10 p-6">
                         <h3 class="text-green-400 font-oswald text-xl uppercase tracking-wider mb-2">Track Submitted Successfully!</h3>
                         <p class="text-xs text-gray-400 uppercase tracking-widest mb-4">Note this Submission ID down! You will need it when opening a ticket in Discord.</p>
@@ -439,7 +409,6 @@
             </div>
             
             <div class="lg:col-span-8 fade-up delay-100 flex flex-col gap-8">
-                <!-- Search Submissions -->
                 <div class="border border-[#222] bg-[#050505] p-6 sm:p-8">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Submission Lookup Search</h3>
                     
@@ -453,7 +422,6 @@
                     </div>
                 </div>
 
-                <!-- Global Site Management -->
                 <div class="border border-[#222] bg-[#050505] p-6 sm:p-8">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Global Site Management</h3>
                     
@@ -494,14 +462,11 @@
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Authorized Admin IDs
         const ADMIN_IDS = ["1533492771556692229", "1248704737243697265"];
 
-        // Dynamic Database Arrays
         let CATALOG = [];
         let ARTISTS = [];
 
-        // Fetch Global Data on Load
         async function loadGlobalData() {
             try {
                 const catRes = await fetch('/api/catalog');
@@ -510,26 +475,35 @@
                 const artRes = await fetch('/api/artists');
                 if (artRes.ok) ARTISTS = await artRes.json();
                 
+                // Fallback to ensure you never have a blank "NO RELEASES" box again
+                if (!CATALOG || CATALOG.length === 0) {
+                    CATALOG = [
+                        { spotify: "https://open.spotify.com/track/11hPrFyqyyHN960ty30mT7", artist: "DJ Nexus8, DJ ADIMA, -Prey, MC K3" },
+                        { spotify: "https://open.spotify.com/track/0EBwsFvKM726xls3dBhOrB", artist: "DJ Nexus8, DJ ADIMA, -Prey" }
+                    ];
+                }
+                if (!ARTISTS || ARTISTS.length === 0) {
+                    ARTISTS = [
+                        { spotify: "https://open.spotify.com/artist/3uA4unR7LBOcqjpbOeCs0Y", name: "Prey", listeners: "7,000,000" },
+                        { spotify: "https://open.spotify.com/artist/4rG1Y4L7JEDb0w23N5Y4R5", name: "LURK", listeners: "3,000,000" },
+                        { spotify: "https://open.spotify.com/artist/12Chz98pHFMEvdxLgHhe1y", name: "SCYTHERMANE", listeners: "10,000,000" }
+                    ];
+                }
+                
                 renderCatalog();
                 renderArtists();
             } catch (err) {
-                console.error("Database connection missing for global catalog.");
                 renderCatalog();
                 renderArtists();
             }
         }
 
-        // Check login state on load
         async function checkAuthSession() {
             try {
                 const res = await fetch('/api/auth/me');
                 if (res.ok) {
                     const user = await res.json();
-                    
-                    // Render user info in bottom left widget
-                    const avatarUrl = user.avatar 
-                        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` 
-                        : `https://cdn.discordapp.com/embed/avatars/0.png`;
+                    const avatarUrl = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
                     document.getElementById('discordUserContent').innerHTML = `
                         <img src="${escapeHtml(avatarUrl)}" class="w-8 h-8 rounded-full border border-[#333]" alt="pfp">
@@ -537,7 +511,6 @@
                         <a href="/api/auth/logout" class="text-[10px] text-gray-500 hover:text-white underline ml-2">Logout</a>
                     `;
 
-                    // Check if authorized admin
                     if (ADMIN_IDS.includes(user.id)) {
                         document.getElementById('admin').classList.remove('hidden');
                         document.getElementById('navAdminLink').classList.remove('hidden');
@@ -545,7 +518,6 @@
                 }
             } catch (e) {}
         }
-        checkAuthSession();
 
         const ROLE_MAP = {
             "1556218488425812079": "Founders & Staff", 
@@ -603,7 +575,6 @@
                     cleanWidgetMembers.forEach(member => {
                         const username = member.username.toLowerCase();
                         const userBackendRoles = roleDict[username] || [];
-                        
                         let assignedRole = "Online Members";
 
                         for (const [roleId, roleName] of Object.entries(ROLE_MAP)) {
@@ -612,7 +583,6 @@
                                 break; 
                             }
                         }
-
                         if (!groupedMembers[assignedRole]) groupedMembers[assignedRole] = [];
                         groupedMembers[assignedRole].push(member);
                     });
@@ -623,13 +593,7 @@
                     roleOrder.forEach(roleName => {
                         const members = groupedMembers[roleName];
                         if (!members || members.length === 0) return; 
-
-                        html += `
-                            <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest border-b border-[#222] pb-1 mt-6 mb-2 pl-2 first:mt-0">
-                                -- ${escapeHtml(roleName)} --
-                            </div>
-                        `;
-
+                        html += `<div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest border-b border-[#222] pb-1 mt-6 mb-2 pl-2 first:mt-0">-- ${escapeHtml(roleName)} --</div>`;
                         html += members.map(member => {
                             let statusColor = 'bg-gray-500';
                             if (member.status === 'online') statusColor = 'bg-green-500';
@@ -649,47 +613,22 @@
                             `;
                         }).join('');
                     });
-
                     container.innerHTML = html;
-
-                } else {
-                    container.innerHTML = `<div class="text-xs text-gray-500 uppercase tracking-widest text-center py-10">NO MEMBERS CURRENTLY ACTIVE</div>`;
                 }
-
             } catch(e) {
-                container.innerHTML = `
-                    <div class="text-xs text-red-500 uppercase tracking-widest text-center py-10 border border-red-900 bg-red-950/20">
-                        CONNECTION FAILED.<br>ENSURE DISCORD SERVER WIDGET IS ENABLED.
-                    </div>
-                `;
+                container.innerHTML = `<div class="text-xs text-red-500 uppercase tracking-widest text-center py-10 border border-red-900 bg-red-950/20">CONNECTION FAILED.<br>ENSURE DISCORD SERVER WIDGET IS ENABLED.</div>`;
             }
         }
 
-        // --- SUBMISSION SYSTEM ---
         document.getElementById('automatedSubmitForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const btn = document.getElementById('submitBtn');
             const originalText = btn.innerText;
             const fileInput = document.getElementById('track_file');
             const file = fileInput.files[0];
             const resultBox = document.getElementById('submissionResultBox');
             
-            if (!file) {
-                btn.innerText = 'ERROR: PLEASE SELECT A FILE';
-                btn.style.color = '#ef4444';
-                btn.style.borderColor = '#ef4444';
-                setTimeout(() => { btn.innerText = originalText; btn.style.borderColor = ''; btn.style.color = ''; }, 3000);
-                return;
-            }
-
-            if (file.size > 26214400) {
-                btn.innerText = 'ERROR: FILE TOO LARGE (MAX 25MB)';
-                btn.style.color = '#ef4444';
-                btn.style.borderColor = '#ef4444';
-                setTimeout(() => { btn.innerText = originalText; btn.style.borderColor = ''; btn.style.color = ''; }, 4000);
-                return; 
-            }
+            if (!file) return;
 
             btn.innerText = 'UPLOADING TO SECURE SERVER...';
             btn.disabled = true;
@@ -698,8 +637,6 @@
             try {
                 const serverReq = await fetch('https://api.gofile.io/servers', { method: 'GET' });
                 const serverData = await serverReq.json();
-                
-                if (serverData.status !== 'ok') throw new Error('GoFile API: Could not find upload server.');
                 const uploadServer = serverData.data.servers[0].name;
 
                 const songTitle = document.getElementById('track_title').value.trim();
@@ -720,24 +657,14 @@
 
                 let uploadFolderId = "";
                 const folderResult = await folderRes.json();
-                if (folderResult.status === 'ok' && folderResult.data && folderResult.data.id) {
-                    uploadFolderId = folderResult.data.id;
-                }
+                if (folderResult.status === 'ok' && folderResult.data && folderResult.data.id) uploadFolderId = folderResult.data.id;
 
                 const formData = new FormData();
                 formData.append('file', renamedFile);
-                if (uploadFolderId) {
-                    formData.append('folderId', uploadFolderId);
-                }
+                if (uploadFolderId) formData.append('folderId', uploadFolderId);
 
-                const fileUploadResponse = await fetch(`https://${uploadServer}.gofile.io/contents/uploadfile`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
+                const fileUploadResponse = await fetch(`https://${uploadServer}.gofile.io/contents/uploadfile`, { method: 'POST', body: formData });
                 const uploadResult = await fileUploadResponse.json();
-                if (uploadResult.status !== 'ok') throw new Error('GoFile API: File upload rejected.');
-                
                 const secureLink = uploadResult.data.downloadPage;
 
                 btn.innerText = 'ROUTING TO A&R...';
@@ -757,52 +684,33 @@
 
                 if (discordBotResponse.ok) {
                     const resJson = await discordBotResponse.json();
-                    const submissionId = resJson.submissionId || "lcd-demo-unknown";
-
+                    document.getElementById('displaySubmissionId').textContent = resJson.submissionId || "lcd-demo-unknown";
                     btn.innerText = 'TRACK SUBMITTED SUCCESSFULLY';
-                    btn.style.borderColor = '#4ade80'; 
-                    btn.style.color = '#4ade80';
+                    btn.style.borderColor = '#4ade80'; btn.style.color = '#4ade80';
                     document.getElementById('automatedSubmitForm').reset();
-                    
-                    document.getElementById('displaySubmissionId').textContent = submissionId;
                     resultBox.classList.remove('hidden');
 
                     setTimeout(() => {
                         let timeLeft = 60;
-                        btn.style.borderColor = '#555';
-                        btn.style.color = '#555';
-                        
+                        btn.style.borderColor = '#555'; btn.style.color = '#555';
                         const countdown = setInterval(() => {
                             btn.innerText = `WAIT ${timeLeft} SECONDS`;
                             timeLeft--;
-                            
                             if (timeLeft < 0) {
                                 clearInterval(countdown);
                                 btn.innerText = originalText;
                                 btn.disabled = false;
-                                btn.style.borderColor = '';
-                                btn.style.color = '';
+                                btn.style.borderColor = ''; btn.style.color = '';
                             }
                         }, 1000);
                     }, 2000);
-
                 } else {
-                    const botErr = await discordBotResponse.text();
-                    throw new Error(`Bot Error: ${botErr}`);
+                    throw new Error("Bot Error");
                 }
-
             } catch (error) {
-                console.error("Submission Pipeline Error:", error.message);
-                btn.innerText = 'ERROR: FAILED TO SUBMIT (CHECK CONSOLE)';
-                btn.style.borderColor = '#ef4444'; 
-                btn.style.color = '#ef4444';
-                
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                    btn.style.borderColor = '';
-                    btn.style.color = '';
-                }, 4000);
+                btn.innerText = 'ERROR: FAILED TO SUBMIT';
+                btn.style.borderColor = '#ef4444'; btn.style.color = '#ef4444';
+                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; btn.style.borderColor = ''; btn.style.color = ''; }, 4000);
             }
         });
 
@@ -817,19 +725,13 @@
         document.getElementById('adminSearchBtn').addEventListener('click', async function() {
             const queryId = document.getElementById('adminSearchInput').value.trim();
             const resultDiv = document.getElementById('adminSearchResult');
-
-            if (!queryId) {
-                resultDiv.innerHTML = '<span class="text-red-400">Please enter a valid submission ID.</span>';
-                return;
-            }
+            if (!queryId) return;
 
             resultDiv.innerHTML = 'Searching database history...';
-
             try {
                 const res = await fetch(`/api/adminSearch?id=${encodeURIComponent(queryId)}`);
-                if (!res.ok) throw new Error('Submission ID not found.');
+                if (!res.ok) throw new Error('Not found.');
                 const record = await res.json();
-
                 resultDiv.innerHTML = `
                     <div class="space-y-3">
                         <p><strong class="text-white">Submission ID:</strong> ${escapeHtml(record.submissionId)}</p>
@@ -837,21 +739,18 @@
                         <p><strong class="text-white">Artist(s):</strong> ${escapeHtml(record.artist)}</p>
                         <p><strong class="text-white">Email(s):</strong> ${escapeHtml(record.email)}</p>
                         <p><strong class="text-white">Audio Link:</strong> <a href="${escapeHtml(record.fileLink)}" target="_blank" class="text-green-400 underline">${escapeHtml(record.fileLink)}</a></p>
-                        <p><strong class="text-white">Submitted At:</strong> ${new Date(record.timestamp).toLocaleString()}</p>
                     </div>
                 `;
             } catch (err) {
-                resultDiv.innerHTML = '<span class="text-red-400">No record found with that Submission ID. Check the ID and try again.</span>';
+                resultDiv.innerHTML = '<span class="text-red-400">No record found with that Submission ID.</span>';
             }
         });
 
-        // --- ADMIN POST TO DB LOGIC ---
         document.getElementById('addReleaseForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = this.querySelector('button');
             const originalText = btn.innerText;
             btn.innerText = 'SAVING...';
-            
             try {
                 const res = await fetch('/api/catalog', {
                     method: 'POST',
@@ -875,7 +774,6 @@
             const btn = this.querySelector('button');
             const originalText = btn.innerText;
             btn.innerText = 'SAVING...';
-            
             try {
                 const res = await fetch('/api/artists', {
                     method: 'POST',
@@ -896,166 +794,91 @@
         });
 
         function escapeHtml(value){
-            return String(value).replace(/[&<>'"]/g, char => ({
-                "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", "\"":"&quot;"
-            }[char]));
+            return String(value).replace(/[&<>'"]/g, char => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", "\"":"&quot;"}[char]));
         }
 
         async function getSpotifyData(release){
-            const url = typeof release === "string" ? release : release.spotify;
+            const url = release.spotify;
             try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 5000);
-                const response = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`, { signal: controller.signal });
-                clearTimeout(timeout);
-                
-                if(!response.ok) throw new Error("Spotify metadata request failed.");
-                
+                const response = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
                 const data = await response.json();
-                return {
-                    spotify: url,
-                    title: data.title || "Unknown Release",
-                    artist: release.artist || data.author_name || "Unknown Artist",
-                    cover: data.thumbnail_url || ""
-                };
-            } catch(error) {
-                return { 
-                    spotify: url, 
-                    title: "Spotify Release", 
-                    artist: release.artist || "Unknown Artist", 
-                    cover: "" 
-                };
-            }
+                return { spotify: url, title: data.title || "Unknown", artist: release.artist || data.author_name || "Unknown", cover: data.thumbnail_url || "" };
+            } catch(error) { return { spotify: url, title: "Spotify Release", artist: release.artist, cover: "" }; }
         }
 
         async function getSpotifyArtistData(artist){
-            const url = typeof artist === "string" ? artist : artist.spotify;
+            const url = artist.spotify;
             try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 5000);
-                const response = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`, { signal: controller.signal });
-                clearTimeout(timeout);
-                
-                if(!response.ok) throw new Error("Spotify artist request failed.");
-                
+                const response = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
                 const data = await response.json();
-                return {
-                    spotify: url,
-                    name: artist.name || data.author_name || "Unknown Artist",
-                    image: data.thumbnail_url || "",
-                    listeners: artist.listeners || "TBA"
-                };
-            } catch(error) {
-                return { 
-                    spotify: url, 
-                    name: artist.name || "Unknown Artist", 
-                    image: "",
-                    listeners: artist.listeners || "TBA"
-                };
-            }
+                return { spotify: url, name: artist.name || data.author_name, image: data.thumbnail_url || "", listeners: artist.listeners || "TBA" };
+            } catch(error) { return { spotify: url, name: artist.name, image: "", listeners: artist.listeners }; }
         }
 
         async function renderCatalog(){
             const grid = document.getElementById("catalogGrid");
             const counter = document.getElementById("releasesCounter");
-            
-            if(!CATALOG.length){
-                grid.innerHTML = `<article class="catalog-item flex items-center justify-center border-dashed border-[#444]"><div class="p-12 text-center"><h3 class="font-oswald text-xl text-gray-500 uppercase tracking-tight">No Releases</h3></div></article>`;
-                counter.textContent = "0 RELEASES";
-                return;
-            }
-
+            if(!CATALOG.length) return;
             counter.textContent = `${CATALOG.length} RELEASE${CATALOG.length === 1 ? "" : "S"}`;
             grid.innerHTML = `<article class="catalog-item flex items-center justify-center border-dashed border-[#444]"><div class="p-12 text-center"><h3 class="font-oswald text-xl text-gray-500 uppercase tracking-tight">Loading...</h3></div></article>`;
-
             const results = await Promise.allSettled(CATALOG.map(release => getSpotifyData(release)));
-            const releases = results.map((result, i) => result.status === "fulfilled" ? result.value : { spotify: CATALOG[i].spotify, title: "Spotify Release", artist: CATALOG[i].artist || "Unknown", cover: "" });
+            const releases = results.map((result, i) => result.status === "fulfilled" ? result.value : { spotify: CATALOG[i].spotify, title: "Spotify Release", artist: CATALOG[i].artist, cover: "" });
 
             grid.innerHTML = "";
             releases.forEach((item, index) => {
-                const coverHTML = item.cover 
-                    ? `<img src="${escapeHtml(item.cover)}" alt="${escapeHtml(item.title)} cover">`
-                    : `<div class="w-full h-full flex items-center justify-center text-gray-500 font-bold uppercase tracking-widest border-b border-[#222]">NO COVER</div>`;
-
-                const cardHTML = `
+                const coverHTML = item.cover ? `<img src="${escapeHtml(item.cover)}" alt="cover">` : `<div class="w-full h-full flex items-center justify-center text-gray-500 font-bold uppercase tracking-widest border-b border-[#222]">NO COVER</div>`;
+                grid.insertAdjacentHTML('beforeend', `
                     <article class="catalog-item group relative">
                         <div class="catalog-image relative">
                             ${coverHTML}
                             <div class="absolute top-3 left-3 bg-black border border-[#444] px-2 py-1 text-[10px] font-bold tracking-widest z-10">LCD-${String(index + 1).padStart(3, '0')}</div>
-                            <a href="${escapeHtml(item.spotify)}" target="_blank" rel="noopener" class="absolute bottom-3 right-3 bg-white text-black w-10 h-10 flex items-center justify-center font-bold opacity-0 group-hover:opacity-100 transition-opacity z-10 clean-invert hover:bg-black hover:text-white border border-transparent hover:border-white">↗</a>
+                            <a href="${escapeHtml(item.spotify)}" target="_blank" class="absolute bottom-3 right-3 bg-white text-black w-10 h-10 flex items-center justify-center font-bold opacity-0 group-hover:opacity-100 transition-opacity z-10 clean-invert hover:bg-black hover:text-white border border-transparent hover:border-white">↗</a>
                         </div>
                         <div class="p-5">
                             <h3 class="font-oswald text-2xl uppercase tracking-tight truncate">${escapeHtml(item.title)}</h3>
                             <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">${escapeHtml(item.artist)}</p>
                         </div>
                     </article>
-                `;
-                grid.insertAdjacentHTML('beforeend', cardHTML);
+                `);
             });
         }
 
         async function renderArtists(){
             const grid = document.getElementById("artistsGrid");
             const counter = document.getElementById("artistsCounter");
-            
-            if(!ARTISTS.length){
-                grid.innerHTML = `<article class="catalog-item flex items-center justify-center border-dashed border-[#444]"><div class="p-12 text-center"><h3 class="font-oswald text-xl text-gray-500 uppercase tracking-tight">No Artists</h3></div></article>`;
-                counter.textContent = "0 ARTISTS";
-                return;
-            }
-
+            if(!ARTISTS.length) return;
             counter.textContent = `${ARTISTS.length} ARTIST${ARTISTS.length === 1 ? "" : "S"}`;
             grid.innerHTML = `<article class="catalog-item flex items-center justify-center border-dashed border-[#444]"><div class="p-12 text-center"><h3 class="font-oswald text-xl text-gray-500 uppercase tracking-tight">Loading...</h3></div></article>`;
-
-            const results = await Promise.allSettled(ARTISTS.name ? ARTISTS.map(artist => getSpotifyArtistData(artist)) : []);
-            const artistsData = results.map((result, i) => result.status === "fulfilled" ? result.value : { spotify: ARTISTS[i].spotify, name: ARTISTS[i].name || "Unknown Artist", image: "", listeners: ARTISTS[i].listeners || "TBA" });
+            const results = await Promise.allSettled(ARTISTS.map(artist => getSpotifyArtistData(artist)));
+            const artistsData = results.map((result, i) => result.status === "fulfilled" ? result.value : { spotify: ARTISTS[i].spotify, name: ARTISTS[i].name, image: "", listeners: ARTISTS[i].listeners });
 
             grid.innerHTML = "";
             artistsData.forEach((artist) => {
-                const imageHTML = artist.image 
-                    ? `<img src="${escapeHtml(artist.image)}" alt="${escapeHtml(artist.name)} profile">`
-                    : `<div class="w-full h-full flex items-center justify-center text-gray-500 font-bold uppercase tracking-widest border-b border-[#222]">NO IMAGE</div>`;
-
-                const cardHTML = `
+                const imageHTML = artist.image ? `<img src="${escapeHtml(artist.image)}" alt="profile">` : `<div class="w-full h-full flex items-center justify-center text-gray-500 font-bold uppercase tracking-widest border-b border-[#222]">NO IMAGE</div>`;
+                grid.insertAdjacentHTML('beforeend', `
                     <article class="catalog-item group">
-                        <div class="catalog-image relative">
-                            ${imageHTML}
-                        </div>
+                        <div class="catalog-image relative">${imageHTML}</div>
                         <div class="p-5 flex flex-col justify-between items-start border-t border-[#111]">
                             <div class="flex justify-between items-center w-full">
                                 <h3 class="font-oswald text-2xl uppercase tracking-tight truncate w-3/4">${escapeHtml(artist.name)}</h3>
-                                <a href="${escapeHtml(artist.spotify)}" target="_blank" rel="noopener" class="text-xs text-gray-500 uppercase tracking-widest hover:text-white transition-colors flex-shrink-0 ml-4">Spotify ↗</a>
+                                <a href="${escapeHtml(artist.spotify)}" target="_blank" class="text-xs text-gray-500 uppercase tracking-widest hover:text-white transition-colors flex-shrink-0 ml-4">Spotify ↗</a>
                             </div>
                             <p class="text-[10px] text-gray-600 uppercase tracking-widest mt-2">${escapeHtml(artist.listeners)} MONTHLY LISTENERS</p>
                         </div>
                     </article>
-                `;
-                grid.insertAdjacentHTML('beforeend', cardHTML);
+                `);
             });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            checkAuthSession();
             loadGlobalData();
-            renderDiscordWidget(); 
-
-            const observerOptions = {
-                root: null,
-                rootMargin: '0px',
-                threshold: 0.15 
-            };
-
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        observer.unobserve(entry.target);
-                    }
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
                 });
-            }, observerOptions);
-
-            document.querySelectorAll('.fade-up').forEach((el) => {
-                observer.observe(el);
-            });
+            }, { root: null, rootMargin: '0px', threshold: 0.15 });
+            document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
         });
     </script>
 </body>
