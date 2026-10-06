@@ -29,187 +29,47 @@
     </script>
 
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            background-color: #000000;
-            color: #ffffff;
-            width: 100%;
-            cursor: auto !important;
-            scroll-behavior: smooth;
-        }
-
-        .noise-overlay {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.05;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-
-        .clean-invert {
-            transition: background-color 0.3s ease, color 0.3s ease;
-            cursor: pointer;
-        }
-        .clean-invert:hover:not(:disabled) {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-        }
-        .clean-invert:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            border-color: #555 !important;
-            color: #555 !important;
-        }
-        
-        .strike-hover {
-            position: relative;
-            display: inline-block;
-        }
-        .strike-hover::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: -2px;
-            width: 0%;
-            height: 2px;
-            background-color: #ffffff;
-            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .strike-hover:hover::after {
-            width: 100%;
-        }
-
-        .socials-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: rgba(0, 0, 0, 0.95);
-            border: 1px solid #333;
-            min-width: 150px;
-            display: none;
-            flex-direction: column;
-            z-index: 100;
-        }
-        .socials-container:hover .socials-dropdown {
-            display: flex;
-        }
-        .socials-dropdown a {
-            padding: 12px 16px;
-            border-bottom: 1px solid #222;
-            transition: background-color 0.2s;
-        }
-        .socials-dropdown a:hover {
-            background-color: #111;
-        }
-        .socials-dropdown a:last-child {
-            border-bottom: none;
-        }
-
-        .fade-up {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .fade-up.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        body, html { margin: 0; padding: 0; background-color: #000000; color: #ffffff; width: 100%; cursor: auto !important; scroll-behavior: smooth; }
+        .noise-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.05; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); }
+        .clean-invert { transition: background-color 0.3s ease, color 0.3s ease; cursor: pointer; }
+        .clean-invert:hover:not(:disabled) { background-color: #ffffff !important; color: #000000 !important; }
+        .clean-invert:disabled { opacity: 0.5; cursor: not-allowed; border-color: #555 !important; color: #555 !important; }
+        .strike-hover { position: relative; display: inline-block; }
+        .strike-hover::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 0%; height: 2px; background-color: #ffffff; transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .strike-hover:hover::after { width: 100%; }
+        .socials-dropdown { position: absolute; top: 100%; left: 0; background: rgba(0, 0, 0, 0.95); border: 1px solid #333; min-width: 150px; display: none; flex-direction: column; z-index: 100; }
+        .socials-container:hover .socials-dropdown { display: flex; }
+        .socials-dropdown a { padding: 12px 16px; border-bottom: 1px solid #222; transition: background-color 0.2s; }
+        .socials-dropdown a:hover { background-color: #111; }
+        .socials-dropdown a:last-child { border-bottom: none; }
+        .fade-up { opacity: 0; transform: translateY(40px); transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
         .delay-100 { transition-delay: 100ms; }
         .delay-200 { transition-delay: 200ms; }
-
-        .clean-input {
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #333;
-            color: #ffffff;
-            border-radius: 0;
-            transition: border-color 0.3s ease;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        }
-        .clean-input:focus {
-            outline: none;
-            border-bottom: 1px solid #ffffff;
-        }
-        .clean-input::placeholder {
-            color: #555;
-        }
-
-        .catalog-scroll-container {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            overflow-y: hidden;
-            gap: 1.5rem;
-            padding-bottom: 1rem;
-            scroll-snap-type: x proximity;
-            scrollbar-width: thin;
-            scrollbar-color: #444 #000;
-        }
-        .catalog-scroll-container::-webkit-scrollbar {
-            height: 6px;
-        }
-        .catalog-scroll-container::-webkit-scrollbar-track {
-            background: #000;
-        }
-        .catalog-scroll-container::-webkit-scrollbar-thumb {
-            background: #444;
-        }
-        .catalog-scroll-container::-webkit-scrollbar-thumb:hover {
-            background: #fff;
-        }
-        .catalog-item {
-            flex: 0 0 320px;
-            width: 320px;
-            scroll-snap-align: start;
-            border: 1px solid #222;
-            background: #050505;
-            transition: border-color 0.3s ease;
-        }
-        .catalog-item:hover {
-            border-color: #ffffff;
-        }
-        .catalog-image {
-            aspect-ratio: 1/1;
-            background: #111;
-            position: relative;
-        }
-        .catalog-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: grayscale(100%) contrast(120%); 
-            transition: filter 0.3s ease;
-        }
-        .catalog-item:hover .catalog-image img {
-            filter: grayscale(0%) contrast(100%);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #000; 
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #333; 
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #fff; 
-        }
-
-        ::selection {
-            background-color: #ffffff;
-            color: #000000;
-        }
+        .clean-input { background: transparent; border: none; border-bottom: 1px solid #333; color: #ffffff; border-radius: 0; transition: border-color 0.3s ease; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        .clean-input:focus { outline: none; border-bottom: 1px solid #ffffff; }
+        .clean-input::placeholder { color: #555; }
+        .catalog-scroll-container { display: flex; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; gap: 1.5rem; padding-bottom: 1rem; scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: #444 #000; }
+        .catalog-scroll-container::-webkit-scrollbar { height: 6px; }
+        .catalog-scroll-container::-webkit-scrollbar-track { background: #000; }
+        .catalog-scroll-container::-webkit-scrollbar-thumb { background: #444; }
+        .catalog-scroll-container::-webkit-scrollbar-thumb:hover { background: #fff; }
+        .catalog-item { flex: 0 0 320px; width: 320px; scroll-snap-align: start; border: 1px solid #222; background: #050505; transition: border-color 0.3s ease; }
+        .catalog-item:hover { border-color: #ffffff; }
+        .catalog-image { aspect-ratio: 1/1; background: #111; position: relative; }
+        .catalog-image img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(120%); transition: filter 0.3s ease; }
+        .catalog-item:hover .catalog-image img { filter: grayscale(0%) contrast(100%); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #000; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #fff; }
+        ::selection { background-color: #ffffff; color: #000000; }
     </style>
 </head>
 <body class="font-sans antialiased">
 
     <div class="noise-overlay"></div>
 
-    <!-- Bottom Left Discord User Widget -->
     <div id="discordUserWidget" class="fixed bottom-6 left-6 z-50 bg-black/90 border border-[#222] p-3 flex items-center gap-3 backdrop-blur-sm text-xs uppercase tracking-widest">
         <div id="discordUserContent" class="flex items-center gap-3">
             <span class="text-gray-500">Not Logged In</span>
@@ -398,7 +258,7 @@
         </div>
     </section>
 
-    <!-- ADMIN PANEL SECTION (PROTECTED) -->
+    <!-- ADMIN PANEL SECTION -->
     <section id="admin" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 hidden">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
             <div class="lg:col-span-4 fade-up">
@@ -409,6 +269,7 @@
             </div>
             
             <div class="lg:col-span-8 fade-up delay-100 flex flex-col gap-8">
+                <!-- Search -->
                 <div class="border border-[#222] bg-[#050505] p-6 sm:p-8">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Submission Lookup Search</h3>
                     
@@ -422,10 +283,11 @@
                     </div>
                 </div>
 
+                <!-- Database Management -->
                 <div class="border border-[#222] bg-[#050505] p-6 sm:p-8">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Global Site Management</h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                         <form id="addReleaseForm" class="flex flex-col gap-4">
                             <h4 class="font-oswald text-xl uppercase tracking-widest text-white">Add Release</h4>
                             <input type="text" id="releaseSpotify" required class="clean-input pb-2 text-sm" placeholder="Spotify Track URL">
@@ -441,6 +303,19 @@
                             <button type="submit" class="font-oswald text-sm uppercase tracking-widest border border-white px-4 py-2 mt-2 clean-invert self-start">Publish Artist</button>
                         </form>
                     </div>
+
+                    <!-- ADMIN LIST UI -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 border-t border-[#222] pt-8">
+                        <div>
+                            <h4 class="font-oswald text-lg uppercase tracking-widest text-white mb-4">Manage Releases</h4>
+                            <div id="adminCatalogList" class="flex flex-col gap-2"></div>
+                        </div>
+                        <div>
+                            <h4 class="font-oswald text-lg uppercase tracking-widest text-white mb-4">Manage Artists</h4>
+                            <div id="adminArtistList" class="flex flex-col gap-2"></div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -475,23 +350,9 @@
                 const artRes = await fetch('/api/artists');
                 if (artRes.ok) ARTISTS = await artRes.json();
                 
-                // Fallback to ensure you never have a blank "NO RELEASES" box again
-                if (!CATALOG || CATALOG.length === 0) {
-                    CATALOG = [
-                        { spotify: "https://open.spotify.com/track/11hPrFyqyyHN960ty30mT7", artist: "DJ Nexus8, DJ ADIMA, -Prey, MC K3" },
-                        { spotify: "https://open.spotify.com/track/0EBwsFvKM726xls3dBhOrB", artist: "DJ Nexus8, DJ ADIMA, -Prey" }
-                    ];
-                }
-                if (!ARTISTS || ARTISTS.length === 0) {
-                    ARTISTS = [
-                        { spotify: "https://open.spotify.com/artist/3uA4unR7LBOcqjpbOeCs0Y", name: "Prey", listeners: "7,000,000" },
-                        { spotify: "https://open.spotify.com/artist/4rG1Y4L7JEDb0w23N5Y4R5", name: "LURK", listeners: "3,000,000" },
-                        { spotify: "https://open.spotify.com/artist/12Chz98pHFMEvdxLgHhe1y", name: "SCYTHERMANE", listeners: "10,000,000" }
-                    ];
-                }
-                
                 renderCatalog();
                 renderArtists();
+                renderAdminLists();
             } catch (err) {
                 renderCatalog();
                 renderArtists();
@@ -528,7 +389,12 @@
             const header = document.getElementById('discord-header');
 
             try {
-                const widgetRes = await fetch('https://discord.com/api/guilds/1554157703067336875/widget.json');
+                // Widget fetch with 5 second timeout to prevent freezing
+                const widgetController = new AbortController();
+                const widgetTimeoutId = setTimeout(() => widgetController.abort(), 5000);
+                const widgetRes = await fetch('https://discord.com/api/guilds/1554157703067336875/widget.json', { signal: widgetController.signal });
+                clearTimeout(widgetTimeoutId);
+
                 if (!widgetRes.ok) throw new Error('Widget disabled');
                 const widgetData = await widgetRes.json();
 
@@ -544,18 +410,24 @@
                 `;
 
                 if (widgetData.members && widgetData.members.length > 0) {
-                    const botNames = ['invite tracker', 'tickets v2', 'voicemaster', 'tickets'];
+                    const excludedBots = ['autorole', 'invite tracker', 'lucid', 'tickets v2', 'voicemaster', 'tickets'];
+                    
                     const cleanWidgetMembers = widgetData.members.filter(member => {
                         const name = member.username.toLowerCase();
                         if (member.bot) return false;
-                        return !botNames.some(b => name.includes(b));
+                        return !excludedBots.some(bot => name.includes(bot));
                     });
 
                     let memberRoles = [];
                     try {
-                        const rolesRes = await fetch('/api/getRoles');
-                        memberRoles = await rolesRes.json();
-                    } catch(e) {}
+                        const rolesController = new AbortController();
+                        const rolesTimeoutId = setTimeout(() => rolesController.abort(), 4000);
+                        const rolesRes = await fetch('/api/getRoles', { signal: rolesController.signal });
+                        clearTimeout(rolesTimeoutId);
+                        if(rolesRes.ok) memberRoles = await rolesRes.json();
+                    } catch(e) {
+                        console.warn("Could not fetch roles, continuing without them");
+                    }
 
                     const roleDict = {};
                     if (Array.isArray(memberRoles)) {
@@ -566,11 +438,7 @@
                         });
                     }
 
-                    const groupedMembers = {
-                        "Founders & Staff": [],
-                        "Label Artists": [],
-                        "Online Members": [] 
-                    };
+                    const groupedMembers = { "Founders & Staff": [], "Label Artists": [], "Online Members": [] };
 
                     cleanWidgetMembers.forEach(member => {
                         const username = member.username.toLowerCase();
@@ -746,6 +614,7 @@
             }
         });
 
+        // Add Release to DB
         document.getElementById('addReleaseForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = this.querySelector('button');
@@ -769,6 +638,7 @@
             setTimeout(() => btn.innerText = originalText, 3000);
         });
 
+        // Add Artist to DB
         document.getElementById('addArtistForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = this.querySelector('button');
@@ -792,6 +662,81 @@
             } catch (err) {}
             setTimeout(() => btn.innerText = originalText, 3000);
         });
+
+        // Reordering UI Logic
+        function renderAdminLists() {
+            const catList = document.getElementById('adminCatalogList');
+            if (CATALOG.length === 0) {
+                catList.innerHTML = '<div class="text-xs text-gray-500 uppercase">No releases found.</div>';
+            } else {
+                catList.innerHTML = CATALOG.map((item, index) => `
+                    <div class="flex justify-between items-center bg-[#111] p-2 border border-[#333] text-sm">
+                        <div class="truncate pr-4 text-gray-300"><span class="text-gray-600 mr-2">${index + 1}.</span> ${escapeHtml(item.artist)}</div>
+                        <div class="flex gap-1">
+                            <button type="button" onclick="moveCatalog(${index}, -1)" class="px-2 py-1 bg-black border border-[#333] hover:border-white transition">▲</button>
+                            <button type="button" onclick="moveCatalog(${index}, 1)" class="px-2 py-1 bg-black border border-[#333] hover:border-white transition">▼</button>
+                            <button type="button" onclick="removeCatalog(${index})" class="px-2 py-1 bg-red-900/50 hover:bg-red-600 hover:text-white transition">X</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const artList = document.getElementById('adminArtistList');
+            if (ARTISTS.length === 0) {
+                artList.innerHTML = '<div class="text-xs text-gray-500 uppercase">No artists found.</div>';
+            } else {
+                artList.innerHTML = ARTISTS.map((item, index) => `
+                    <div class="flex justify-between items-center bg-[#111] p-2 border border-[#333] text-sm">
+                        <div class="truncate pr-4 text-gray-300"><span class="text-gray-600 mr-2">${index + 1}.</span> ${escapeHtml(item.name)}</div>
+                        <div class="flex gap-1">
+                            <button type="button" onclick="moveArtist(${index}, -1)" class="px-2 py-1 bg-black border border-[#333] hover:border-white transition">▲</button>
+                            <button type="button" onclick="moveArtist(${index}, 1)" class="px-2 py-1 bg-black border border-[#333] hover:border-white transition">▼</button>
+                            <button type="button" onclick="removeArtist(${index})" class="px-2 py-1 bg-red-900/50 hover:bg-red-600 hover:text-white transition">X</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.moveCatalog = async function(index, direction) {
+            if (index + direction < 0 || index + direction >= CATALOG.length) return;
+            const temp = CATALOG[index];
+            CATALOG[index] = CATALOG[index + direction];
+            CATALOG[index + direction] = temp;
+            
+            document.getElementById('adminCatalogList').innerHTML = '<div class="text-xs text-gray-500 uppercase">Saving Order...</div>';
+            await fetch('/api/catalog', { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(CATALOG) });
+            loadGlobalData();
+        };
+
+        window.removeCatalog = async function(index) {
+            if(confirm("Remove this release globally?")) {
+                CATALOG.splice(index, 1);
+                document.getElementById('adminCatalogList').innerHTML = '<div class="text-xs text-red-500 uppercase">Deleting...</div>';
+                await fetch('/api/catalog', { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(CATALOG) });
+                loadGlobalData();
+            }
+        };
+
+        window.moveArtist = async function(index, direction) {
+            if (index + direction < 0 || index + direction >= ARTISTS.length) return;
+            const temp = ARTISTS[index];
+            ARTISTS[index] = ARTISTS[index + direction];
+            ARTISTS[index + direction] = temp;
+            
+            document.getElementById('adminArtistList').innerHTML = '<div class="text-xs text-gray-500 uppercase">Saving Order...</div>';
+            await fetch('/api/artists', { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(ARTISTS) });
+            loadGlobalData();
+        };
+
+        window.removeArtist = async function(index) {
+            if(confirm("Remove this artist globally?")) {
+                ARTISTS.splice(index, 1);
+                document.getElementById('adminArtistList').innerHTML = '<div class="text-xs text-red-500 uppercase">Deleting...</div>';
+                await fetch('/api/artists', { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(ARTISTS) });
+                loadGlobalData();
+            }
+        };
 
         function escapeHtml(value){
             return String(value).replace(/[&<>'"]/g, char => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", "\"":"&quot;"}[char]));
@@ -818,9 +763,16 @@
         async function renderCatalog(){
             const grid = document.getElementById("catalogGrid");
             const counter = document.getElementById("releasesCounter");
-            if(!CATALOG.length) return;
+            
+            if(!CATALOG || CATALOG.length === 0) {
+                counter.textContent = "0 RELEASES";
+                grid.innerHTML = `<article class="catalog-item flex items-center justify-center border-dashed border-[#444]"><div class="p-12 text-center"><h3 class="font-oswald text-xl text-gray-500 uppercase tracking-tight">NO RELEASES</h3></div></article>`;
+                return;
+            }
+
             counter.textContent = `${CATALOG.length} RELEASE${CATALOG.length === 1 ? "" : "S"}`;
             grid.innerHTML = `<article class="catalog-item flex items-center justify-center border-dashed border-[#444]"><div class="p-12 text-center"><h3 class="font-oswald text-xl text-gray-500 uppercase tracking-tight">Loading...</h3></div></article>`;
+            
             const results = await Promise.allSettled(CATALOG.map(release => getSpotifyData(release)));
             const releases = results.map((result, i) => result.status === "fulfilled" ? result.value : { spotify: CATALOG[i].spotify, title: "Spotify Release", artist: CATALOG[i].artist, cover: "" });
 
@@ -846,9 +798,16 @@
         async function renderArtists(){
             const grid = document.getElementById("artistsGrid");
             const counter = document.getElementById("artistsCounter");
-            if(!ARTISTS.length) return;
+            
+            if(!ARTISTS || ARTISTS.length === 0) {
+                counter.textContent = "0 ARTISTS";
+                grid.innerHTML = `<article class="catalog-item flex items-center justify-center border-dashed border-[#444]"><div class="p-12 text-center"><h3 class="font-oswald text-xl text-gray-500 uppercase tracking-tight">NO ARTISTS</h3></div></article>`;
+                return;
+            }
+
             counter.textContent = `${ARTISTS.length} ARTIST${ARTISTS.length === 1 ? "" : "S"}`;
             grid.innerHTML = `<article class="catalog-item flex items-center justify-center border-dashed border-[#444]"><div class="p-12 text-center"><h3 class="font-oswald text-xl text-gray-500 uppercase tracking-tight">Loading...</h3></div></article>`;
+            
             const results = await Promise.allSettled(ARTISTS.map(artist => getSpotifyArtistData(artist)));
             const artistsData = results.map((result, i) => result.status === "fulfilled" ? result.value : { spotify: ARTISTS[i].spotify, name: ARTISTS[i].name, image: "", listeners: ARTISTS[i].listeners });
 
@@ -873,6 +832,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             checkAuthSession();
             loadGlobalData();
+            renderDiscordWidget(); 
             const observer = new IntersectionObserver((entries, obs) => {
                 entries.forEach(e => {
                     if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
