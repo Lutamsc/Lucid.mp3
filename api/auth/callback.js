@@ -7,7 +7,8 @@ export default async function handler(req, res) {
     const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
     const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
     
-    const redirectUri = 'https://lucidmp3-eight.vercel.app/api/auth/callback';
+    // The exact unencoded redirect URI
+    const redirectUri = 'https://www.lucidmp3.com/api/auth/callback';
 
     try {
         // 1. Get the user's access token
@@ -24,7 +25,15 @@ export default async function handler(req, res) {
         });
 
         const tokenData = await tokenRes.json();
-        if (!tokenData.access_token) return res.status(400).send('Failed to obtain access token');
+        
+        // Detailed error fallback
+        if (!tokenData.access_token) {
+            console.error("Discord Token Error:", tokenData);
+            return res.status(400).json({
+                error: 'Failed to obtain access token',
+                details: tokenData
+            });
+        }
 
         // 2. Get the user's Discord profile data
         const userRes = await fetch('https://discord.com/api/users/@me', {
@@ -46,6 +55,7 @@ export default async function handler(req, res) {
 
         res.redirect('/');
     } catch (error) {
+        console.error("Auth Catch Error:", error);
         res.status(500).send('Authentication error');
     }
 }
