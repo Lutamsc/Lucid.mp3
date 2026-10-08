@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
     // ==========================================
-    // 1. SPOTIFY AUTOMATOR (Triggered via background ping from cron-job.org)
+    // 1. SPOTIFY AUTOMATOR
     // ==========================================
     if (req.method === 'GET') {
         const PLAYLIST_URL = process.env.SPOTIFY_PLAYLIST_URL;
@@ -24,7 +24,11 @@ export default async function handler(req, res) {
             const tracks = await getTracks(PLAYLIST_URL);
             if (!tracks || tracks.length === 0) return res.status(200).json({ message: 'Playlist empty or not found.' });
 
-            const currentTracks = tracks.map(track => track.external_urls?.spotify || `https://open.spotify.com/track/${track.id}`);
+            // Fix for undefined: safely extract URL whether it's a playlist or standard array
+            const currentTracks = tracks.map(item => {
+                const trackObj = item.track || item;
+                return trackObj.external_urls?.spotify || (trackObj.id ? `https://open.spotify.com/track/${trackObj.id}` : null);
+            }).filter(Boolean); // removes any nulls
 
             const dbRes = await fetch(`${UPSTASH_URL}/get/spotify_last_checked`, { headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` } });
             const dbData = await dbRes.json();
@@ -35,9 +39,16 @@ export default async function handler(req, res) {
             const newTracks = currentTracks.filter(trackUrl => !previouslyPosted.includes(trackUrl));
             if (newTracks.length === 0) return res.status(200).json({ message: 'No new tracks to post.' });
 
-            let discordMessage = `<@&${ROLE_ID}>\n`;
-            if (newTracks.length === 1) discordMessage += `**New Lucid.Mp3 Release!**\n${newTracks[0]}`;
-            else discordMessage += `**${newTracks.length} New Lucid.Mp3 Releases:**\n\n${newTracks.join('\n')}`;
+            // Professional Formatting with Spacing
+            let discordMessage = `<@&${ROLE_ID}>\n\n`;
+            if (newTracks.length === 1) {
+                discordMessage += `**🎵 New Lucid.Mp3 Release!**\n\n🎧 **Listen Here:**\n${newTracks[0]}`;
+            } else {
+                discordMessage += `**🎵 ${newTracks.length} New Lucid.Mp3 Releases!**\n\n`;
+                newTracks.forEach(trackUrl => {
+                    discordMessage += `🎧 ${trackUrl}\n\n`;
+                });
+            }
 
             await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
                 method: 'POST',
@@ -59,13 +70,14 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // 2. DISCORD ADMIN COMMANDS (Triggered from Website Admin Panel)
+    // 2. DISCORD ADMIN COMMANDS
     // ==========================================
     if (req.method === 'POST') {
         const data = req.body;
         const command = data.command; 
 
         try {
+            // Basic Message
             if (command === 'announce') {
                 await fetch(`https://discord.com/api/v10/channels/${data.channelId}/messages`, {
                     method: 'POST',
@@ -75,6 +87,24 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true });
             }
 
+            // Rich Embed Message
+            if (command === 'embed') {
+                await fetch(`https://discord.com/api/v10/channels/${data.channelId}/messages`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        embeds: [{
+                            title: data.title,
+                            description: data.message,
+                            color: 0xffffff,
+                            image: data.imageUrl ? { url: data.imageUrl } : null
+                        }]
+                    })
+                });
+                return res.status(200).json({ success: true });
+            }
+
+            // Purge Messages
             if (command === 'purge') {
                 const getRes = await fetch(`https://discord.com/api/v10/channels/${data.channelId}/messages?limit=${data.count}`, {
                     headers: { 'Authorization': `Bot ${DISCORD_TOKEN}` }
@@ -95,6 +125,18 @@ export default async function handler(req, res) {
                 return res.status(200).json({ success: true });
             }
 
+            // Lock / Unlock Channel
+            if (command === 'lockdown') {
+                const lockState = data.action === 'lock' ? "2048" : "0"; // 2048 is SEND_MESSAGES
+                await fetch(`https://discord.com/api/v10/channels/${data.channelId}/permissions/${GUILD_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 0, deny: lockState, allow: data.action === 'unlock' ? "2048" : "0" })
+                });
+                return res.status(200).json({ success: true });
+            }
+
+            // Roles & Moderation
             if (command === 'moderate') {
                 let url = '', method = '', body = null;
                 const headers = { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'X-Audit-Log-Reason': data.reason || 'Admin Panel' };
@@ -111,21 +153,20 @@ export default async function handler(req, res) {
                     url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${data.userId}`; method = 'PATCH'; headers['Content-Type'] = 'application/json';
                     body = JSON.stringify({ communication_disabled_until: null });
                 }
+                else if (data.action === 'addRole') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${data.userId}/roles/${data.roleId}`; method = 'PUT'; }
+                else if (data.action === 'removeRole') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${data.userId}/roles/${data.roleId}`; method = 'DELETE'; }
 
                 await fetch(url, { method, headers, body });
                 return res.status(200).json({ success: true });
             }
 
+            // Welcome Message Config
             if (command === 'config') {
                 await fetch(`${UPSTASH_URL}/set/bot_config:welcome_message`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(data.welcomeMessage)
                 });
-                return res.status(200).json({ success: true });
-            }
-
-            if (command === 'status') {
                 return res.status(200).json({ success: true });
             }
 
