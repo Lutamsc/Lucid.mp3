@@ -1,18 +1,3 @@
-import spotifyUrlInfo from 'spotify-url-info';
-
-// Disguise the Vercel server as Googlebot. Spotify ALWAYS lets Google bypass its firewalls.
-const customFetch = (url, options) => {
-    return fetch(url, {
-        ...options,
-        headers: {
-            ...options?.headers,
-            'user-agent': 'googlebot'
-        }
-    });
-};
-
-const { getTracks } = spotifyUrlInfo(customFetch);
-
 export default async function handler(req, res) {
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
     const GUILD_ID = '1554157703067336875'; 
@@ -20,75 +5,61 @@ export default async function handler(req, res) {
     const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
     // ==========================================
-    // 1. SPOTIFY AUTOMATOR
+    // 1. SPOTIFY AUTOMATOR (Official API)
     // ==========================================
     if (req.method === 'GET') {
-        const PLAYLIST_URL = process.env.SPOTIFY_PLAYLIST_URL;
+        const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
+        const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+        const PLAYLIST_ID = process.env.SPOTIFY_PLAYLIST_ID;
         const CHANNEL_ID = process.env.RELEASES_CHANNEL_ID; 
         const ROLE_ID = process.env.NEW_RELEASE_ROLE_ID; 
 
-        if (!PLAYLIST_URL || !DISCORD_TOKEN || !UPSTASH_URL) {
-            return res.status(500).json({ error: 'Missing configuration variables in Vercel.' });
+        if (!CLIENT_ID || !CLIENT_SECRET || !PLAYLIST_ID || !DISCORD_TOKEN) {
+            return res.status(500).json({ error: 'Missing Spotify API Environment Variables.' });
         }
 
         try {
-            const tracks = await getTracks(PLAYLIST_URL);
-            if (!tracks || tracks.length === 0) return res.status(200).json({ message: 'Playlist empty or not found.' });
+            // A. Authenticate with Spotify API
+            const authString = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
+            const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
+                method: 'POST',
+                headers: { 'Authorization': `Basic ${authString}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'grant_type=client_credentials'
+            });
+            const tokenData = await tokenRes.json();
+            if (!tokenData.access_token) return res.status(500).json({ error: 'Failed to authenticate with Spotify API' });
 
-            // Extract valid links AND metadata (Aggressive hunting for Artists)
-            const currentTracksData = tracks.map(item => {
-                const trackObj = item.track || item;
-                
-                let url = null;
-                if (trackObj.external_urls?.spotify) url = trackObj.external_urls.spotify;
-                else if (trackObj.id) url = `https://open.spotify.com/track/${trackObj.id}`;
-                else if (trackObj.uri && trackObj.uri.includes('track:')) url = `https://open.spotify.com/track/${trackObj.uri.split(':').pop()}`;
-                else if (trackObj.url) url = trackObj.url;
-                
-                if (!url) return null;
+            // B. Fetch Playlist Tracks
+            const playlistRes = await fetch(`https://api.spotify.com/v1/playlists/${PLAYLIST_ID}/tracks?limit=25`, {
+                headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
+            });
+            const playlistData = await playlistRes.json();
+            if (!playlistData.items || playlistData.items.length === 0) return res.status(200).json({ message: 'Playlist empty.' });
 
-                // Hunt for the track name
-                const name = trackObj.name || trackObj.title || "Unknown Track";
-                
-                // Hunt for the artist name (Spotify hides this in different places)
-                let artists = "Unknown Artist";
-                if (Array.isArray(trackObj.artists)) {
-                    artists = trackObj.artists.map(a => a.name || a).join(', ');
-                } else if (trackObj.subtitle) {
-                    artists = trackObj.subtitle;
-                } else if (trackObj.artist) {
-                    artists = trackObj.artist;
-                } else if (trackObj.author) {
-                    artists = trackObj.author;
-                }
-
-                return { url, name, artists };
-            }).filter(Boolean); 
+            // C. Extract Links & Metadata
+            const currentTracksData = playlistData.items.map(item => {
+                const track = item.track;
+                if (!track || !track.external_urls?.spotify) return null;
+                return {
+                    url: track.external_urls.spotify,
+                    name: track.name || "Unknown Track",
+                    artists: track.artists ? track.artists.map(a => a.name).join(', ') : "Unknown Artist"
+                };
+            }).filter(Boolean);
 
             const dbRes = await fetch(`${UPSTASH_URL}/get/spotify_last_checked`, { headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` } });
             const dbData = await dbRes.json();
-            
-            let previouslyPosted = [];
-            if (dbData.result) previouslyPosted = typeof dbData.result === 'string' ? JSON.parse(dbData.result) : dbData.result;
+            let previouslyPosted = dbData.result ? (typeof dbData.result === 'string' ? JSON.parse(dbData.result) : dbData.result) : [];
 
-            // Find new tracks
+            // D. Find New Tracks
             let newTracks = currentTracksData.filter(track => !previouslyPosted.includes(track.url));
             
-            // FIRST RUN SAFETY: If memory was wiped, only post the TOP 3 tracks (the newest ones)
-            if (previouslyPosted.length === 0 && newTracks.length > 3) {
-                newTracks = newTracks.slice(0, 3);
-            }
+            // First Run Safety Limit
+            if (previouslyPosted.length === 0 && newTracks.length > 3) newTracks = newTracks.slice(0, 3);
+            if (newTracks.length === 0) return res.status(200).json({ message: 'No new tracks to post.', tracksFound: currentTracksData.length });
 
-            if (newTracks.length === 0) {
-                return res.status(200).json({ 
-                    message: 'No new tracks to post. The database already remembers these songs.',
-                    tracksFound: currentTracksData.length 
-                });
-            }
-
-            // EXACT FORMAT REQUESTED (With Colon)
+            // E. Format Exact Message
             let discordMessage = `<@&${ROLE_ID}>\n## New **Lucid.Mp3** Releases\n\n`;
-            
             newTracks.forEach(track => {
                 discordMessage += `* ${track.name} - ${track.artists}:\n   ${track.url}\n\n`;
             });
@@ -99,72 +70,94 @@ export default async function handler(req, res) {
                 body: JSON.stringify({ content: discordMessage.trim() })
             });
 
-            // Save ALL found URLs to memory so it never double-posts old songs again
+            // F. Save Memory
             const allUrls = currentTracksData.map(t => t.url);
             const updatedMemory = Array.from(new Set([...allUrls, ...previouslyPosted])).slice(0, 500); 
-            
             await fetch(`${UPSTASH_URL}/set/spotify_last_checked`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedMemory)
             });
 
             return res.status(200).json({ success: true, posted: newTracks.length });
         } catch (error) {
-            return res.status(500).json({ error: 'Failed to process Spotify sync.', details: error.message });
+            return res.status(500).json({ error: error.message });
         }
     }
 
     // ==========================================
-    // 2. DISCORD MODERATION COMMANDS
+    // 2. DISCORD ADMIN COMMANDS
     // ==========================================
     if (req.method === 'POST') {
         const { command, userId, action, duration, roleId, reason, channelId, message, title, imageUrl, count } = req.body; 
+        const headers = { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json', 'X-Audit-Log-Reason': reason || 'Admin Panel' };
 
-        if (command === 'announce') {
-            await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, { method: 'POST', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ content: message }) });
-            return res.status(200).json({ success: true });
-        }
-        if (command === 'embed') {
-            await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, { method: 'POST', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ embeds: [{ title: title, description: message, color: 0xffffff, image: imageUrl ? { url: imageUrl } : null }] }) });
-            return res.status(200).json({ success: true });
-        }
-        if (command === 'purge') {
-            const getRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?limit=${count}`, { headers: { 'Authorization': `Bot ${DISCORD_TOKEN}` } });
-            const messages = await getRes.json();
-            if (!messages || messages.length === 0) return res.status(200).json({ success: true });
-            const messageIds = messages.map(m => m.id);
-            if (messageIds.length === 1) await fetch(`https://discord.com/api/v10/channels/${channelId}/messages/${messageIds[0]}`, { method: 'DELETE', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}` } });
-            else await fetch(`https://discord.com/api/v10/channels/${channelId}/messages/bulk-delete`, { method: 'POST', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: messageIds }) });
-            return res.status(200).json({ success: true });
-        }
-        if (command === 'lockdown') {
-            const lockState = action === 'lock' ? "2048" : "0"; 
-            await fetch(`https://discord.com/api/v10/channels/${channelId}/permissions/${GUILD_ID}`, { method: 'PUT', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 0, deny: lockState, allow: action === 'unlock' ? "2048" : "0" }) });
-            return res.status(200).json({ success: true });
-        }
+        try {
+            // Welcome & Leave Embed Builder
+            if (command === 'welcomeLeave') {
+                const isWelcome = action === 'welcome';
+                const userRes = await fetch(`https://discord.com/api/v10/users/${userId}`, { headers });
+                const userData = await userRes.json();
+                
+                let avatarUrl = 'https://cdn.discordapp.com/embed/avatars/0.png';
+                if (userData.id && userData.avatar) avatarUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=256`;
 
-        if (command === 'moderate') {
-            let url = '', method = '', bodyPayload = null;
-            const headers = { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'X-Audit-Log-Reason': reason || 'Admin Panel' };
+                const embed = {
+                    title: isWelcome ? "Member Joined" : "Member Left",
+                    description: isWelcome ? `Welcome <@${userId}> to **Lucid.Mp3**.` : `<@${userId}> has left **Lucid.Mp3**.`,
+                    color: 0x2b2d31, // Invisible Dark Gray
+                    thumbnail: { url: avatarUrl },
+                    timestamp: new Date().toISOString()
+                };
 
-            try {
+                await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+                    method: 'POST', headers, body: JSON.stringify({ embeds: [embed] })
+                });
+                return res.status(200).json({ success: true });
+            }
+
+            if (command === 'announce') {
+                await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, { method: 'POST', headers, body: JSON.stringify({ content: message }) });
+                return res.status(200).json({ success: true });
+            }
+            if (command === 'embed') {
+                await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, { method: 'POST', headers, body: JSON.stringify({ embeds: [{ title: title, description: message, color: 0x2b2d31, image: imageUrl ? { url: imageUrl } : null }] }) });
+                return res.status(200).json({ success: true });
+            }
+            if (command === 'purge') {
+                const getRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?limit=${count}`, { headers });
+                const messages = await getRes.json();
+                if (!messages || messages.length === 0) return res.status(200).json({ success: true });
+                const messageIds = messages.map(m => m.id);
+                if (messageIds.length === 1) await fetch(`https://discord.com/api/v10/channels/${channelId}/messages/${messageIds[0]}`, { method: 'DELETE', headers });
+                else await fetch(`https://discord.com/api/v10/channels/${channelId}/messages/bulk-delete`, { method: 'POST', headers, body: JSON.stringify({ messages: messageIds }) });
+                return res.status(200).json({ success: true });
+            }
+            if (command === 'lockdown') {
+                const lockState = action === 'lock' ? "2048" : "0"; 
+                await fetch(`https://discord.com/api/v10/channels/${channelId}/permissions/${GUILD_ID}`, { method: 'PUT', headers, body: JSON.stringify({ type: 0, deny: lockState, allow: action === 'unlock' ? "2048" : "0" }) });
+                return res.status(200).json({ success: true });
+            }
+
+            // User Moderation
+            if (command === 'moderate') {
+                let url = '', method = '', bodyPayload = null;
+
                 if (action === 'kick') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'DELETE'; }
                 else if (action === 'ban') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/bans/${userId}`; method = 'PUT'; }
                 else if (action === 'unban') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/bans/${userId}`; method = 'DELETE'; }
                 else if (action === 'softban') {
                     const banUrl = `https://discord.com/api/v10/guilds/${GUILD_ID}/bans/${userId}`;
-                    await fetch(banUrl, { method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json'}, body: JSON.stringify({ delete_message_seconds: 604800 }) });
+                    await fetch(banUrl, { method: 'PUT', headers, body: JSON.stringify({ delete_message_seconds: 604800 }) });
                     await fetch(banUrl, { method: 'DELETE', headers });
                     return res.status(200).json({ success: true });
                 }
                 else if (action === 'timeout') {
-                    url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'PATCH'; headers['Content-Type'] = 'application/json';
+                    url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'PATCH';
                     const until = new Date(Date.now() + parseInt(duration) * 1000).toISOString();
                     bodyPayload = JSON.stringify({ communication_disabled_until: until });
                 }
                 else if (action === 'untimeout') {
-                    url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'PATCH'; headers['Content-Type'] = 'application/json';
+                    url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'PATCH';
                     bodyPayload = JSON.stringify({ communication_disabled_until: null });
                 }
                 else if (action === 'warn') {
@@ -189,9 +182,9 @@ export default async function handler(req, res) {
 
                 if (url) await fetch(url, { method, headers, body: bodyPayload });
                 return res.status(200).json({ success: true });
-            } catch (e) {
-                return res.status(500).json({ error: e.message });
             }
+        } catch (e) {
+            return res.status(500).json({ error: e.message });
         }
     }
 }
