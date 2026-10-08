@@ -37,14 +37,22 @@ export default async function handler(req, res) {
             const tracks = await getTracks(PLAYLIST_URL);
             if (!tracks || tracks.length === 0) return res.status(200).json({ message: 'Playlist empty or not found.' });
 
-            // Extract valid links
-            const currentTracks = tracks.map(item => {
+            // Extract valid links AND metadata (Title, Artist)
+            const currentTracksData = tracks.map(item => {
                 const trackObj = item.track || item;
-                if (trackObj.external_urls?.spotify) return trackObj.external_urls.spotify;
-                if (trackObj.id) return `https://open.spotify.com/track/${trackObj.id}`;
-                if (trackObj.uri && trackObj.uri.includes('track:')) return `https://open.spotify.com/track/${trackObj.uri.split(':').pop()}`;
-                if (trackObj.url) return trackObj.url;
-                return null;
+                
+                let url = null;
+                if (trackObj.external_urls?.spotify) url = trackObj.external_urls.spotify;
+                else if (trackObj.id) url = `https://open.spotify.com/track/${trackObj.id}`;
+                else if (trackObj.uri && trackObj.uri.includes('track:')) url = `https://open.spotify.com/track/${trackObj.uri.split(':').pop()}`;
+                else if (trackObj.url) url = trackObj.url;
+                
+                if (!url) return null;
+
+                const name = trackObj.name || "Unknown Track";
+                const artists = trackObj.artists ? trackObj.artists.map(a => a.name).join(', ') : "Unknown Artist";
+
+                return { url, name, artists };
             }).filter(Boolean); 
 
             const dbRes = await fetch(`${UPSTASH_URL}/get/spotify_last_checked`, { headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` } });
@@ -53,32 +61,32 @@ export default async function handler(req, res) {
             let previouslyPosted = [];
             if (dbData.result) previouslyPosted = typeof dbData.result === 'string' ? JSON.parse(dbData.result) : dbData.result;
 
-            const newTracks = currentTracks.filter(trackUrl => !previouslyPosted.includes(trackUrl));
+            // Find new tracks by comparing URLs
+            const newTracks = currentTracksData.filter(track => !previouslyPosted.includes(track.url));
             
             if (newTracks.length === 0) {
                 return res.status(200).json({ 
                     message: 'No new tracks to post. The database already remembers these songs.',
-                    tracksFound: currentTracks.length 
+                    tracksFound: currentTracksData.length 
                 });
             }
 
-            // POST EACH TRACK SEPARATELY (Fixes Discord's 1-embed limit)
-            // Raw, underground aesthetic matching the Lucid.mp3 branding
-            for (const trackUrl of newTracks) {
-                const discordMessage = `<@&${ROLE_ID}>\n**LUCID.MP3 // NEW RELEASE**\n${trackUrl}`;
-                
-                await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: discordMessage })
-                });
+            // FORMAT EXACTLY AS REQUESTED
+            let discordMessage = `<@&${ROLE_ID}>\n## New **Lucid.Mp3** Releases\n\n`;
+            
+            newTracks.forEach(track => {
+                discordMessage += `* ${track.name} - ${track.artists}\n   ${track.url}\n\n`;
+            });
 
-                // 1-second delay so Discord doesn't rate-limit the bot
-                await new Promise(r => setTimeout(r, 1000));
-            }
+            await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: discordMessage.trim() })
+            });
 
-            // Expanded memory bank to safely hold 200 tracks
-            const updatedMemory = [...newTracks, ...previouslyPosted].slice(0, 200); 
+            // Save just the URLs to memory to prevent duplicates
+            const newUrls = newTracks.map(t => t.url);
+            const updatedMemory = [...newUrls, ...previouslyPosted].slice(0, 200); 
             await fetch(`${UPSTASH_URL}/set/spotify_last_checked`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
