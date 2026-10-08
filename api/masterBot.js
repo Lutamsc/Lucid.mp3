@@ -1,14 +1,12 @@
 import spotifyUrlInfo from 'spotify-url-info';
 
-// Disguise the Vercel server as a real Google Chrome web browser
+// Disguise the Vercel server as Googlebot. Spotify ALWAYS lets Google bypass its firewalls.
 const customFetch = (url, options) => {
     return fetch(url, {
         ...options,
         headers: {
             ...options?.headers,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5'
+            'user-agent': 'googlebot'
         }
     });
 };
