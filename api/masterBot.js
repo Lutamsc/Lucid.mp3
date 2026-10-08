@@ -24,11 +24,25 @@ export default async function handler(req, res) {
             const tracks = await getTracks(PLAYLIST_URL);
             if (!tracks || tracks.length === 0) return res.status(200).json({ message: 'Playlist empty or not found.' });
 
+            // BULLETPROOF URL EXTRACTION: Check everywhere Spotify hides the data
             const currentTracks = tracks.map(item => {
-                const trackId = item.id || (item.track && item.track.id);
-                if (trackId) return `https://open.spotify.com/track/${trackId}`;
+                const trackObj = item.track || item;
+                
+                if (trackObj.external_urls?.spotify) return trackObj.external_urls.spotify;
+                if (trackObj.id) return `https://open.spotify.com/track/${trackObj.id}`;
+                if (trackObj.uri && trackObj.uri.includes('track:')) return `https://open.spotify.com/track/${trackObj.uri.split(':').pop()}`;
+                if (trackObj.url) return trackObj.url;
+                
                 return null;
             }).filter(Boolean); 
+
+            // Fail-safe debug check
+            if (currentTracks.length === 0) {
+                return res.status(200).json({ 
+                    message: 'Scraper found tracks but could not extract URLs.',
+                    rawSpotifyDataExample: tracks[0] // Prints raw data so we can adapt to Spotify updates
+                });
+            }
 
             const dbRes = await fetch(`${UPSTASH_URL}/get/spotify_last_checked`, { headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` } });
             const dbData = await dbRes.json();
@@ -38,7 +52,6 @@ export default async function handler(req, res) {
 
             const newTracks = currentTracks.filter(trackUrl => !previouslyPosted.includes(trackUrl));
             
-            // If there are no new tracks, tell us!
             if (newTracks.length === 0) {
                 return res.status(200).json({ 
                     message: 'No new tracks to post. The database already remembers these songs.',
@@ -46,7 +59,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Fixed Professional Formatting
+            // Professional Formatting with Spacing
             let discordMessage = `<@&${ROLE_ID}>\n\n`;
             if (newTracks.length === 1) {
                 discordMessage += `**🎵 New Lucid.Mp3 Release!**\n\n🎧 **Listen Here:**\n${newTracks[0]}`;
