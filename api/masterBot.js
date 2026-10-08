@@ -24,11 +24,12 @@ export default async function handler(req, res) {
             const tracks = await getTracks(PLAYLIST_URL);
             if (!tracks || tracks.length === 0) return res.status(200).json({ message: 'Playlist empty or not found.' });
 
-            // Fix for "undefined": safely extract URL whether it's a playlist or standard array
+            // FIX: Guaranteed URL extraction to prevent "undefined"
             const currentTracks = tracks.map(item => {
-                const trackObj = item.track || item;
-                return trackObj.external_urls?.spotify || (trackObj.id ? `https://open.spotify.com/track/${trackObj.id}` : null);
-            }).filter(Boolean); // removes any nulls
+                const trackId = item.id || (item.track && item.track.id);
+                if (trackId) return `https://open.spotify.com/track/${trackId}`;
+                return null;
+            }).filter(Boolean); 
 
             const dbRes = await fetch(`${UPSTASH_URL}/get/spotify_last_checked`, { headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` } });
             const dbData = await dbRes.json();
@@ -70,13 +71,13 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // 2. COMPACT DISCORD MODERATION COMMANDS
+    // 2. DISCORD MODERATION COMMANDS
     // ==========================================
     if (req.method === 'POST') {
         const { command, userId, action, duration, roleId, reason } = req.body; 
 
         if (command === 'moderate') {
-            let url = '', method = '', body = null;
+            let url = '', method = '', bodyPayload = null;
             const headers = { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'X-Audit-Log-Reason': reason || 'Admin Panel' };
 
             try {
@@ -95,11 +96,11 @@ export default async function handler(req, res) {
                 else if (action === 'timeout') {
                     url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'PATCH'; headers['Content-Type'] = 'application/json';
                     const until = new Date(Date.now() + parseInt(duration) * 1000).toISOString();
-                    body = JSON.stringify({ communication_disabled_until: until });
+                    bodyPayload = JSON.stringify({ communication_disabled_until: until });
                 }
                 else if (action === 'untimeout') {
                     url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'PATCH'; headers['Content-Type'] = 'application/json';
-                    body = JSON.stringify({ communication_disabled_until: null });
+                    bodyPayload = JSON.stringify({ communication_disabled_until: null });
                 }
                 
                 // Warning System (Saved to Database)
@@ -130,7 +131,7 @@ export default async function handler(req, res) {
                     return res.status(200).json({ success: true });
                 }
 
-                if (url) await fetch(url, { method, headers, body });
+                if (url) await fetch(url, { method, headers, body: bodyPayload });
                 return res.status(200).json({ success: true });
             } catch (e) {
                 return res.status(500).json({ error: e.message });
