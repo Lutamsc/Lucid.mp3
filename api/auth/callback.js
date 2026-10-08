@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
     const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
     
-    const redirectUri = 'https://lucidmp3-eight.vercel.app/api/auth/callback';
+  const redirectUri = 'https://www.lucidmp3.com/api/auth/callback';
 
     try {
         // 1. Get the user's access token

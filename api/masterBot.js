@@ -17,14 +17,13 @@ export default async function handler(req, res) {
         const ROLE_ID = process.env.NEW_RELEASE_ROLE_ID; 
 
         if (!PLAYLIST_URL || !DISCORD_TOKEN || !UPSTASH_URL) {
-            return res.status(500).json({ error: 'Missing configuration variables.' });
+            return res.status(500).json({ error: 'Missing configuration variables in Vercel.' });
         }
 
         try {
             const tracks = await getTracks(PLAYLIST_URL);
             if (!tracks || tracks.length === 0) return res.status(200).json({ message: 'Playlist empty or not found.' });
 
-            // FIX: Guaranteed URL extraction to prevent "undefined"
             const currentTracks = tracks.map(item => {
                 const trackId = item.id || (item.track && item.track.id);
                 if (trackId) return `https://open.spotify.com/track/${trackId}`;
@@ -38,9 +37,16 @@ export default async function handler(req, res) {
             if (dbData.result) previouslyPosted = typeof dbData.result === 'string' ? JSON.parse(dbData.result) : dbData.result;
 
             const newTracks = currentTracks.filter(trackUrl => !previouslyPosted.includes(trackUrl));
-            if (newTracks.length === 0) return res.status(200).json({ message: 'No new tracks to post.' });
+            
+            // If there are no new tracks, tell us!
+            if (newTracks.length === 0) {
+                return res.status(200).json({ 
+                    message: 'No new tracks to post. The database already remembers these songs.',
+                    tracksFound: currentTracks.length 
+                });
+            }
 
-            // Professional Formatting with Spacing
+            // Fixed Professional Formatting
             let discordMessage = `<@&${ROLE_ID}>\n\n`;
             if (newTracks.length === 1) {
                 discordMessage += `**🎵 New Lucid.Mp3 Release!**\n\n🎧 **Listen Here:**\n${newTracks[0]}`;
@@ -51,11 +57,16 @@ export default async function handler(req, res) {
                 });
             }
 
-            await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
+            const discordRes = await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: discordMessage })
             });
+
+            if (!discordRes.ok) {
+                const errData = await discordRes.json();
+                return res.status(500).json({ error: 'Discord rejected the message', details: errData });
+            }
 
             const updatedMemory = [...newTracks, ...previouslyPosted].slice(0, 50); 
             await fetch(`${UPSTASH_URL}/set/spotify_last_checked`, {
@@ -66,7 +77,7 @@ export default async function handler(req, res) {
 
             return res.status(200).json({ success: true, posted: newTracks.length });
         } catch (error) {
-            return res.status(500).json({ error: 'Failed to process Spotify sync.' });
+            return res.status(500).json({ error: 'Failed to process Spotify sync.', details: error.message });
         }
     }
 
@@ -74,7 +85,30 @@ export default async function handler(req, res) {
     // 2. DISCORD MODERATION COMMANDS
     // ==========================================
     if (req.method === 'POST') {
-        const { command, userId, action, duration, roleId, reason } = req.body; 
+        const { command, userId, action, duration, roleId, reason, channelId, message, title, imageUrl, count } = req.body; 
+
+        if (command === 'announce') {
+            await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, { method: 'POST', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ content: message }) });
+            return res.status(200).json({ success: true });
+        }
+        if (command === 'embed') {
+            await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, { method: 'POST', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ embeds: [{ title: title, description: message, color: 0xffffff, image: imageUrl ? { url: imageUrl } : null }] }) });
+            return res.status(200).json({ success: true });
+        }
+        if (command === 'purge') {
+            const getRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?limit=${count}`, { headers: { 'Authorization': `Bot ${DISCORD_TOKEN}` } });
+            const messages = await getRes.json();
+            if (!messages || messages.length === 0) return res.status(200).json({ success: true });
+            const messageIds = messages.map(m => m.id);
+            if (messageIds.length === 1) await fetch(`https://discord.com/api/v10/channels/${channelId}/messages/${messageIds[0]}`, { method: 'DELETE', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}` } });
+            else await fetch(`https://discord.com/api/v10/channels/${channelId}/messages/bulk-delete`, { method: 'POST', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: messageIds }) });
+            return res.status(200).json({ success: true });
+        }
+        if (command === 'lockdown') {
+            const lockState = action === 'lock' ? "2048" : "0"; 
+            await fetch(`https://discord.com/api/v10/channels/${channelId}/permissions/${GUILD_ID}`, { method: 'PUT', headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 0, deny: lockState, allow: action === 'unlock' ? "2048" : "0" }) });
+            return res.status(200).json({ success: true });
+        }
 
         if (command === 'moderate') {
             let url = '', method = '', bodyPayload = null;
@@ -84,15 +118,12 @@ export default async function handler(req, res) {
                 if (action === 'kick') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'DELETE'; }
                 else if (action === 'ban') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/bans/${userId}`; method = 'PUT'; }
                 else if (action === 'unban') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/bans/${userId}`; method = 'DELETE'; }
-                
-                // Softban: Ban (deleting 7 days of messages), then immediately unban
                 else if (action === 'softban') {
                     const banUrl = `https://discord.com/api/v10/guilds/${GUILD_ID}/bans/${userId}`;
                     await fetch(banUrl, { method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json'}, body: JSON.stringify({ delete_message_seconds: 604800 }) });
                     await fetch(banUrl, { method: 'DELETE', headers });
                     return res.status(200).json({ success: true });
                 }
-                
                 else if (action === 'timeout') {
                     url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'PATCH'; headers['Content-Type'] = 'application/json';
                     const until = new Date(Date.now() + parseInt(duration) * 1000).toISOString();
@@ -102,28 +133,19 @@ export default async function handler(req, res) {
                     url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`; method = 'PATCH'; headers['Content-Type'] = 'application/json';
                     bodyPayload = JSON.stringify({ communication_disabled_until: null });
                 }
-                
-                // Warning System (Saved to Database)
                 else if (action === 'warn') {
-                    const warnData = { reason: reason || "No reason", date: new Date().toISOString() };
-                    await fetch(`${UPSTASH_URL}/rpush/warnings:${userId}`, {
-                        method: 'POST', headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify(warnData)
-                    });
+                    await fetch(`${UPSTASH_URL}/rpush/warnings:${userId}`, { method: 'POST', headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: reason || "No reason", date: new Date().toISOString() }) });
                     return res.status(200).json({ success: true });
                 }
                 else if (action === 'warnings') {
-                    const res = await fetch(`${UPSTASH_URL}/lrange/warnings:${userId}/0/-1`, { headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` } });
-                    const data = await res.json();
-                    return res.status(200).json({ success: true, warnings: data.result || [] });
+                    const resWarn = await fetch(`${UPSTASH_URL}/lrange/warnings:${userId}/0/-1`, { headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` } });
+                    const dataWarn = await resWarn.json();
+                    return res.status(200).json({ success: true, warnings: dataWarn.result || [] });
                 }
-
                 else if (action === 'addRole') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}/roles/${roleId}`; method = 'PUT'; }
                 else if (action === 'removeRole') { url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}/roles/${roleId}`; method = 'DELETE'; }
-                
-                // Role All Users
                 else if (action === 'roleall') {
-                    const membersRes = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members?limit=1000`, { headers });
+                    const membersRes = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members?limit=1000`, { headers: { 'Authorization': `Bot ${DISCORD_TOKEN}` } });
                     const members = await membersRes.json();
                     for (const m of members) {
                         if (!m.user.bot) await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members/${m.user.id}/roles/${roleId}`, { method: 'PUT', headers });
