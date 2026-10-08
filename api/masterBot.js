@@ -1,6 +1,19 @@
 import spotifyUrlInfo from 'spotify-url-info';
 
-const { getTracks } = spotifyUrlInfo(fetch);
+// Disguise the Vercel server as a real Google Chrome web browser
+const customFetch = (url, options) => {
+    return fetch(url, {
+        ...options,
+        headers: {
+            ...options?.headers,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5'
+        }
+    });
+};
+
+const { getTracks } = spotifyUrlInfo(customFetch);
 
 export default async function handler(req, res) {
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
@@ -9,7 +22,7 @@ export default async function handler(req, res) {
     const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
     // ==========================================
-    // 1. SPOTIFY AUTOMATOR (Public Link Scraper)
+    // 1. SPOTIFY AUTOMATOR
     // ==========================================
     if (req.method === 'GET') {
         const PLAYLIST_URL = process.env.SPOTIFY_PLAYLIST_URL;
@@ -24,25 +37,15 @@ export default async function handler(req, res) {
             const tracks = await getTracks(PLAYLIST_URL);
             if (!tracks || tracks.length === 0) return res.status(200).json({ message: 'Playlist empty or not found.' });
 
-            // BULLETPROOF URL EXTRACTION: Check everywhere Spotify hides the data
+            // Extract valid links
             const currentTracks = tracks.map(item => {
                 const trackObj = item.track || item;
-                
                 if (trackObj.external_urls?.spotify) return trackObj.external_urls.spotify;
                 if (trackObj.id) return `https://open.spotify.com/track/${trackObj.id}`;
                 if (trackObj.uri && trackObj.uri.includes('track:')) return `https://open.spotify.com/track/${trackObj.uri.split(':').pop()}`;
                 if (trackObj.url) return trackObj.url;
-                
                 return null;
             }).filter(Boolean); 
-
-            // Fail-safe debug check
-            if (currentTracks.length === 0) {
-                return res.status(200).json({ 
-                    message: 'Scraper found tracks but could not extract URLs.',
-                    rawSpotifyDataExample: tracks[0] // Prints raw data so we can adapt to Spotify updates
-                });
-            }
 
             const dbRes = await fetch(`${UPSTASH_URL}/get/spotify_last_checked`, { headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}` } });
             const dbData = await dbRes.json();
@@ -59,29 +62,23 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Professional Formatting with Spacing
-            let discordMessage = `<@&${ROLE_ID}>\n\n`;
-            if (newTracks.length === 1) {
-                discordMessage += `**🎵 New Lucid.Mp3 Release!**\n\n🎧 **Listen Here:**\n${newTracks[0]}`;
-            } else {
-                discordMessage += `**🎵 ${newTracks.length} New Lucid.Mp3 Releases!**\n\n`;
-                newTracks.forEach(trackUrl => {
-                    discordMessage += `🎧 ${trackUrl}\n\n`;
+            // POST EACH TRACK SEPARATELY (Fixes Discord's 1-embed limit)
+            // Raw, underground aesthetic matching the Lucid.mp3 branding
+            for (const trackUrl of newTracks) {
+                const discordMessage = `<@&${ROLE_ID}>\n**LUCID.MP3 // NEW RELEASE**\n${trackUrl}`;
+                
+                await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: discordMessage })
                 });
+
+                // 1-second delay so Discord doesn't rate-limit the bot
+                await new Promise(r => setTimeout(r, 1000));
             }
 
-            const discordRes = await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bot ${DISCORD_TOKEN}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: discordMessage })
-            });
-
-            if (!discordRes.ok) {
-                const errData = await discordRes.json();
-                return res.status(500).json({ error: 'Discord rejected the message', details: errData });
-            }
-
-            const updatedMemory = [...newTracks, ...previouslyPosted].slice(0, 50); 
+            // Expanded memory bank to safely hold 200 tracks
+            const updatedMemory = [...newTracks, ...previouslyPosted].slice(0, 200); 
             await fetch(`${UPSTASH_URL}/set/spotify_last_checked`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
