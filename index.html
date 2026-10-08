@@ -264,7 +264,7 @@
             <div class="lg:col-span-4 fade-up">
                 <h2 class="font-oswald text-4xl sm:text-5xl uppercase tracking-tighter mb-4">Admin Panel</h2>
                 <p class="text-sm text-gray-500 uppercase tracking-widest leading-relaxed">
-                    Search submission IDs.<br>Inspect database history.<br>A&R Staff Only.
+                    Search submission IDs.<br>Manage Discord Server.<br>Manage Database.<br>A&R Staff Only.
                 </p>
             </div>
             
@@ -280,6 +280,88 @@
 
                     <div id="adminSearchResult" class="border border-[#222] bg-black p-6 text-xs text-gray-400 tracking-wider">
                         Enter a unique submission ID above to pull up track details, artist emails, and download links.
+                    </div>
+                </div>
+
+                <!-- ALL NEW: Full Discord Server Management Suite -->
+                <div class="border border-[#222] bg-[#050505] p-6 sm:p-8">
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Discord Server Moderation & Control</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        
+                        <!-- Col 1: Messaging & Channel Control -->
+                        <div class="flex flex-col gap-6">
+                            <div>
+                                <h4 class="font-oswald text-lg uppercase tracking-widest text-white mb-3">Messaging & Channel</h4>
+                                <!-- Announce -->
+                                <form id="discordAnnounceForm" class="flex flex-col gap-3 mb-6">
+                                    <input type="text" id="announceChannelId" required class="clean-input pb-2 text-sm" placeholder="Channel ID to send to">
+                                    <textarea id="announceMessage" required class="clean-input pb-2 text-sm resize-none h-16" placeholder="Message content..."></textarea>
+                                    <button type="submit" class="font-oswald text-xs uppercase tracking-widest border border-white px-4 py-2 clean-invert self-start">Post Message</button>
+                                </form>
+
+                                <!-- Purge Messages -->
+                                <form id="discordPurgeForm" class="flex flex-col gap-3">
+                                    <input type="text" id="purgeChannelId" required class="clean-input pb-2 text-sm" placeholder="Channel ID to clear">
+                                    <input type="number" id="purgeCount" required min="1" max="100" class="clean-input pb-2 text-sm" placeholder="Number of messages (1-100)">
+                                    <button type="submit" class="font-oswald text-xs uppercase tracking-widest border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors px-4 py-2 self-start">Purge Messages</button>
+                                </form>
+                            </div>
+                            
+                            <!-- Bot Config (Welcome & Status) -->
+                            <div class="border-t border-[#333] pt-6">
+                                <h4 class="font-oswald text-lg uppercase tracking-widest text-white mb-3">Bot Configuration</h4>
+                                
+                                <form id="discordConfigForm" class="flex flex-col gap-3 mb-6">
+                                    <textarea id="welcomeMessageInput" required class="clean-input pb-2 text-sm resize-none h-12" placeholder="Welcome {user} to the server!"></textarea>
+                                    <button type="submit" class="font-oswald text-xs uppercase tracking-widest border border-white px-4 py-2 clean-invert self-start">Update Welcome Msg</button>
+                                </form>
+
+                                <form id="discordStatusForm" class="flex flex-col gap-3">
+                                    <select id="botStatusType" class="bg-transparent border-b border-[#333] text-sm text-gray-400 pb-2 outline-none focus:border-white">
+                                        <option value="0" class="bg-black">Playing</option>
+                                        <option value="2" class="bg-black">Listening to</option>
+                                        <option value="3" class="bg-black">Watching</option>
+                                        <option value="5" class="bg-black">Competing in</option>
+                                    </select>
+                                    <input type="text" id="botStatusText" required class="clean-input pb-2 text-sm" placeholder="Status Text (e.g. Demos)">
+                                    <button type="submit" class="font-oswald text-xs uppercase tracking-widest border border-white px-4 py-2 clean-invert self-start">Update Bot Status</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Col 2: Advanced User Moderation -->
+                        <div class="flex flex-col gap-6">
+                            <div>
+                                <h4 class="font-oswald text-lg uppercase tracking-widest text-white mb-3">Advanced User Moderation</h4>
+                                <form id="discordModForm" class="flex flex-col gap-4">
+                                    <input type="text" id="modUserId" required class="clean-input pb-2 text-sm" placeholder="User ID to Moderate">
+                                    
+                                    <select id="modAction" class="bg-transparent border-b border-[#333] text-sm text-gray-400 pb-2 outline-none focus:border-white" 
+                                            onchange="document.getElementById('timeoutDurationContainer').style.display = this.value === 'timeout' ? 'block' : 'none'">
+                                        <option value="kick" class="bg-black">Kick User</option>
+                                        <option value="ban" class="bg-black">Ban User</option>
+                                        <option value="unban" class="bg-black">Unban User</option>
+                                        <option value="timeout" class="bg-black">Timeout (Mute) User</option>
+                                        <option value="unmute" class="bg-black">Remove Timeout</option>
+                                    </select>
+                                    
+                                    <div id="timeoutDurationContainer" class="hidden">
+                                        <select id="timeoutDuration" class="bg-transparent border-b border-[#333] text-sm text-gray-400 pb-2 outline-none focus:border-white w-full">
+                                            <option value="60" class="bg-black">60 Seconds</option>
+                                            <option value="300" class="bg-black">5 Minutes</option>
+                                            <option value="3600" class="bg-black">1 Hour</option>
+                                            <option value="86400" class="bg-black">1 Day</option>
+                                            <option value="604800" class="bg-black">1 Week</option>
+                                        </select>
+                                    </div>
+
+                                    <input type="text" id="modReason" class="clean-input pb-2 text-sm" placeholder="Reason for action (Optional)">
+                                    <button type="submit" class="font-oswald text-sm uppercase tracking-widest border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors px-4 py-2 mt-2 self-start">Execute Action</button>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -389,7 +471,6 @@
             const header = document.getElementById('discord-header');
 
             try {
-                // Widget fetch with 5 second timeout to prevent freezing
                 const widgetController = new AbortController();
                 const widgetTimeoutId = setTimeout(() => widgetController.abort(), 5000);
                 const widgetRes = await fetch('https://discord.com/api/guilds/1554157703067336875/widget.json', { signal: widgetController.signal });
@@ -612,6 +693,115 @@
             } catch (err) {
                 resultDiv.innerHTML = '<span class="text-red-400">No record found with that Submission ID.</span>';
             }
+        });
+
+        // --- DISCORD MODERATION LOGIC ---
+        
+        // Announce
+        document.getElementById('discordAnnounceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'SENDING...';
+            try {
+                const res = await fetch('/api/bot/announce', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        channelId: document.getElementById('announceChannelId').value,
+                        message: document.getElementById('announceMessage').value
+                    })
+                });
+                if (res.ok) { btn.innerText = 'SENT!'; this.reset(); } 
+                else { btn.innerText = 'ERROR'; btn.style.color = '#ef4444'; btn.style.borderColor = '#ef4444'; }
+            } catch (err) { btn.innerText = 'ERROR'; }
+            setTimeout(() => { btn.innerText = originalText; btn.style.color = ''; btn.style.borderColor = ''; }, 3000);
+        });
+
+        // Purge
+        document.getElementById('discordPurgeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'PURGING...';
+            try {
+                const res = await fetch('/api/bot/purge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        channelId: document.getElementById('purgeChannelId').value,
+                        count: document.getElementById('purgeCount').value
+                    })
+                });
+                if (res.ok) { btn.innerText = 'PURGED!'; this.reset(); } 
+                else { btn.innerText = 'ERROR'; }
+            } catch (err) { btn.innerText = 'ERROR'; }
+            setTimeout(() => { btn.innerText = originalText; }, 3000);
+        });
+
+        // User Mod
+        document.getElementById('discordModForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'EXECUTING...';
+            const action = document.getElementById('modAction').value;
+            const duration = action === 'timeout' ? document.getElementById('timeoutDuration').value : null;
+
+            try {
+                const res = await fetch('/api/bot/moderate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: document.getElementById('modUserId').value,
+                        action: action,
+                        duration: duration,
+                        reason: document.getElementById('modReason').value
+                    })
+                });
+                if (res.ok) { btn.innerText = 'ACTION APPLIED'; this.reset(); document.getElementById('timeoutDurationContainer').style.display='none';} 
+                else { btn.innerText = 'ERROR'; }
+            } catch (err) { btn.innerText = 'ERROR'; }
+            setTimeout(() => btn.innerText = originalText, 3000);
+        });
+
+        // Config - Welcome Msg
+        document.getElementById('discordConfigForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'SAVING...';
+            try {
+                const res = await fetch('/api/bot/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ welcomeMessage: document.getElementById('welcomeMessageInput').value })
+                });
+                if (res.ok) { btn.innerText = 'SAVED!'; this.reset(); } 
+                else { btn.innerText = 'ERROR'; }
+            } catch (err) { btn.innerText = 'ERROR'; }
+            setTimeout(() => { btn.innerText = originalText; }, 3000);
+        });
+
+        // Config - Status Update
+        document.getElementById('discordStatusForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'UPDATING...';
+            try {
+                const res = await fetch('/api/bot/status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: document.getElementById('botStatusType').value,
+                        text: document.getElementById('botStatusText').value
+                    })
+                });
+                if (res.ok) { btn.innerText = 'STATUS UPDATED!'; this.reset(); } 
+                else { btn.innerText = 'ERROR'; }
+            } catch (err) { btn.innerText = 'ERROR'; }
+            setTimeout(() => { btn.innerText = originalText; }, 3000);
         });
 
         // Add Release to DB
