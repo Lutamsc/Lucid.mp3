@@ -704,10 +704,11 @@
             const originalText = btn.innerText;
             btn.innerText = 'SENDING...';
             try {
-                const res = await fetch('/api/bot/announce', {
+                const res = await fetch('/api/masterBot', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        command: 'announce',
                         channelId: document.getElementById('announceChannelId').value,
                         message: document.getElementById('announceMessage').value
                     })
@@ -725,10 +726,11 @@
             const originalText = btn.innerText;
             btn.innerText = 'PURGING...';
             try {
-                const res = await fetch('/api/bot/purge', {
+                const res = await fetch('/api/masterBot', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        command: 'purge',
                         channelId: document.getElementById('purgeChannelId').value,
                         count: document.getElementById('purgeCount').value
                     })
@@ -749,10 +751,11 @@
             const duration = action === 'timeout' ? document.getElementById('timeoutDuration').value : null;
 
             try {
-                const res = await fetch('/api/bot/moderate', {
+                const res = await fetch('/api/masterBot', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        command: 'moderate',
                         userId: document.getElementById('modUserId').value,
                         action: action,
                         duration: duration,
@@ -772,10 +775,10 @@
             const originalText = btn.innerText;
             btn.innerText = 'SAVING...';
             try {
-                const res = await fetch('/api/bot/config', {
+                const res = await fetch('/api/masterBot', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ welcomeMessage: document.getElementById('welcomeMessageInput').value })
+                    body: JSON.stringify({ command: 'config', welcomeMessage: document.getElementById('welcomeMessageInput').value })
                 });
                 if (res.ok) { btn.innerText = 'SAVED!'; this.reset(); } 
                 else { btn.innerText = 'ERROR'; }
@@ -790,10 +793,11 @@
             const originalText = btn.innerText;
             btn.innerText = 'UPDATING...';
             try {
-                const res = await fetch('/api/bot/status', {
+                const res = await fetch('/api/masterBot', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        command: 'status',
                         type: document.getElementById('botStatusType').value,
                         text: document.getElementById('botStatusText').value
                     })
