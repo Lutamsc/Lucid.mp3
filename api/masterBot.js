@@ -76,9 +76,9 @@ export default async function handler(req, res) {
             // Find new tracks
             let newTracks = currentTracksData.filter(track => !previouslyPosted.includes(track.url));
             
-            // FIRST RUN SAFETY: If memory was wiped, only post the latest 3 tracks at the bottom of the playlist
+            // FIRST RUN SAFETY: If memory was wiped, only post the TOP 3 tracks (the newest ones)
             if (previouslyPosted.length === 0 && newTracks.length > 3) {
-                newTracks = newTracks.slice(-3);
+                newTracks = newTracks.slice(0, 3);
             }
 
             if (newTracks.length === 0) {
@@ -88,11 +88,11 @@ export default async function handler(req, res) {
                 });
             }
 
-            // EXACT FORMAT REQUESTED
+            // EXACT FORMAT REQUESTED (With Colon)
             let discordMessage = `<@&${ROLE_ID}>\n## New **Lucid.Mp3** Releases\n\n`;
             
             newTracks.forEach(track => {
-                discordMessage += `* ${track.name} - ${track.artists}\n   ${track.url}\n\n`;
+                discordMessage += `* ${track.name} - ${track.artists}:\n   ${track.url}\n\n`;
             });
 
             await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
