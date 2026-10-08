@@ -37,7 +37,7 @@ export default async function handler(req, res) {
             const tracks = await getTracks(PLAYLIST_URL);
             if (!tracks || tracks.length === 0) return res.status(200).json({ message: 'Playlist empty or not found.' });
 
-            // Extract valid links AND metadata (Title, Artist)
+            // Extract valid links AND metadata (Aggressive hunting for Artists)
             const currentTracksData = tracks.map(item => {
                 const trackObj = item.track || item;
                 
@@ -49,8 +49,20 @@ export default async function handler(req, res) {
                 
                 if (!url) return null;
 
-                const name = trackObj.name || "Unknown Track";
-                const artists = trackObj.artists ? trackObj.artists.map(a => a.name).join(', ') : "Unknown Artist";
+                // Hunt for the track name
+                const name = trackObj.name || trackObj.title || "Unknown Track";
+                
+                // Hunt for the artist name (Spotify hides this in different places)
+                let artists = "Unknown Artist";
+                if (Array.isArray(trackObj.artists)) {
+                    artists = trackObj.artists.map(a => a.name || a).join(', ');
+                } else if (trackObj.subtitle) {
+                    artists = trackObj.subtitle;
+                } else if (trackObj.artist) {
+                    artists = trackObj.artist;
+                } else if (trackObj.author) {
+                    artists = trackObj.author;
+                }
 
                 return { url, name, artists };
             }).filter(Boolean); 
@@ -61,9 +73,14 @@ export default async function handler(req, res) {
             let previouslyPosted = [];
             if (dbData.result) previouslyPosted = typeof dbData.result === 'string' ? JSON.parse(dbData.result) : dbData.result;
 
-            // Find new tracks by comparing URLs
-            const newTracks = currentTracksData.filter(track => !previouslyPosted.includes(track.url));
+            // Find new tracks
+            let newTracks = currentTracksData.filter(track => !previouslyPosted.includes(track.url));
             
+            // FIRST RUN SAFETY: If memory was wiped, only post the latest 3 tracks at the bottom of the playlist
+            if (previouslyPosted.length === 0 && newTracks.length > 3) {
+                newTracks = newTracks.slice(-3);
+            }
+
             if (newTracks.length === 0) {
                 return res.status(200).json({ 
                     message: 'No new tracks to post. The database already remembers these songs.',
@@ -71,7 +88,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            // FORMAT EXACTLY AS REQUESTED
+            // EXACT FORMAT REQUESTED
             let discordMessage = `<@&${ROLE_ID}>\n## New **Lucid.Mp3** Releases\n\n`;
             
             newTracks.forEach(track => {
@@ -84,9 +101,10 @@ export default async function handler(req, res) {
                 body: JSON.stringify({ content: discordMessage.trim() })
             });
 
-            // Save just the URLs to memory to prevent duplicates
-            const newUrls = newTracks.map(t => t.url);
-            const updatedMemory = [...newUrls, ...previouslyPosted].slice(0, 200); 
+            // Save ALL found URLs to memory so it never double-posts old songs again
+            const allUrls = currentTracksData.map(t => t.url);
+            const updatedMemory = Array.from(new Set([...allUrls, ...previouslyPosted])).slice(0, 500); 
+            
             await fetch(`${UPSTASH_URL}/set/spotify_last_checked`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
