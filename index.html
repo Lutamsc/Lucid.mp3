@@ -272,12 +272,10 @@
                 <!-- Search -->
                 <div class="border border-[#222] bg-[#050505] p-6 sm:p-8">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Submission Lookup Search</h3>
-                    
                     <div class="flex flex-col sm:flex-row gap-4 mb-6">
                         <input type="text" id="adminSearchInput" class="clean-input pb-3 text-sm flex-1" placeholder="Enter Submission ID (e.g. lcd-demo-0001)">
                         <button type="button" id="adminSearchBtn" class="font-oswald text-sm uppercase tracking-widest border border-white px-6 py-2 clean-invert">Search ID</button>
                     </div>
-
                     <div id="adminSearchResult" class="border border-[#222] bg-black p-4 text-xs text-gray-400 tracking-wider">
                         Enter a unique submission ID above.
                     </div>
@@ -285,85 +283,45 @@
 
                 <!-- ALL NEW COMPACT DISCORD ADMIN -->
                 <div class="border border-[#222] bg-[#050505] p-6 sm:p-8">
-                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Discord Management Console</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">Compact Moderation Console</h3>
                     
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        
-                        <!-- Col 1: Messaging & Channel Control -->
-                        <div class="flex flex-col gap-5">
-                            
-                            <!-- Messages/Embeds -->
-                            <form id="discordAnnounceForm" class="flex flex-col gap-2 p-4 border border-[#222] bg-black">
-                                <h4 class="font-oswald text-sm uppercase tracking-widest text-gray-400 mb-2">Send Message / Embed</h4>
-                                <input type="text" id="msgChannelId" required class="clean-input pb-1 text-xs" placeholder="Channel ID">
-                                <select id="msgType" class="bg-transparent border-b border-[#333] text-xs text-gray-400 pb-1 outline-none focus:border-white" onchange="document.getElementById('embedFields').style.display = this.value === 'embed' ? 'flex' : 'none'">
-                                    <option value="text" class="bg-black">Standard Text</option>
-                                    <option value="embed" class="bg-black">Rich Embed</option>
+                    <form id="discordModForm" class="flex flex-col gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Action Selection -->
+                            <div>
+                                <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Command Action</label>
+                                <select id="modAction" class="bg-black border border-[#333] text-sm text-white p-3 outline-none focus:border-white w-full" 
+                                        onchange="document.getElementById('modDynamic').innerHTML = this.value === 'timeout' ? '<label class=\'text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block mt-4\'>Duration</label><select id=\'modDuration\' class=\'bg-black border border-[#333] text-sm text-white p-3 outline-none focus:border-white w-full\'><option value=\'300\'>5 Mins</option><option value=\'3600\'>1 Hour</option><option value=\'86400\'>1 Day</option></select>' : (this.value.includes('Role') || this.value === 'roleall' ? '<label class=\'text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block mt-4\'>Role ID</label><input type=\'text\' id=\'modRoleId\' class=\'bg-transparent border-b border-[#333] text-sm text-white pb-2 outline-none focus:border-white w-full\' placeholder=\'Enter Role ID\'>' : '')">
+                                    <option value="kick">Kick User</option>
+                                    <option value="ban">Ban User</option>
+                                    <option value="softban">Softban (Ban + Delete Messages)</option>
+                                    <option value="unban">Unban User</option>
+                                    <option value="timeout">Timeout / Mute</option>
+                                    <option value="untimeout">Remove Timeout</option>
+                                    <option value="warn">Issue Database Warning</option>
+                                    <option value="warnings">Check User Warnings</option>
+                                    <option value="addRole">Give User Role</option>
+                                    <option value="removeRole">Remove User Role</option>
+                                    <option value="roleall">Give Role to ALL Users</option>
                                 </select>
-                                <div id="embedFields" class="hidden flex-col gap-2">
-                                    <input type="text" id="msgTitle" class="clean-input pb-1 text-xs" placeholder="Embed Title">
-                                    <input type="text" id="msgImage" class="clean-input pb-1 text-xs" placeholder="Image URL (Optional)">
-                                </div>
-                                <textarea id="msgContent" required class="clean-input pb-1 text-xs resize-none h-12" placeholder="Message content..."></textarea>
-                                <button type="submit" class="font-oswald text-[10px] uppercase tracking-widest border border-white px-3 py-1 mt-1 clean-invert self-start">Post</button>
-                            </form>
-
-                            <!-- Moderation Grid (Purge & Lock) -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <form id="discordPurgeForm" class="flex flex-col gap-2 p-4 border border-[#222] bg-black">
-                                    <h4 class="font-oswald text-sm uppercase tracking-widest text-gray-400 mb-2">Purge Chat</h4>
-                                    <input type="text" id="purgeChannelId" required class="clean-input pb-1 text-xs" placeholder="Channel ID">
-                                    <input type="number" id="purgeCount" required min="1" max="100" class="clean-input pb-1 text-xs" placeholder="Count (1-100)">
-                                    <button type="submit" class="font-oswald text-[10px] uppercase tracking-widest border border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-2 py-1 mt-1 self-start">Delete</button>
-                                </form>
-
-                                <form id="discordLockForm" class="flex flex-col gap-2 p-4 border border-[#222] bg-black">
-                                    <h4 class="font-oswald text-sm uppercase tracking-widest text-gray-400 mb-2">Lockdown</h4>
-                                    <input type="text" id="lockChannelId" required class="clean-input pb-1 text-xs" placeholder="Channel ID">
-                                    <select id="lockAction" class="bg-transparent border-b border-[#333] text-xs text-gray-400 pb-1 outline-none focus:border-white">
-                                        <option value="lock" class="bg-black">Lock Channel</option>
-                                        <option value="unlock" class="bg-black">Unlock Channel</option>
-                                    </select>
-                                    <button type="submit" class="font-oswald text-[10px] uppercase tracking-widest border border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-2 py-1 mt-1 self-start">Execute</button>
-                                </form>
+                                <div id="modDynamic" class="text-xs"></div>
                             </div>
 
+                            <!-- Target Data -->
+                            <div>
+                                <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Target User ID</label>
+                                <input type="text" id="modUserId" class="bg-transparent border-b border-[#333] text-sm text-white pb-2 mb-4 outline-none focus:border-white w-full" placeholder="User ID (Leave blank for RoleAll)">
+                                
+                                <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Reason</label>
+                                <input type="text" id="modReason" class="bg-transparent border-b border-[#333] text-sm text-white pb-2 outline-none focus:border-white w-full" placeholder="Reason (Optional)">
+                            </div>
                         </div>
 
-                        <!-- Col 2: User Moderation & Config -->
-                        <div class="flex flex-col gap-5">
-                            
-                            <!-- User Mod & Roles -->
-                            <form id="discordModForm" class="flex flex-col gap-2 p-4 border border-[#222] bg-black">
-                                <h4 class="font-oswald text-sm uppercase tracking-widest text-gray-400 mb-2">User Moderation</h4>
-                                <input type="text" id="modUserId" required class="clean-input pb-1 text-xs" placeholder="Target User ID">
-                                
-                                <select id="modAction" class="bg-transparent border-b border-[#333] text-xs text-gray-400 pb-1 outline-none focus:border-white" 
-                                        onchange="document.getElementById('modDynamic').innerHTML = this.value === 'timeout' ? '<option value=\'300\' class=\'bg-black\'>5 Mins</option><option value=\'3600\' class=\'bg-black\'>1 Hour</option><option value=\'86400\' class=\'bg-black\'>1 Day</option>' : (this.value.includes('Role') ? '<input type=\'text\' id=\'modRoleId\' class=\'clean-input pb-1 text-xs w-full\' placeholder=\'Enter Role ID\'>' : '')">
-                                    <option value="kick" class="bg-black">Kick</option>
-                                    <option value="ban" class="bg-black">Ban</option>
-                                    <option value="unban" class="bg-black">Unban</option>
-                                    <option value="timeout" class="bg-black">Timeout</option>
-                                    <option value="unmute" class="bg-black">Remove Timeout</option>
-                                    <option value="addRole" class="bg-black">Give Role</option>
-                                    <option value="removeRole" class="bg-black">Remove Role</option>
-                                </select>
-                                
-                                <div id="modDynamic" class="text-xs"></div>
-                                <input type="text" id="modReason" class="clean-input pb-1 text-xs" placeholder="Reason (Optional)">
-                                <button type="submit" class="font-oswald text-[10px] uppercase tracking-widest border border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 mt-1 self-start">Execute Action</button>
-                            </form>
-
-                            <!-- Welcome Msg -->
-                            <form id="discordConfigForm" class="flex flex-col gap-2 p-4 border border-[#222] bg-black">
-                                <h4 class="font-oswald text-sm uppercase tracking-widest text-gray-400 mb-2">Welcome Config</h4>
-                                <textarea id="welcomeMessageInput" required class="clean-input pb-1 text-xs resize-none h-10" placeholder="Welcome {user} to the server!"></textarea>
-                                <button type="submit" class="font-oswald text-[10px] uppercase tracking-widest border border-white px-3 py-1 mt-1 clean-invert self-start">Save Format</button>
-                            </form>
-                            
-                        </div>
-
-                    </div>
+                        <button type="submit" class="font-oswald text-sm uppercase tracking-widest border border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-6 py-3 mt-2 self-start transition-colors">Execute Command</button>
+                    </form>
+                    
+                    <!-- Response UI for Warning Check -->
+                    <div id="modOutputBox" class="hidden mt-4 bg-black border border-[#333] p-4 text-xs text-gray-300"></div>
                 </div>
 
                 <!-- Database Management -->
@@ -617,88 +575,55 @@
             } catch (err) { resultDiv.innerHTML = '<span class="text-red-400">No record found with that Submission ID.</span>'; }
         });
 
-        // --- DISCORD MODERATION LOGIC ---
-        
-        // Announce / Embed
-        document.getElementById('discordAnnounceForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); const btn = this.querySelector('button'); const originalText = btn.innerText; btn.innerText = 'SENDING...';
-            const type = document.getElementById('msgType').value;
-            try {
-                const res = await fetch('/api/masterBot', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        command: type === 'embed' ? 'embed' : 'announce',
-                        channelId: document.getElementById('msgChannelId').value,
-                        message: document.getElementById('msgContent').value,
-                        title: document.getElementById('msgTitle').value,
-                        imageUrl: document.getElementById('msgImage').value
-                    })
-                });
-                if (res.ok) { btn.innerText = 'SENT!'; this.reset(); document.getElementById('embedFields').style.display='none'; } else { btn.innerText = 'ERROR'; btn.style.color = '#ef4444'; }
-            } catch (err) { btn.innerText = 'ERROR'; }
-            setTimeout(() => { btn.innerText = originalText; btn.style.color = ''; }, 3000);
-        });
-
-        // Purge
-        document.getElementById('discordPurgeForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); const btn = this.querySelector('button'); const originalText = btn.innerText; btn.innerText = 'PURGING...';
-            try {
-                const res = await fetch('/api/masterBot', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: 'purge', channelId: document.getElementById('purgeChannelId').value, count: document.getElementById('purgeCount').value })
-                });
-                if (res.ok) { btn.innerText = 'PURGED!'; this.reset(); } else { btn.innerText = 'ERROR'; }
-            } catch (err) { btn.innerText = 'ERROR'; }
-            setTimeout(() => { btn.innerText = originalText; }, 3000);
-        });
-
-        // Lockdown
-        document.getElementById('discordLockForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); const btn = this.querySelector('button'); const originalText = btn.innerText; btn.innerText = 'LOCKING...';
-            try {
-                const res = await fetch('/api/masterBot', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: 'lockdown', channelId: document.getElementById('lockChannelId').value, action: document.getElementById('lockAction').value })
-                });
-                if (res.ok) { btn.innerText = 'EXECUTED!'; this.reset(); } else { btn.innerText = 'ERROR'; }
-            } catch (err) { btn.innerText = 'ERROR'; }
-            setTimeout(() => { btn.innerText = originalText; }, 3000);
-        });
-
-        // User Mod
+        // COMPACT MODERATION LOGIC
         document.getElementById('discordModForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); const btn = this.querySelector('button'); const originalText = btn.innerText; btn.innerText = 'EXECUTING...';
+            e.preventDefault(); 
+            const btn = this.querySelector('button'); const originalText = btn.innerText; btn.innerText = 'EXECUTING...';
             const action = document.getElementById('modAction').value;
-            const dynamicInput = document.getElementById('modDynamic').querySelector('input, select');
+            const outputBox = document.getElementById('modOutputBox');
+            outputBox.classList.add('hidden');
             
             try {
+                const durationEl = document.getElementById('modDuration');
+                const roleEl = document.getElementById('modRoleId');
+
+                const payload = {
+                    command: 'moderate',
+                    userId: document.getElementById('modUserId').value,
+                    action: action,
+                    duration: durationEl ? durationEl.value : null,
+                    roleId: roleEl ? roleEl.value : null,
+                    reason: document.getElementById('modReason').value
+                };
+
                 const res = await fetch('/api/masterBot', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        command: 'moderate',
-                        userId: document.getElementById('modUserId').value,
-                        action: action,
-                        duration: action === 'timeout' ? dynamicInput.value : null,
-                        roleId: (action === 'addRole' || action === 'removeRole') ? dynamicInput.value : null,
-                        reason: document.getElementById('modReason').value
-                    })
+                    body: JSON.stringify(payload)
                 });
-                if (res.ok) { btn.innerText = 'ACTION APPLIED'; this.reset(); document.getElementById('modDynamic').innerHTML='';} else { btn.innerText = 'ERROR'; }
+                
+                const data = await res.json();
+
+                if (res.ok) { 
+                    btn.innerText = 'ACTION APPLIED'; 
+                    this.reset(); 
+                    document.getElementById('modDynamic').innerHTML='';
+                    
+                    if (action === 'warnings') {
+                        outputBox.classList.remove('hidden');
+                        if (data.warnings.length === 0) {
+                            outputBox.innerHTML = '<span class="text-green-400">This user has 0 warnings.</span>';
+                        } else {
+                            outputBox.innerHTML = `<strong class="text-white block mb-2">Warning History:</strong>` + data.warnings.map(w => {
+                                const parsed = typeof w === 'string' ? JSON.parse(w) : w;
+                                return `• [${new Date(parsed.date).toLocaleDateString()}] ${escapeHtml(parsed.reason)}`;
+                            }).join('<br>');
+                        }
+                    }
+                } else { 
+                    btn.innerText = 'ERROR'; 
+                }
             } catch (err) { btn.innerText = 'ERROR'; }
             setTimeout(() => btn.innerText = originalText, 3000);
-        });
-
-        // Config - Welcome Msg
-        document.getElementById('discordConfigForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); const btn = this.querySelector('button'); const originalText = btn.innerText; btn.innerText = 'SAVING...';
-            try {
-                const res = await fetch('/api/masterBot', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: 'config', welcomeMessage: document.getElementById('welcomeMessageInput').value })
-                });
-                if (res.ok) { btn.innerText = 'SAVED!'; this.reset(); } else { btn.innerText = 'ERROR'; }
-            } catch (err) { btn.innerText = 'ERROR'; }
-            setTimeout(() => { btn.innerText = originalText; }, 3000);
         });
 
         // Add Release
