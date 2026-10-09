@@ -626,7 +626,7 @@
                     </button>
                 </div>
 
-                <!-- Assets Uploader (Direct Multi-CDN Streaming Uploader) -->
+                <!-- Assets Uploader (Multi-CDN Direct Upload) -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Assets Uploader</h3>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -945,11 +945,11 @@
                 if (res.ok) {
                     CURRENT_USER = await res.json();
                     const avatarUrl = CURRENT_USER.avatar 
-                        ? `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png` 
+                        ? (CURRENT_USER.avatar.startsWith('http') ? CURRENT_USER.avatar : `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png`) 
                         : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
                     document.getElementById('discordUserContent').innerHTML = `
-                        <img src="${escapeHtml(avatarUrl)}" class="w-8 h-8 rounded-full border border-[#333]">
+                        <img src="${escapeHtml(avatarUrl)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" class="w-8 h-8 rounded-full border border-[#333]">
                         <span class="text-white font-bold">${escapeHtml(CURRENT_USER.username)}</span>
                         <a href="/api/master?action=logout" class="text-[10px] text-gray-500 hover:text-white underline ml-2">Logout</a>
                     `;
@@ -993,7 +993,7 @@
             if (tabId === 'customize') renderTabsEditor();
         }
 
-        // Direct Multi-Provider Client-Side Upload (No 4.5MB Vercel Limits & Full Audio Range Streaming)
+        // Direct Multi-Provider Client-Side Upload (No 4.5MB Vercel Limits & Safe Text Parsing)
         async function uploadAssetFile(input, targetInputId) {
             const file = input.files[0];
             if (!file) return;
@@ -1005,16 +1005,19 @@
             try {
                 let uploadedUrl = null;
 
-                // Provider 1: qu.ax (Open developer API, supports video/audio/images up to 256MB)
+                // Provider 1: qu.ax (Official upload endpoint is https://qu.ax/upload.php)
                 try {
                     const fd = new FormData();
                     fd.append('files[]', file);
-                    const qRes = await fetch('https://qu.ax/api/upload', { method: 'POST', body: fd });
-                    const qText = await qRes.text();
-                    if (qText.startsWith('{')) {
-                        const qData = JSON.parse(qText);
-                        if (qData.success && qData.files && qData.files[0]?.url) {
-                            uploadedUrl = qData.files[0].url;
+                    const res = await fetch('https://qu.ax/upload.php', {
+                        method: 'POST',
+                        body: fd
+                    });
+                    const text = await res.text();
+                    if (text.startsWith('{')) {
+                        const data = JSON.parse(text);
+                        if (data && data.success && data.files && data.files[0] && data.files[0].url) {
+                            uploadedUrl = data.files[0].url;
                         }
                     }
                 } catch(e) {}
@@ -1024,28 +1027,15 @@
                     try {
                         const fd = new FormData();
                         fd.append('files[]', file);
-                        const pRes = await fetch('https://pomf2.lain.la/upload.php', { method: 'POST', body: fd });
-                        const pText = await pRes.text();
-                        if (pText.startsWith('{')) {
-                            const pData = JSON.parse(pText);
-                            if (pData.success && pData.files && pData.files[0]?.url) {
-                                uploadedUrl = pData.files[0].url;
-                            }
-                        }
-                    } catch(e) {}
-                }
-
-                // Provider 3: tmpfiles.org direct stream fallback
-                if (!uploadedUrl) {
-                    try {
-                        const fd = new FormData();
-                        fd.append('file', file);
-                        const tRes = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: fd });
-                        const tText = await tRes.text();
-                        if (tText.startsWith('{')) {
-                            const tData = JSON.parse(tText);
-                            if (tData.data?.url) {
-                                uploadedUrl = tData.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                        const res = await fetch('https://pomf2.lain.la/upload.php', {
+                            method: 'POST',
+                            body: fd
+                        });
+                        const txt = await res.text();
+                        if (txt.startsWith('{')) {
+                            const data = JSON.parse(txt);
+                            if (data && data.success && data.files && data.files[0] && data.files[0].url) {
+                                uploadedUrl = data.files[0].url;
                             }
                         }
                     } catch(e) {}
@@ -1054,18 +1044,22 @@
                 if (uploadedUrl) {
                     document.getElementById(targetInputId).value = uploadedUrl;
 
-                    // Automatically populate track metadata from audio file
+                    // Automatically pre-fill track metadata when uploading an audio file
                     if (targetInputId === 'custAudio') {
                         const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
                         const titleField = document.getElementById('custTrackTitle');
                         const artistField = document.getElementById('custTrackArtist');
-                        if (titleField && !titleField.value) titleField.value = cleanName;
-                        if (artistField && !artistField.value && CURRENT_USER) artistField.value = CURRENT_USER.username;
+                        if (titleField && (!titleField.value || titleField.value === 'VOLTA')) {
+                            titleField.value = cleanName;
+                        }
+                        if (artistField && (!artistField.value || artistField.value === 'WN3bula') && CURRENT_USER) {
+                            artistField.value = CURRENT_USER.username;
+                        }
                     }
 
                     if (btn) btn.textContent = "Uploaded!";
                 } else {
-                    alert("Upload services are busy. Please paste a direct streamable link into the input.");
+                    alert("Upload services are busy. Please paste a direct streamable file URL (.mp3, .png, .mp4).");
                     if (btn) btn.textContent = "Failed";
                 }
             } catch(err) {
@@ -1282,7 +1276,7 @@
                     document.getElementById('custSubBio').value = data.subBio || '';
                     document.getElementById('custBioText').value = data.description || '';
                     document.getElementById('custLocationText').value = data.location || '';
-                    document.getElementById('custDiscordTag').value = data.discordTag || '';
+                    document.getElementById('custDiscordTag').value = data.discordTag || data.discordUsername || CURRENT_USER.username;
 
                     document.getElementById('custBgEffect').value = data.bgEffect || 'none';
                     document.getElementById('custUserEffect').value = data.userEffect || 'none';
@@ -1307,18 +1301,30 @@
             if (!CURRENT_USER) return;
             const selectedIconBadges = Array.from(document.querySelectorAll('input[name="iconBadgeCheck"]:checked')).map(cb => cb.value);
 
-            // Default avatar automatically to user's real Discord avatar if empty
-            const enteredAvatar = document.getElementById('custAvatar').value.trim();
-            const resolvedAvatar = enteredAvatar || (CURRENT_USER.avatar ? `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png');
+            // Clean invalid download links (e.g. gofile / filewire HTML links)
+            let enteredAvatar = document.getElementById('custAvatar').value.trim();
+            if (enteredAvatar.includes('gofile.io') || enteredAvatar.includes('filewire.com')) {
+                alert("Please do not paste Gofile or Filewire landing page links for your avatar. It has been automatically reset to your Discord avatar.");
+                enteredAvatar = '';
+            }
+
+            let enteredAudio = document.getElementById('custAudio').value.trim();
+            if (enteredAudio.includes('gofile.io') || enteredAudio.includes('filewire.com')) {
+                alert("Please do not paste Gofile or Filewire download page links for audio. Use the 'Upload File' button instead.");
+                enteredAudio = '';
+            }
+
+            const fallbackDcAvatar = CURRENT_USER.avatar ? (CURRENT_USER.avatar.startsWith('http') ? CURRENT_USER.avatar : `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png?size=256`) : 'https://cdn.discordapp.com/embed/avatars/0.png';
+            const resolvedAvatar = enteredAvatar || fallbackDcAvatar;
 
             const payload = {
                 userId: CURRENT_USER.id,
                 username: document.getElementById('accountHandleField').value.trim() || CURRENT_USER.username,
                 background: document.getElementById('custBackground').value.trim(),
-                audio: document.getElementById('custAudio').value.trim(),
+                audio: enteredAudio,
                 avatar: resolvedAvatar,
                 cursor: document.getElementById('custCursor').value.trim(),
-                trackTitle: document.getElementById('custTrackTitle').value.trim() || "Audio Track",
+                trackTitle: document.getElementById('custTrackTitle').value.trim(),
                 trackArtist: document.getElementById('custTrackArtist').value.trim() || CURRENT_USER.username,
                 trackCover: document.getElementById('custTrackCover').value.trim() || resolvedAvatar,
                 subBio: document.getElementById('custSubBio').value.trim(),
@@ -1423,7 +1429,7 @@
             } catch(e) {}
         }
 
-        // Demo Submission via Direct Upload
+        // Demo Submission Pipeline
         document.getElementById('automatedSubmitForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -1435,20 +1441,13 @@
 
             try {
                 let directUrl = null;
-                try {
-                    const fd = new FormData();
-                    fd.append('files[]', file);
-                    const qRes = await fetch('https://qu.ax/api/upload', { method: 'POST', body: fd });
-                    const qData = await qRes.json();
+                const fd = new FormData();
+                fd.append('files[]', file);
+                const qRes = await fetch('https://qu.ax/upload.php', { method: 'POST', body: fd });
+                const qText = await qRes.text();
+                if (qText.startsWith('{')) {
+                    const qData = JSON.parse(qText);
                     if (qData.success && qData.files && qData.files[0]?.url) directUrl = qData.files[0].url;
-                } catch(err) {}
-
-                if (!directUrl) {
-                    const fd = new FormData();
-                    fd.append('file', file);
-                    const tRes = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: fd });
-                    const tData = await tRes.json();
-                    if (tData.data?.url) directUrl = tData.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
                 }
 
                 const subRes = await fetch('/api/master?action=submitdemo', {
@@ -1458,7 +1457,7 @@
                         title: document.getElementById('track_title').value.trim(),
                         artist: document.getElementById('artist').value.trim(),
                         email: document.getElementById('email').value.trim(),
-                        fileUrl: directUrl || 'Direct Upload Received'
+                        fileUrl: directUrl || 'Direct Upload'
                     })
                 });
 
