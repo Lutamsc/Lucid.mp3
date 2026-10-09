@@ -3,920 +3,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucid Links | User Bio</title>
+    <title>Bio Profile | Lucid Links</title>
     
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        oswald: ['Oswald', 'sans-serif'],
-                        sans: ['Space Grotesk', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        dark: '#050505',
-                        card: '#080808',
-                        border: '#1f1f1f',
-                    }
-                }
-            }
-        }
-    </script>
 
     <style>
-        :root {
-            --accent-color: #ffffff;
-            --text-color: #ffffff;
-            --card-bg: rgba(8, 8, 8, 0.85);
-            --icon-color: #ffffff;
-            --card-opacity: 0.85;
-            --card-blur: 24px;
-        }
-
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
-            color: #ffffff;
-            overflow-x: hidden;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #030303; color: #ffffff;
             font-family: 'Space Grotesk', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
+            overflow-x: hidden;
         }
 
-        /* Subtle analog noise texture */
-        .noise-overlay {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 90;
-            opacity: 0.04;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        .noise-layer {
+            position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         }
 
-        /* Ambient Canvas Shader */
-        #fxCanvas {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
+        #pageBgMedia {
+            position: fixed; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -10; filter: brightness(0.65);
         }
 
-        /* Background Media Container */
-        #bgMediaLayer {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: 1;
-            transition: opacity 0.8s ease;
-        }
-
-        /* Scanline Overlay */
-        .scanlines {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 15;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%;
-        }
-
-        /* Bio Glass Card */
-        #bioCard {
-            background-color: var(--card-bg);
-            opacity: var(--card-opacity);
-            backdrop-filter: blur(var(--card-blur));
-            -webkit-backdrop-filter: blur(var(--card-blur));
+        .card-container {
+            max-width: 580px; width: 100%;
+            background: rgba(10, 10, 10, 0.88);
+            backdrop-filter: blur(28px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.95);
         }
 
-        #bioCard:hover {
-            border-color: rgba(255, 255, 255, 0.22);
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.05);
-        }
-
-        /* Glow Animations */
-        .glow-user {
-            text-shadow: 0 0 16px rgba(255, 255, 255, 0.85), 0 0 32px rgba(255, 255, 255, 0.35);
-        }
-
-        .glow-socials-active i {
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9));
-        }
-
-        .glow-badges-active span {
-            box-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
-        }
-
-        /* Chromatic Aberration Text Shader */
-        .effect-chromatic {
-            animation: chromaticShift 3s infinite alternate ease-in-out;
-        }
-        @keyframes chromaticShift {
-            0% { text-shadow: -2px 0 #ff0055, 2px 0 #00ffff; }
-            50% { text-shadow: 2px 0 #ff0055, -2px 0 #00ffff; }
-            100% { text-shadow: -1px 0 #9900ff, 1px 0 #00ff66; }
-        }
-
-        /* Custom Audio Visualizer Equalizer Bar */
-        .eq-bar {
-            width: 3px;
-            background-color: #ffffff;
-            border-radius: 2px;
-            animation: eqBounce 1s infinite ease-in-out alternate;
-        }
-        .eq-bar:nth-child(1) { height: 14px; animation-delay: 0.1s; }
-        .eq-bar:nth-child(2) { height: 8px; animation-delay: 0.3s; }
-        .eq-bar:nth-child(3) { height: 18px; animation-delay: 0.15s; }
-        .eq-bar:nth-child(4) { height: 10px; animation-delay: 0.4s; }
-        .eq-bar:nth-child(5) { height: 16px; animation-delay: 0.25s; }
-
-        @keyframes eqBounce {
-            0% { transform: scaleY(0.3); }
-            100% { transform: scaleY(1.2); }
-        }
-
-        /* Click To Enter Interactive Gate */
-        #audioGate {
-            transition: opacity 0.45s ease, visibility 0.45s;
-        }
-
-        /* Badge Pills */
-        .badge-pill {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            padding: 3px 8px;
-            border-radius: 6px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: transform 0.2s ease, border-color 0.2s ease;
-        }
-        .badge-pill:hover {
-            transform: translateY(-1px);
-        }
-
-        /* Social Platform Icon Tiles */
-        .social-link-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: var(--icon-color);
-            transition: all 0.25s ease;
+        .bg-banner {
+            width: 100%; height: 190px;
+            background-size: cover; background-position: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
         }
-        .social-link-icon:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+
+        .avatar-overlap {
+            margin-top: -60px; width: 115px; height: 115px;
+            border-radius: 9999px; border: 4px solid #0a0a0a;
+            position: relative; background: #111;
         }
 
-        /* Tooltips */
-        .tooltip-text {
-            position: absolute;
-            bottom: 110%;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 4px 8px;
-            background-color: #000000;
-            border: 1px solid #333333;
-            border-radius: 4px;
-            font-size: 9px;
-            font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            z-index: 100;
+        .social-pill {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc; transition: all 0.2s ease;
         }
-        .social-link-icon:hover .tooltip-text {
-            opacity: 1;
-            transform: translateX(-50%) translateY(-3px);
+        .social-pill:hover {
+            background: #ffffff; color: #000000; transform: translateY(-2px);
         }
 
-        /* Toast Alert */
-        #toastNotice {
-            transition: transform 0.3s ease, opacity 0.3s ease;
+        .custom-tab-btn {
+            font-size: 11px; font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase; letter-spacing: 0.15em;
+            color: #777; padding: 10px 16px;
+            border-bottom: 2px solid transparent; transition: all 0.2s;
+        }
+        .custom-tab-btn.active {
+            color: #ffffff; border-bottom-color: #ffffff; font-weight: 700;
+        }
+
+        .audio-slider {
+            -webkit-appearance: none; height: 4px; border-radius: 2px; background: #222; outline: none;
+        }
+        .audio-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #ffffff; cursor: pointer;
         }
     </style>
 </head>
-<body id="masterBody" class="antialiased flex items-center justify-center min-h-screen relative p-4">
+<body class="flex items-center justify-center min-h-screen p-4 relative">
+    <div class="noise-layer"></div>
+    <div id="bgContainer"></div>
+    <audio id="bgAudio" loop></audio>
 
-    <!-- Global Noise Filter Layer -->
-    <div class="noise-overlay"></div>
-
-    <!-- Procedural Particles / Rain Canvas Shader -->
-    <canvas id="fxCanvas"></canvas>
-
-    <!-- Background Media Layer (Image / GIF / Solid) -->
-    <div id="bgMediaLayer"></div>
-
-    <!-- CRT Glitch Scanline Layer -->
-    <div id="scanlineLayer" class="hidden scanlines"></div>
-
-    <!-- Hidden Background Audio Player -->
-    <audio id="bgAudioLoop" loop preload="auto"></audio>
-
-    <!-- ======================================================== -->
-    <!-- INTERACTIVE AUDIO GATE ("CLICK ANYWHERE TO ENTER")       -->
-    <!-- ======================================================== -->
-    <div id="audioGate" class="fixed inset-0 bg-black/92 z-[200] flex flex-col items-center justify-center cursor-pointer select-none">
-        <div class="flex flex-col items-center gap-3">
-            <span class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white/80 animate-pulse text-lg">
-                <i class="fa-solid fa-volume-high"></i>
-            </span>
-            <p class="font-oswald text-xl md:text-2xl uppercase tracking-[0.35em] text-white animate-pulse">
-                Click anywhere to enter
-            </p>
-            <span class="text-[10px] font-mono text-gray-500 uppercase tracking-widest mt-1">
-                Lucid.mp3 Profile Network // Underground
-            </span>
-        </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- TOP UTILITY CONTROLS (Mute / Share / Fullscreen / Views) -->
-    <!-- ======================================================== -->
-    <div class="fixed top-6 right-6 z-[100] flex items-center gap-3">
-        <!-- Audio Volume / Mute Button -->
-        <button id="btnAudioToggle" onclick="toggleAudioMute()" class="w-9 h-9 rounded-full bg-black/70 border border-[#333] hover:border-white text-xs text-white flex items-center justify-center backdrop-blur-md transition-all">
-            <i id="audioIconState" class="fa-solid fa-volume-high"></i>
-        </button>
-
-        <!-- Share / Copy Profile Button -->
-        <button onclick="copyProfileShareUrl()" class="w-9 h-9 rounded-full bg-black/70 border border-[#333] hover:border-white text-xs text-white flex items-center justify-center backdrop-blur-md transition-all" title="Share Bio">
-            <i class="fa-solid fa-share-nodes"></i>
-        </button>
-
-        <!-- Main Home Link -->
-        <a href="/" class="px-3 py-1.5 rounded-full bg-black/70 border border-[#333] hover:border-white text-[10px] font-mono uppercase tracking-widest text-gray-300 hover:text-white flex items-center gap-2 backdrop-blur-md transition-all">
-            <span>Lucid.mp3</span>
-            <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
-        </a>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toastNotice" class="fixed bottom-6 z-[300] bg-black border border-white/30 text-white font-mono text-xs uppercase px-5 py-2.5 rounded-full shadow-2xl opacity-0 pointer-events-none translate-y-6">
-        Link copied to clipboard!
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- MAIN FLOATING GUNS.LOL / D3LTA PROFILE CARD               -->
-    <!-- ======================================================== -->
-    <main id="bioCard" class="w-full max-w-md rounded-3xl p-8 relative shadow-2xl z-20 flex flex-col items-center text-center my-12">
-        
-        <!-- Top Profile Banner Decorator Line -->
-        <div class="w-16 h-1 rounded-full bg-white/20 mb-6"></div>
-
-        <!-- 1. Profile Avatar & Discord Status Indicator -->
-        <div class="relative mb-4">
-            <div class="w-28 h-28 rounded-full border-2 border-white/20 overflow-hidden bg-[#111] shadow-xl relative">
-                <img id="cardAvatarImg" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="w-full h-full object-cover">
-            </div>
-            <!-- Discord Realtime Gateway Status Dot -->
-            <span id="discordPresenceDot" class="w-5 h-5 bg-gray-600 border-[3px] border-black rounded-full absolute bottom-1 right-1 shadow-md transition-colors duration-300" title="Offline"></span>
-        </div>
-
-        <!-- 2. Username & Typography Shaders -->
-        <h1 id="cardUsername" class="font-bold text-2xl tracking-wide flex items-center justify-center gap-2 mb-1">
-            Loading...
-        </h1>
-
-        <!-- Pronouns Tag / Subtitle -->
-        <span id="cardPronounDisplay" class="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-400 mb-3 block">
-            HE/HIM
+    <!-- Autoplay Gate -->
+    <div id="gateOverlay" class="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center cursor-pointer">
+        <span class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white mb-3 animate-pulse">
+            <i class="fa-solid fa-volume-high"></i>
         </span>
+        <p class="font-oswald text-xl uppercase tracking-[0.3em] text-white">Click anywhere to enter</p>
+        <span class="text-[10px] font-mono text-gray-500 uppercase mt-1">Lucid.mp3 Profile Network</span>
+    </div>
 
-        <!-- 3. Dual Badge System (Staff Awarded + Self Selected) -->
-        <div id="cardBadgesRow" class="flex flex-wrap justify-center gap-1.5 mb-4 max-w-sm">
-            <span class="badge-pill border border-white text-black bg-white font-bold">
-                <i class="fa-solid fa-circle-check text-[8px]"></i> Member
-            </span>
+    <!-- wn3bula Style Card -->
+    <div class="card-container relative my-8">
+        <div id="profileBanner" class="bg-banner bg-[#111]">
+            <div class="absolute top-3 left-4 text-[10px] font-mono uppercase tracking-widest text-white/80 flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10">
+                <i class="fa-regular fa-calendar"></i>
+                <span id="statJoined">Joined Oct 2025</span>
+            </div>
+
+            <div class="absolute top-3 right-4 flex items-center gap-2">
+                <div class="text-[10px] font-mono uppercase tracking-widest text-white/80 flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10">
+                    <i class="fa-regular fa-eye"></i>
+                    <span id="statViews">0 Views</span>
+                </div>
+                <div class="text-[10px] font-mono uppercase tracking-widest text-white/80 flex items-center gap-1 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10 font-bold">
+                    <i class="fa-solid fa-ranking-star text-yellow-400"></i>
+                    <span id="statRank">#1</span>
+                </div>
+            </div>
         </div>
 
-        <!-- 4. Bio Description & Location -->
-        <p id="cardBioText" class="text-xs text-gray-300 font-mono leading-relaxed mb-1 max-w-xs"></p>
-        <div id="cardLocationContainer" class="flex items-center gap-1.5 text-[10px] font-mono text-gray-500 mb-6">
-            <i class="fa-solid fa-location-dot"></i>
-            <span id="cardLocationText">Underground</span>
-        </div>
+        <div class="flex flex-col items-center px-6 pb-6 text-center">
+            <div class="avatar-overlap overflow-hidden shadow-2xl">
+                <img id="profileAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
+                <span id="discordStatusDot" class="w-4 h-4 bg-gray-600 border-2 border-black rounded-full absolute bottom-1 right-1"></span>
+            </div>
 
-        <!-- 5. Mini Audio Track Player (Waveform Bar) -->
-        <div id="miniAudioPlayer" class="w-full bg-black/60 border border-[#222] rounded-xl p-3 mb-6 hidden flex-col gap-2">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5 truncate">
-                    <button onclick="toggleAudioPlayback()" class="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center text-xs hover:scale-105 transition">
-                        <i id="playBtnIcon" class="fa-solid fa-play ml-0.5"></i>
-                    </button>
-                    <div class="truncate text-left">
-                        <p id="audioTrackName" class="text-[11px] font-bold text-white truncate">Background Audio Track</p>
-                        <p class="text-[9px] font-mono text-gray-500 uppercase">Looping Audio</p>
+            <h1 id="profileUsername" class="font-bold text-2xl tracking-tight text-white mt-3 flex items-center gap-2">wn3bula</h1>
+            <div id="profileBadgesRow" class="flex items-center justify-center gap-2 mt-1.5 text-sm text-gray-400"></div>
+
+            <span id="profileHandleText" class="text-xs font-mono text-gray-400 mt-2 block">@wn3bula</span>
+            <p id="profileTagline" class="text-xs font-bold text-gray-200 uppercase tracking-widest mt-1">D3LTA OWNER / FREAKYY</p>
+            <p id="profileSubBio" class="text-xs text-gray-400 font-mono mt-0.5">me nebula</p>
+
+            <div id="profileLocationBox" class="flex items-center gap-1 text-[11px] font-mono text-gray-400 mt-2">
+                <i class="fa-solid fa-location-dot"></i>
+                <span id="profileLocationText">Austria</span>
+            </div>
+
+            <div id="profileSocialsGrid" class="flex items-center justify-center gap-2.5 mt-4"></div>
+
+            <!-- Discord Presence Dock -->
+            <div class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-3.5 mt-6 flex items-center justify-between text-left">
+                <div class="flex items-center gap-3 truncate">
+                    <div class="w-11 h-11 rounded-full bg-[#181818] overflow-hidden border border-[#262626] flex-shrink-0">
+                        <img id="dockAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
+                    </div>
+                    <div class="truncate">
+                        <div class="flex items-center gap-1.5">
+                            <span id="dockUsername" class="text-xs font-bold text-white truncate font-sans">freaky WN3bula | OWNER</span>
+                            <span class="text-[9px] border border-[#333] px-1 py-0.5 rounded text-gray-400 font-mono">STATUS</span>
+                        </div>
+                        <p id="dockActivity" class="text-[10px] font-mono text-gray-500 truncate mt-0.5">Connecting...</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-1">
-                    <div class="eq-bar"></div>
-                    <div class="eq-bar"></div>
-                    <div class="eq-bar"></div>
-                    <div class="eq-bar"></div>
-                    <div class="eq-bar"></div>
+                <button onclick="copyDiscordTag()" class="border border-[#333] hover:border-white text-[10px] font-mono uppercase px-3 py-1.5 rounded-lg text-gray-300 hover:text-white transition flex-shrink-0 ml-2">
+                    Add Friend
+                </button>
+            </div>
+
+            <!-- Music Player Dock (Matching Image 3) -->
+            <div id="audioPlayerCard" class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-4 mt-3 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 truncate">
+                        <div class="w-12 h-12 rounded-xl bg-[#181818] overflow-hidden border border-[#222] flex-shrink-0">
+                            <img id="trackCover" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
+                        </div>
+                        <div class="truncate text-left">
+                            <h4 id="trackTitle" class="text-xs font-bold text-white truncate">VOLTA</h4>
+                            <p id="trackArtist" class="text-[10px] font-mono text-gray-500 truncate">WN3bula</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i id="volumeIcon" class="fa-solid fa-volume-high text-xs text-gray-400"></i>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.8" class="audio-slider w-16 accent-white">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="togglePlayAudio()" class="text-white hover:text-gray-300 transition text-sm">
+                        <i id="playIcon" class="fa-solid fa-play"></i>
+                    </button>
+                    <input type="range" id="seekSlider" min="0" max="100" value="0" class="audio-slider flex-1 accent-white">
+                    <span id="timeDisplay" class="text-[9px] font-mono text-gray-500">0:00 / 0:25</span>
                 </div>
             </div>
-            <!-- Progress Tracker -->
-            <div class="w-full bg-[#1a1a1a] h-1 rounded-full overflow-hidden cursor-pointer" onclick="scrubAudioPosition(event)">
-                <div id="audioProgressBar" class="bg-white h-full w-0 transition-all duration-100"></div>
-            </div>
+
+            <!-- Dynamic Tab Headers Row -->
+            <div id="tabHeadersRow" class="w-full border-b border-[#222] mt-6 flex justify-around overflow-x-auto"></div>
+
+            <!-- Dynamic Tab Bodies Container -->
+            <div id="tabBodiesContainer" class="w-full pt-4 text-xs font-mono text-gray-400 text-left"></div>
         </div>
+    </div>
 
-        <!-- 6. 34-Platform Social Icon Directory Grid -->
-        <div id="cardSocialsGrid" class="flex flex-wrap justify-center gap-2.5 mb-6 max-w-xs">
-            <!-- Dynamically populated from profile configuration -->
-        </div>
-
-        <!-- 7. Live Discord Presence Dock (Lanyard Realtime Gateway) -->
-        <div id="discordPresenceWidget" class="w-full bg-black/75 border border-[#222] p-3.5 rounded-2xl flex items-center gap-3.5 text-left transition-all">
-            <div class="relative flex-shrink-0">
-                <div class="w-12 h-12 rounded-full bg-[#151515] overflow-hidden border border-[#333]">
-                    <img id="dockAvatarImg" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
-                </div>
-            </div>
-
-            <div class="flex-1 truncate">
-                <div class="flex items-center gap-1.5">
-                    <p id="dockPresenceUsername" class="text-xs font-bold text-white truncate font-sans">Discord Offline</p>
-                    <span id="dockPresenceBadge" class="text-[8px] font-mono border border-[#333] px-1 py-0.2 rounded text-gray-400">STATUS</span>
-                </div>
-                <p id="dockPresenceActivity" class="text-[10px] text-gray-400 font-mono truncate mt-0.5">Connecting to gateway...</p>
-            </div>
-
-            <!-- Spotify Pulsing Equalizer Icon -->
-            <div id="dockSpotifyIndicator" class="hidden text-green-400 text-lg mr-1 animate-pulse" title="Listening to Spotify">
-                <i class="fa-brands fa-spotify"></i>
-            </div>
-        </div>
-
-        <!-- 8. Card Footer Watermark -->
-        <div class="mt-8 pt-4 border-t border-white/5 w-full flex items-center justify-between text-[9px] font-mono text-gray-600 uppercase tracking-widest">
-            <a href="/" class="hover:text-white transition">LUCID.MP3</a>
-            <span id="cardTotalViewsDisplay">0 VIEWS</span>
-        </div>
-    </main>
-
-    <!-- ======================================================== -->
-    <!-- MASTER CLIENT-SIDE LOGIC & PROCEDURAL ENGINE             -->
-    <!-- ======================================================== -->
     <script>
-        // -----------------------------------------------------------
-        // 1. URL & PARAMETER RESOLVER
-        // -----------------------------------------------------------
-        function getTargetHandle() {
-            const urlParams = new URLSearchParams(window.location.search);
-            let handle = urlParams.get('username') || urlParams.get('handle');
+        const urlParams = new URLSearchParams(window.location.search);
+        let targetHandle = urlParams.get('handle') || urlParams.get('username') || window.location.pathname.split('/').pop().replace('@', '');
+        if (!targetHandle) targetHandle = 'wn3bula';
 
-            if (!handle) {
-                const parts = window.location.pathname.split('/').filter(Boolean);
-                if (parts.length > 0) {
-                    handle = parts[0].replace('@', '');
-                }
-            }
-            return handle ? handle.toLowerCase().trim() : null;
-        }
+        let audioEl = document.getElementById('bgAudio');
+        let profileUserId = null;
 
-        const TARGET_HANDLE = getTargetHandle();
-        let PROFILE_DATA = null;
-        let LANYARD_WS = null;
-
-        // -----------------------------------------------------------
-        // 2. PROCEDURAL CANVAS SHADER ENGINE (RAIN, ASH, SCANLINES)
-        // -----------------------------------------------------------
-        const canvas = document.getElementById('fxCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let activeEffect = 'none';
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class RainDrop {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * -canvas.height;
-                this.length = Math.random() * 20 + 15;
-                this.speed = Math.random() * 10 + 18;
-                this.opacity = Math.random() * 0.25 + 0.1;
-            }
-            update() {
-                this.y += this.speed;
-                if (this.y > canvas.height) {
-                    this.y = -20;
-                    this.x = Math.random() * canvas.width;
-                }
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                ctx.lineWidth = 1;
-                ctx.moveTo(this.x, this.y);
-                ctx.lineTo(this.x, this.y + this.length);
-                ctx.stroke();
-            }
-        }
-
-        class AshParticle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.speedY = Math.random() * 1 + 0.5;
-                this.speedX = Math.random() * 1 - 0.5;
-                this.opacity = Math.random() * 0.4 + 0.1;
-            }
-            update() {
-                this.y += this.speedY;
-                this.x += this.speedX;
-                if (this.y > canvas.height) {
-                    this.y = -10;
-                    this.x = Math.random() * canvas.width;
-                }
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function initShaderParticles(type) {
-            particles = [];
-            activeEffect = type;
-            const count = type === 'rain' ? 120 : (type === 'particles' ? 80 : 0);
-            
-            for (let i = 0; i < count; i++) {
-                if (type === 'rain') particles.push(new RainDrop());
-                if (type === 'particles') particles.push(new AshParticle());
-            }
-        }
-
-        function renderShaderLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (activeEffect !== 'none') {
-                for (let i = 0; i < particles.length; i++) {
-                    particles[i].update();
-                    particles[i].draw();
-                }
-            }
-            requestAnimationFrame(renderShaderLoop);
-        }
-        renderShaderLoop();
-
-        // -----------------------------------------------------------
-        // 3. COMPLETE SOCIAL PLATFORM DIRECTORY MAPPING
-        // -----------------------------------------------------------
-        const PLATFORM_MAP = {
-            snapchat: { name: 'Snapchat', icon: 'fa-brands fa-snapchat', color: '#fffc00' },
-            youtube: { name: 'YouTube', icon: 'fa-brands fa-youtube', color: '#ff0000' },
-            discord: { name: 'Discord', icon: 'fa-brands fa-discord', color: '#5865f2' },
-            spotify: { name: 'Spotify', icon: 'fa-brands fa-spotify', color: '#1db954' },
-            instagram: { name: 'Instagram', icon: 'fa-brands fa-instagram', color: '#e4405f' },
-            twitter: { name: 'X / Twitter', icon: 'fa-brands fa-x-twitter', color: '#ffffff' },
-            tiktok: { name: 'TikTok', icon: 'fa-brands fa-tiktok', color: '#ffffff' },
-            telegram: { name: 'Telegram', icon: 'fa-brands fa-telegram', color: '#24a1de' },
-            soundcloud: { name: 'SoundCloud', icon: 'fa-brands fa-soundcloud', color: '#ff5500' },
-            paypal: { name: 'PayPal', icon: 'fa-brands fa-paypal', color: '#00457c' },
-            github: { name: 'GitHub', icon: 'fa-brands fa-github', color: '#ffffff' },
-            twitch: { name: 'Twitch', icon: 'fa-brands fa-twitch', color: '#9146ff' },
-            steam: { name: 'Steam', icon: 'fa-brands fa-steam', color: '#ffffff' },
-            reddit: { name: 'Reddit', icon: 'fa-brands fa-reddit', color: '#ff4500' },
-            roblox: { name: 'Roblox', icon: 'fa-solid fa-cube', color: '#ffffff' },
-            cashapp: { name: 'Cash App', icon: 'fa-solid fa-dollar-sign', color: '#00d632' },
-            applemusic: { name: 'Apple Music', icon: 'fa-brands fa-apple', color: '#fc3c44' },
-            playstation: { name: 'PlayStation', icon: 'fa-brands fa-playstation', color: '#003791' },
-            xbox: { name: 'Xbox', icon: 'fa-brands fa-xbox', color: '#107c10' },
-            custom: { name: 'Website', icon: 'fa-solid fa-globe', color: '#10b981' }
-        };
-
-        // -----------------------------------------------------------
-        // 4. DATASTORE FETCHING & RENDER PIPELINE
-        // -----------------------------------------------------------
-        async function fetchProfileData() {
-            if (!TARGET_HANDLE) {
-                renderNotFound("No Handle Provided");
-                return;
-            }
+        async function sendAnalyticsEvent(type) {
+            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            let ref = 'direct';
+            if (document.referrer.includes('discord')) ref = 'discord';
+            else if (document.referrer.includes('tiktok')) ref = 'tiktok';
 
             try {
-                const res = await fetch(`/api/master?action=profile&username=${encodeURIComponent(TARGET_HANDLE)}`);
-                if (!res.ok) {
-                    renderNotFound(`@${TARGET_HANDLE} is unclaimed.`);
-                    return;
-                }
-
-                PROFILE_DATA = await res.json();
-                applyProfileTheme(PROFILE_DATA);
-                renderSocialIcons(PROFILE_DATA.socials || {}, PROFILE_DATA.monochrome);
-                renderBadges(PROFILE_DATA);
-                initBackgroundAudio(PROFILE_DATA.audio);
-                
-                if (PROFILE_DATA.userId) {
-                    connectLanyardPresence(PROFILE_DATA.userId);
-                } else {
-                    document.getElementById('dockPresenceUsername').textContent = PROFILE_DATA.username || TARGET_HANDLE;
-                    document.getElementById('dockPresenceActivity').textContent = "Not connected to Discord gateway";
-                }
-            } catch(e) {
-                renderNotFound("Failed to load profile from datastore.");
-            }
-        }
-
-        function renderNotFound(msg) {
-            document.getElementById('audioGate').style.display = 'none';
-            document.getElementById('cardUsername').textContent = "404 Not Found";
-            document.getElementById('cardBioText').textContent = msg;
-            document.getElementById('cardLocationContainer').classList.add('hidden');
-            document.getElementById('discordPresenceWidget').classList.add('hidden');
-        }
-
-        // -----------------------------------------------------------
-        // 5. THEME & VISUAL STYLING ENGINE
-        // -----------------------------------------------------------
-        function applyProfileTheme(data) {
-            document.title = `@${data.username || TARGET_HANDLE} | Lucid Links`;
-
-            // Custom Cursors
-            if (data.cursor) {
-                document.body.style.cursor = `url('${data.cursor}'), auto`;
-            }
-
-            // Background Media Layer
-            if (data.background) {
-                const bg = document.getElementById('bgMediaLayer');
-                bg.style.backgroundImage = `url('${data.background}')`;
-            }
-
-            // Opacity & Blur Sliders
-            const opacity = (parseInt(data.opacity || 85, 10)) / 100;
-            const blur = parseInt(data.blur || 24, 10);
-            const cardBg = data.cardBgColor || '#080808';
-            const textColor = data.textColor || '#ffffff';
-            const accentColor = data.accentColor || '#ffffff';
-            const iconColor = data.iconColor || '#ffffff';
-
-            document.documentElement.style.setProperty('--card-opacity', opacity);
-            document.documentElement.style.setProperty('--card-blur', `${blur}px`);
-            document.documentElement.style.setProperty('--card-bg', cardBg);
-            document.documentElement.style.setProperty('--text-color', textColor);
-            document.documentElement.style.setProperty('--accent-color', accentColor);
-            document.documentElement.style.setProperty('--icon-color', iconColor);
-
-            // Text Color Application
-            document.getElementById('cardUsername').style.color = textColor;
-            document.getElementById('cardBioText').style.color = textColor;
-
-            // Description and Location
-            document.getElementById('cardUsername').textContent = data.username || TARGET_HANDLE;
-            document.getElementById('cardBioText').textContent = data.description || '';
-            
-            if (data.location) {
-                document.getElementById('cardLocationText').textContent = data.location;
-                document.getElementById('cardLocationContainer').classList.remove('hidden');
-            } else {
-                document.getElementById('cardLocationContainer').classList.add('hidden');
-            }
-
-            // Profile Avatar
-            const avatarImg = document.getElementById('cardAvatarImg');
-            const dockImg = document.getElementById('dockAvatarImg');
-            const resolvedAvatar = data.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
-            avatarImg.src = resolvedAvatar;
-            dockImg.src = resolvedAvatar;
-
-            // Shader Effects
-            if (data.bgEffect === 'rain') initShaderParticles('rain');
-            else if (data.bgEffect === 'particles') initShaderParticles('particles');
-            else if (data.bgEffect === 'scanline') {
-                document.getElementById('scanlineLayer').classList.remove('hidden');
-            }
-
-            // Username Shaders
-            if (data.userEffect === 'chromatic') {
-                document.getElementById('cardUsername').classList.add('effect-chromatic');
-            }
-
-            // Glow Toggles
-            if (data.glowUsername) document.getElementById('cardUsername').classList.add('glow-user');
-            if (data.glowSocials) document.getElementById('cardSocialsGrid').classList.add('glow-socials-active');
-            if (data.glowBadges) document.getElementById('cardBadgesRow').classList.add('glow-badges-active');
-        }
-
-        // -----------------------------------------------------------
-        // 6. BADGES ENGINE
-        // -----------------------------------------------------------
-        function renderBadges(data) {
-            const container = document.getElementById('cardBadgesRow');
-            let html = `
-                <span class="badge-pill border border-white text-black bg-white font-bold">
-                    <i class="fa-solid fa-circle-check text-[8px]"></i> Member
-                </span>
-            `;
-
-            // Staff Badges (Owner, Coder, Helper, Friend, A&R, Promoter, Lucid Cover Artist)
-            const staffList = Array.isArray(data.staffBadges) ? data.staffBadges : [];
-            staffList.forEach(b => {
-                let badgeStyle = "border-purple-500 bg-purple-950/40 text-purple-300";
-                let icon = "fa-solid fa-crown";
-
-                if (b === 'Coder') icon = "fa-solid fa-code";
-                if (b === 'Helper') icon = "fa-solid fa-hand-holding-hand";
-                if (b === 'Friend') icon = "fa-solid fa-heart";
-                if (b === 'A&R') icon = "fa-solid fa-headphones";
-                if (b === 'Promoter') icon = "fa-solid fa-bullhorn";
-                if (b === 'Lucid Cover Artist') icon = "fa-solid fa-palette";
-
-                html += `
-                    <span class="badge-pill border ${badgeStyle}">
-                        <i class="${icon} text-[8px]"></i> ${escapeHtml(b)}
-                    </span>
-                `;
-            });
-
-            // Self-Selected Badges (Cover Artist, Editor, Artist, Pronouns)
-            const selfList = Array.isArray(data.selfBadges) ? data.selfBadges : [];
-            let foundPronoun = null;
-
-            selfList.forEach(b => {
-                if (['He/Him', 'She/Her', 'They/Them', 'Other'].includes(b)) {
-                    foundPronoun = b;
-                    return;
-                }
-                html += `
-                    <span class="badge-pill border border-[#333] bg-[#111] text-gray-300">
-                        <i class="fa-solid fa-tag text-[8px]"></i> ${escapeHtml(b)}
-                    </span>
-                `;
-            });
-
-            container.innerHTML = html;
-
-            // Pronouns Line
-            const pronounDisplay = document.getElementById('cardPronounDisplay');
-            if (foundPronoun) {
-                pronounDisplay.textContent = foundPronoun.toUpperCase();
-                pronounDisplay.classList.remove('hidden');
-            } else {
-                pronounDisplay.classList.add('hidden');
-            }
-        }
-
-        // -----------------------------------------------------------
-        // 7. SOCIAL LINKS GENERATOR
-        // -----------------------------------------------------------
-        function renderSocialIcons(socialsObj, isMonochrome) {
-            const container = document.getElementById('cardSocialsGrid');
-            let html = '';
-
-            for (const [key, rawUrl] of Object.entries(socialsObj)) {
-                if (!rawUrl || rawUrl.trim() === '') continue;
-
-                const url = rawUrl.trim();
-                const platform = PLATFORM_MAP[key] || { name: key, icon: 'fa-solid fa-link', color: '#ffffff' };
-                const iconColorStyle = isMonochrome ? 'color: var(--icon-color);' : `color: ${platform.color};`;
-
-                html += `
-                    <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="social-link-icon" style="${iconColorStyle}">
-                        <i class="${platform.icon}"></i>
-                        <span class="tooltip-text">${escapeHtml(platform.name)}</span>
-                    </a>
-                `;
-            }
-
-            container.innerHTML = html;
-        }
-
-        // -----------------------------------------------------------
-        // 8. LIVE DISCORD PRESENCE VIA LANYARD WEBSOCKET
-        // -----------------------------------------------------------
-        function connectLanyardPresence(discordUserId) {
-            const dot = document.getElementById('discordPresenceDot');
-            const usernameEl = document.getElementById('dockPresenceUsername');
-            const activityEl = document.getElementById('dockPresenceActivity');
-            const spotifyIcon = document.getElementById('dockSpotifyIndicator');
-
-            function handlePresenceData(d) {
-                if (!d) return;
-
-                // Status Indicator
-                const statusColors = {
-                    online: 'bg-green-500',
-                    idle: 'bg-yellow-500',
-                    dnd: 'bg-red-500',
-                    offline: 'bg-gray-600'
-                };
-
-                dot.className = `w-5 h-5 border-[3px] border-black rounded-full absolute bottom-1 right-1 shadow-md transition-colors duration-300 ${statusColors[d.discord_status] || 'bg-gray-600'}`;
-                dot.title = d.discord_status ? d.discord_status.toUpperCase() : 'Offline';
-
-                // Display Tag
-                usernameEl.textContent = d.discord_user ? d.discord_user.username : (PROFILE_DATA.username || TARGET_HANDLE);
-
-                // Spotify Listening Track
-                if (d.listening_to_spotify && d.spotify) {
-                    activityEl.textContent = `Listening to ${d.spotify.song} by ${d.spotify.artist}`;
-                    spotifyIcon.classList.remove('hidden');
-                    return;
-                }
-
-                spotifyIcon.classList.add('hidden');
-
-                // Custom Presence Activity or Game
-                const mainActivity = d.activities ? d.activities.find(a => a.type === 0 || a.type === 4) : null;
-                if (mainActivity) {
-                    if (mainActivity.type === 4 && mainActivity.state) {
-                        activityEl.textContent = mainActivity.state;
-                    } else if (mainActivity.name) {
-                        activityEl.textContent = `Playing ${mainActivity.name}`;
-                    }
-                } else if (d.discord_status !== 'offline') {
-                    activityEl.textContent = `Active on Discord (${d.discord_status.toUpperCase()})`;
-                } else {
-                    activityEl.textContent = "Offline on Discord";
-                }
-            }
-
-            // Real-time WebSocket Gateway
-            try {
-                LANYARD_WS = new WebSocket('wss://api.lanyard.rest/socket');
-                let heartbeatInterval = null;
-
-                LANYARD_WS.onopen = () => {
-                    // Subscribe to the Discord User ID
-                    LANYARD_WS.send(JSON.stringify({
-                        op: 2,
-                        d: { subscribe_to_id: discordUserId }
-                    }));
-                };
-
-                LANYARD_WS.onmessage = (event) => {
-                    const message = JSON.parse(event.data);
-                    if (message.op === 1) {
-                        // Heartbeat interval
-                        heartbeatInterval = setInterval(() => {
-                            LANYARD_WS.send(JSON.stringify({ op: 3 }));
-                        }, message.d.heartbeat_interval);
-                    }
-                    if (message.t === 'INIT_STATE' || message.t === 'PRESENCE_UPDATE') {
-                        handlePresenceData(message.d);
-                    }
-                };
-
-                LANYARD_WS.onerror = () => {
-                    fetchPresenceFallback(discordUserId, handlePresenceData);
-                };
-
-                LANYARD_WS.onclose = () => {
-                    if (heartbeatInterval) clearInterval(heartbeatInterval);
-                };
-            } catch(e) {
-                fetchPresenceFallback(discordUserId, handlePresenceData);
-            }
-        }
-
-        async function fetchPresenceFallback(id, callback) {
-            try {
-                const res = await fetch(`https://api.lanyard.rest/v1/users/${id}`);
-                const json = await res.json();
-                if (json.success) callback(json.data);
+                await fetch('/api/master', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'track_event',
+                        handle: targetHandle,
+                        userId: profileUserId,
+                        type,
+                        device: isMobile ? 'mobile' : 'desktop',
+                        referrer: ref
+                    })
+                });
             } catch(e) {}
         }
 
-        // -----------------------------------------------------------
-        // 9. BACKGROUND AUDIO CONTROLLER & WAVEFORM PROGRESS
-        // -----------------------------------------------------------
-        const audioEl = document.getElementById('bgAudioLoop');
-        let audioConfigured = false;
+        async function loadProfile() {
+            try {
+                const res = await fetch(`/api/master?action=profile&username=${encodeURIComponent(targetHandle)}`);
+                if (!res.ok) return;
+                const d = await res.json();
+                profileUserId = d.userId;
 
-        function initBackgroundAudio(audioUrl) {
-            if (!audioUrl || audioUrl.trim() === '') {
-                document.getElementById('audioGate').style.display = 'none';
-                return;
-            }
+                document.title = `@${d.username || targetHandle} | Bio`;
+                document.getElementById('profileUsername').textContent = d.username || targetHandle;
+                document.getElementById('profileHandleText').textContent = `@${targetHandle}`;
+                if (d.description) document.getElementById('profileTagline').textContent = d.description;
+                if (d.subBio) document.getElementById('profileSubBio').textContent = d.subBio;
+                if (d.joinedDate) document.getElementById('statJoined').textContent = d.joinedDate;
+                if (d.location) document.getElementById('profileLocationText').textContent = d.location;
 
-            audioConfigured = true;
-            audioEl.src = audioUrl;
-
-            // Un-hide mini player widget inside profile card
-            const playerBox = document.getElementById('miniAudioPlayer');
-            playerBox.classList.remove('hidden');
-            playerBox.classList.add('flex');
-
-            const fileName = audioUrl.split('/').pop().split('?')[0] || "Background Audio";
-            document.getElementById('audioTrackName').textContent = decodeURIComponent(fileName);
-
-            audioEl.addEventListener('timeupdate', () => {
-                if (audioEl.duration) {
-                    const pct = (audioEl.currentTime / audioEl.duration) * 100;
-                    document.getElementById('audioProgressBar').style.width = `${pct}%`;
+                // FIX: Global Custom Cursor Engine
+                if (d.cursor && d.cursor.trim()) {
+                    let cursorStyle = document.getElementById('globalCursorStyle');
+                    if (!cursorStyle) {
+                        cursorStyle = document.createElement('style');
+                        cursorStyle.id = 'globalCursorStyle';
+                        document.head.appendChild(cursorStyle);
+                    }
+                    cursorStyle.innerHTML = `* , *:hover, a, button, input, div, span, p, h1, h2, h3, h4 { cursor: url('${d.cursor.trim()}'), auto !important; }`;
                 }
+
+                // Avatar & Banner
+                const pfp = d.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
+                document.getElementById('profileAvatar').src = pfp;
+                document.getElementById('dockAvatar').src = pfp;
+                document.getElementById('trackCover').src = d.trackCover || pfp;
+
+                // Video vs Image Background
+                const bgUrl = d.background || '';
+                const bgBox = document.getElementById('bgContainer');
+                if (bgUrl.endsWith('.mp4') || bgUrl.endsWith('.webm')) {
+                    bgBox.innerHTML = `<video id="pageBgMedia" autoplay loop muted playsinline src="${bgUrl}"></video>`;
+                } else if (bgUrl) {
+                    bgBox.innerHTML = `<div id="pageBgMedia" style="background-image: url('${bgUrl}'); background-size: cover; background-position: center;"></div>`;
+                }
+
+                if (bgUrl && !bgUrl.endsWith('.mp4') && !bgUrl.endsWith('.webm')) {
+                    document.getElementById('profileBanner').style.backgroundImage = `url('${bgUrl}')`;
+                }
+
+                // Music Player Metadata
+                if (d.audio) {
+                    audioEl.src = d.audio;
+                    document.getElementById('trackTitle').textContent = d.trackTitle || "VOLTA";
+                    document.getElementById('trackArtist').textContent = d.trackArtist || d.username || "WN3bula";
+                }
+
+                // Badges
+                const badgesRow = document.getElementById('profileBadgesRow');
+                badgesRow.innerHTML = '';
+                const iconMap = {
+                    crown: 'fa-solid fa-crown text-yellow-400',
+                    star: 'fa-solid fa-star text-purple-400',
+                    heart: 'fa-solid fa-heart text-pink-500',
+                    paw: 'fa-solid fa-paw text-gray-300',
+                    skull: 'fa-solid fa-skull text-gray-200',
+                    sparkles: 'fa-solid fa-wand-magic-sparkles text-cyan-400',
+                    fire: 'fa-solid fa-fire text-red-500',
+                    gamepad: 'fa-solid fa-gamepad text-indigo-400'
+                };
+                if (Array.isArray(d.iconBadges)) {
+                    d.iconBadges.forEach(b => {
+                        badgesRow.innerHTML += `<i class="${iconMap[b] || 'fa-solid fa-tag'} text-xs"></i>`;
+                    });
+                } else {
+                    badgesRow.innerHTML = `<i class="fa-solid fa-crown text-yellow-400 text-xs"></i><i class="fa-solid fa-star text-purple-400 text-xs"></i><i class="fa-solid fa-heart text-pink-500 text-xs"></i><i class="fa-solid fa-paw text-gray-300 text-xs"></i>`;
+                }
+
+                // Socials
+                const s = d.socials || {};
+                const sGrid = document.getElementById('profileSocialsGrid');
+                sGrid.innerHTML = '';
+                const icons = {
+                    spotify: 'fa-brands fa-spotify', instagram: 'fa-brands fa-instagram',
+                    youtube: 'fa-brands fa-youtube', discord: 'fa-brands fa-discord',
+                    tiktok: 'fa-brands fa-tiktok', soundcloud: 'fa-brands fa-soundcloud',
+                    custom: 'fa-solid fa-link'
+                };
+                for (const [key, link] of Object.entries(s)) {
+                    if (link) {
+                        sGrid.innerHTML += `
+                            <a href="${link}" target="_blank" onclick="sendAnalyticsEvent('click')" class="social-pill">
+                                <i class="${icons[key] || 'fa-solid fa-link'}"></i>
+                            </a>
+                        `;
+                    }
+                }
+
+                // Dynamic Tabs
+                const customTabs = Array.isArray(d.customTabs) && d.customTabs.length > 0 
+                    ? d.customTabs 
+                    : [
+                        { title: 'Main', content: 'D3LTA OWNER / FREAKYY\nUnderground sound collective.' },
+                        { title: 'FAV ANIMES', content: '• Tokyo Ghoul\n• Evangelion\n• Lain' },
+                        { title: 'SOCIALS', content: 'Check verified social pills above.' },
+                        { title: 'Priv Info', content: 'DAW: FL Studio 21 • Hardware: Focusrite' }
+                    ];
+
+                renderCustomTabs(customTabs);
+                sendAnalyticsEvent('view');
+
+                if (d.userId) connectLanyard(d.userId);
+            } catch (err) {}
+        }
+
+        function renderCustomTabs(tabs) {
+            const headersRow = document.getElementById('tabHeadersRow');
+            const bodiesCol = document.getElementById('tabBodiesContainer');
+            headersRow.innerHTML = '';
+            bodiesCol.innerHTML = '';
+
+            tabs.forEach((tab, i) => {
+                const btn = document.createElement('button');
+                btn.className = `custom-tab-btn ${i === 0 ? 'active' : ''}`;
+                btn.textContent = tab.title;
+                btn.onclick = () => {
+                    document.querySelectorAll('.custom-tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.tab-content-panel').forEach(p => p.classList.add('hidden'));
+                    document.getElementById(`tabPanel-${i}`).classList.remove('hidden');
+                };
+                headersRow.appendChild(btn);
+
+                const panel = document.createElement('div');
+                panel.id = `tabPanel-${i}`;
+                panel.className = `tab-content-panel whitespace-pre-line ${i === 0 ? '' : 'hidden'}`;
+                panel.textContent = tab.content;
+                bodiesCol.appendChild(panel);
             });
         }
 
-        function toggleAudioPlayback() {
-            const icon = document.getElementById('playBtnIcon');
+        function connectLanyard(uid) {
+            try {
+                const ws = new WebSocket('wss://api.lanyard.rest/socket');
+                ws.onopen = () => ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: uid } }));
+                ws.onmessage = (event) => {
+                    const msg = JSON.parse(event.data);
+                    if (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE') {
+                        const data = msg.d;
+                        const statusColors = { online: 'bg-green-500', idle: 'bg-yellow-500', dnd: 'bg-red-500', offline: 'bg-gray-600' };
+                        document.getElementById('discordStatusDot').className = `w-4 h-4 border-2 border-black rounded-full absolute bottom-1 right-1 ${statusColors[data.discord_status] || 'bg-gray-600'}`;
+
+                        if (data.listening_to_spotify && data.spotify) {
+                            document.getElementById('dockActivity').textContent = `Listening to ${data.spotify.song} by ${data.spotify.artist}`;
+                        } else if (data.activities && data.activities[0]) {
+                            document.getElementById('dockActivity').textContent = data.activities[0].name;
+                        } else {
+                            document.getElementById('dockActivity').textContent = data.discord_status ? data.discord_status.toUpperCase() : 'OFFLINE';
+                        }
+                    }
+                };
+            } catch (e) {}
+        }
+
+        function togglePlayAudio() {
+            const icon = document.getElementById('playIcon');
             if (audioEl.paused) {
-                audioEl.play().then(() => {
-                    icon.className = "fa-solid fa-pause ml-0";
-                }).catch(() => {});
+                audioEl.play();
+                icon.className = 'fa-solid fa-pause';
             } else {
                 audioEl.pause();
-                icon.className = "fa-solid fa-play ml-0.5";
+                icon.className = 'fa-solid fa-play';
             }
         }
 
-        function toggleAudioMute() {
-            audioEl.muted = !audioEl.muted;
-            document.getElementById('audioIconState').className = audioEl.muted 
-                ? "fa-solid fa-volume-xmark" 
-                : "fa-solid fa-volume-high";
-        }
-
-        function scrubAudioPosition(e) {
-            if (!audioEl.duration) return;
-            const bar = e.currentTarget;
-            const rect = bar.getBoundingClientRect();
-            const clickPos = (e.clientX - rect.left) / rect.width;
-            audioEl.currentTime = clickPos * audioEl.duration;
-        }
-
-        // Click to Enter Overlay (Solves Autoplay restrictions)
-        document.getElementById('audioGate').addEventListener('click', function() {
-            this.style.opacity = '0';
-            setTimeout(() => this.style.display = 'none', 450);
-
-            if (audioConfigured) {
-                audioEl.play().then(() => {
-                    document.getElementById('playBtnIcon').className = "fa-solid fa-pause ml-0";
-                }).catch(() => {});
+        audioEl.addEventListener('timeupdate', () => {
+            if (audioEl.duration) {
+                const pct = (audioEl.currentTime / audioEl.duration) * 100;
+                document.getElementById('seekSlider').value = pct;
+                const formatTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+                document.getElementById('timeDisplay').textContent = `${formatTime(audioEl.currentTime)} / ${formatTime(audioEl.duration)}`;
             }
         });
 
-        // -----------------------------------------------------------
-        // 10. UTILITIES (TOAST, SHARE URL, COPY)
-        // -----------------------------------------------------------
-        function copyProfileShareUrl() {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                showToast("Bio link copied to clipboard!");
-            }).catch(() => {
-                showToast("Error copying link.");
-            });
+        document.getElementById('volumeSlider').addEventListener('input', (e) => {
+            audioEl.volume = e.target.value;
+            const vIcon = document.getElementById('volumeIcon');
+            if (audioEl.volume === 0) vIcon.className = "fa-solid fa-volume-xmark text-xs text-gray-400";
+            else if (audioEl.volume < 0.5) vIcon.className = "fa-solid fa-volume-low text-xs text-gray-400";
+            else vIcon.className = "fa-solid fa-volume-high text-xs text-gray-400";
+        });
+
+        document.getElementById('seekSlider').addEventListener('input', (e) => {
+            if (audioEl.duration) audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
+        });
+
+        function copyDiscordTag() {
+            navigator.clipboard.writeText(targetHandle);
+            alert("Discord username copied to clipboard!");
         }
 
-        function showToast(text) {
-            const toast = document.getElementById('toastNotice');
-            toast.textContent = text;
-            toast.classList.remove('opacity-0', 'translate-y-6', 'pointer-events-none');
-            toast.classList.add('opacity-100', 'translate-y-0');
+        document.getElementById('gateOverlay').addEventListener('click', function() {
+            this.style.display = 'none';
+            if (audioEl.src) {
+                audioEl.play().then(() => document.getElementById('playIcon').className = 'fa-solid fa-pause').catch(() => {});
+            }
+        });
 
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-6', 'pointer-events-none');
-            }, 2500);
-        }
-
-        function escapeHtml(val) {
-            return String(val || '').replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));
-        }
-
-        // Initialize on DOM load
-        document.addEventListener('DOMContentLoaded', fetchProfileData);
+        document.addEventListener('DOMContentLoaded', loadProfile);
     </script>
 </body>
 </html>
