@@ -2,17 +2,12 @@ import { verifyKey } from 'discord-interactions';
 import nodemailer from 'nodemailer';
 import cookie from 'cookie';
 
-// Disable default Vercel bodyParser so raw Ed25519 signature checks succeed
 export const config = {
     api: {
         bodyParser: false,
     },
 };
 
-/**
- * Buffer stream reader to extract unparsed raw string body.
- * Required for Discord cryptographic signature verification.
- */
 async function getRawBody(req) {
     const chunks = [];
     for await (const chunk of req) {
@@ -21,33 +16,22 @@ async function getRawBody(req) {
     return Buffer.concat(chunks).toString('utf8');
 }
 
-/**
- * Safe parameter unwrapper for Vercel dynamic routing rewrites.
- */
 function unwrapParam(val) {
     if (!val) return '';
     if (Array.isArray(val)) return val.join('/');
     return String(val);
 }
 
-/**
- * Sanitizes Upstash string IDs from nested quote serialization.
- */
 function cleanRedisId(rawId) {
     if (!rawId) return null;
     let str = String(rawId).trim();
     if (str.startsWith('"') && str.endsWith('"')) {
-        try { 
-            str = JSON.parse(str); 
-        } catch (e) { 
-            str = str.slice(1, -1); 
-        }
+        try { str = JSON.parse(str); } catch (e) { str = str.slice(1, -1); }
     }
     return str;
 }
 
 export default async function handler(req, res) {
-    // 1. Extract raw body and attempt JSON parsing for standard API endpoints
     const rawBody = await getRawBody(req);
     
     if (rawBody && rawBody.trim().length > 0) {
@@ -60,7 +44,6 @@ export default async function handler(req, res) {
         req.body = {};
     }
 
-    // 2. URL and routing parameters normalization
     const urlObj = new URL(req.url, 'http://localhost');
     const pathname = urlObj.pathname.toLowerCase();
 
@@ -68,13 +51,11 @@ export default async function handler(req, res) {
     const actionParam = unwrapParam(req.query.action || req.query.route || matchParam || req.body?.action);
     const action = actionParam.toLowerCase();
 
-    // Helper for multi-path routing matching
     const isRoute = (name) => {
         const lowerName = name.toLowerCase();
         return pathname.includes(lowerName) || action.includes(lowerName);
     };
 
-    // 3. Environment variables configuration
     const UPSTASH_URL = process.env.UPSTASH_URL || process.env.UPSTASH_REDIS_REST_URL;
     const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
@@ -94,56 +75,7 @@ export default async function handler(req, res) {
     };
 
     // =========================================================================
-    // SECTION 0: DIRECT MEDIA STORAGE PROXY (NO GOFILE / NO CATBOX IP BLOCKS)
-    // =========================================================================
-    if (isRoute('upload')) {
-        if (req.method !== 'POST') return res.status(405).json({ error: "Method not allowed" });
-        try {
-            const { fileData, fileName } = req.body;
-            if (!fileData) return res.status(400).json({ error: "Missing fileData payload" });
-
-            let base64Content = fileData;
-            let mimeType = 'application/octet-stream';
-            if (fileData.includes(';base64,')) {
-                const parts = fileData.split(';base64,');
-                mimeType = parts[0].replace('data:', '');
-                base64Content = parts[1];
-            }
-
-            const buffer = Buffer.from(base64Content, 'base64');
-            const blob = new Blob([buffer], { type: mimeType });
-
-            // Provider 1: qu.ax (High-speed open CDN, raw audio/video/image links)
-            try {
-                const fd = new FormData();
-                fd.append('files[]', blob, fileName || 'media.bin');
-                const qRes = await fetch('https://qu.ax/api/upload', { method: 'POST', body: fd });
-                const qData = await qRes.json();
-                if (qData.success && qData.files && qData.files[0]?.url) {
-                    return res.status(200).json({ success: true, url: qData.files[0].url });
-                }
-            } catch (err) {}
-
-            // Provider 2: tmpfiles.org direct download stream fallback
-            try {
-                const fd2 = new FormData();
-                fd2.append('file', blob, fileName || 'media.bin');
-                const tRes = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: fd2 });
-                const tData = await tRes.json();
-                if (tData.data?.url) {
-                    const directUrl = tData.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
-                    return res.status(200).json({ success: true, url: directUrl });
-                }
-            } catch (err) {}
-
-            return res.status(500).json({ error: "Direct storage providers currently unreachable" });
-        } catch (err) {
-            return res.status(500).json({ error: err.message });
-        }
-    }
-
-    // =========================================================================
-    // SECTION 1: DISCORD OAUTH2 AUTHENTICATION & SESSION SUITE
+    // 0. DISCORD OAUTH2 (Auto-generates Real Discord Avatar & Username)
     // =========================================================================
     if (isRoute('discord') || isRoute('auth/discord')) {
         const redirectUri = encodeURIComponent('https://www.lucidmp3.com/api/auth/callback');
@@ -153,7 +85,7 @@ export default async function handler(req, res) {
 
     if (isRoute('callback') || isRoute('auth/callback')) {
         const code = req.query.code;
-        if (!code) return res.status(400).send('Authorization code missing from Discord callback.');
+        if (!code) return res.status(400).send('Missing code parameter.');
         const redirectUri = 'https://www.lucidmp3.com/api/auth/callback';
 
         try {
@@ -170,28 +102,58 @@ export default async function handler(req, res) {
             });
 
             const tokenData = await tokenResponse.json();
-            if (!tokenData.access_token) return res.status(400).send('Failed to obtain Discord access token.');
+            if (!tokenData.access_token) return res.status(400).send('OAuth2 token acquisition failed.');
 
             const userResponse = await fetch('https://discord.com/api/users/@me', {
                 headers: { Authorization: `Bearer ${tokenData.access_token}` },
             });
             const userData = await userResponse.json();
 
+            // Construct permanent Discord avatar URL
+            const discordAvatarUrl = userData.avatar 
+                ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.${userData.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256` 
+                : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+            // Auto-sync real Discord profile to Upstash
+            try {
+                const existingRes = await fetch(`${UPSTASH_URL}/get/bio:user:${userData.id}`, { headers: redisHeaders });
+                const existingData = await existingRes.json();
+                let existing = existingData.result ? (typeof existingData.result === 'string' ? JSON.parse(existingData.result) : existingData.result) : {};
+                
+                existing.userId = userData.id;
+                existing.discordAvatar = discordAvatarUrl;
+                existing.discordUsername = userData.username;
+                existing.discordTag = userData.global_name || userData.username;
+                if (!existing.username) existing.username = userData.username.toLowerCase();
+                if (!existing.avatar) existing.avatar = discordAvatarUrl;
+
+                await fetch(`${UPSTASH_URL}/set/bio:user:${userData.id}`, {
+                    method: 'POST',
+                    headers: redisHeaders,
+                    body: JSON.stringify(existing)
+                });
+                await fetch(`${UPSTASH_URL}/set/bio:handle:${userData.username.toLowerCase()}`, {
+                    method: 'POST',
+                    headers: redisHeaders,
+                    body: JSON.stringify(userData.id)
+                });
+            } catch(e) {}
+
             res.setHeader('Set-Cookie', cookie.serialize('discord_user', JSON.stringify({
                 id: userData.id,
                 username: userData.username,
-                avatar: userData.avatar,
-                discriminator: userData.discriminator || '0'
+                global_name: userData.global_name || userData.username,
+                avatar: discordAvatarUrl
             }), {
                 httpOnly: true,
                 secure: process.env.NODE_ENV !== 'development',
-                maxAge: 60 * 60 * 24 * 7, // 1 Week
+                maxAge: 60 * 60 * 24 * 7,
                 path: '/'
             }));
 
             return res.redirect('/');
         } catch (error) {
-            return res.status(500).send(`Authentication error: ${error.message}`);
+            return res.status(500).send(`Auth error: ${error.message}`);
         }
     }
 
@@ -202,373 +164,16 @@ export default async function handler(req, res) {
 
     if (isRoute('me') || isRoute('auth/me')) {
         const cookies = cookie.parse(req.headers.cookie || '');
-        if (!cookies.discord_user) {
-            return res.status(401).json({ error: 'Not authenticated' });
-        }
+        if (!cookies.discord_user) return res.status(401).json({ error: 'Not authenticated' });
         try {
-            const user = JSON.parse(cookies.discord_user);
-            return res.status(200).json(user);
+            return res.status(200).json(JSON.parse(cookies.discord_user));
         } catch (e) {
-            return res.status(401).json({ error: 'Invalid user session token' });
+            return res.status(401).json({ error: 'Invalid session' });
         }
     }
 
     // =========================================================================
-    // SECTION 2: DISCORD INTERACTIONS WEBHOOK (MODALS, EMAILS & DISPATCH)
-    // =========================================================================
-    if (isRoute('interactions') || (req.headers['x-signature-ed25519'] && req.headers['x-signature-timestamp'])) {
-        if (req.method !== 'POST') return res.status(405).end();
-
-        const signature = req.headers['x-signature-ed25519'];
-        const timestamp = req.headers['x-signature-timestamp'];
-
-        if (!signature || !timestamp || !DISCORD_PUBLIC_KEY) {
-            return res.status(401).send('Missing request cryptographic signature headers or public key.');
-        }
-
-        const isValidRequest = verifyKey(rawBody, signature, timestamp, DISCORD_PUBLIC_KEY);
-        if (!isValidRequest) {
-            return res.status(401).send('Invalid Ed25519 request signature.');
-        }
-
-        const interaction = typeof req.body === 'object' ? req.body : JSON.parse(rawBody);
-
-        // Ping Handshake (Type 1)
-        if (interaction.type === 1) {
-            return res.status(200).json({ type: 1 });
-        }
-
-        // Button Click -> Trigger Interactive Modal (Type 3 -> Type 9)
-        if (interaction.type === 3) {
-            const customId = interaction.data?.custom_id;
-            if (customId === 'btn_accept' || customId === 'btn_reject') {
-                const isAccept = customId === 'btn_accept';
-                return res.status(200).json({
-                    type: 9,
-                    data: {
-                        title: isAccept ? "Accept Demo Submission" : "Reject Demo Submission",
-                        custom_id: isAccept ? "modal_accept" : "modal_reject",
-                        components: [{
-                            type: 1,
-                            components: [{
-                                type: 4,
-                                custom_id: "reason_input",
-                                label: isAccept ? "Feedback / Next steps for artist:" : "Feedback / Rejection reason:",
-                                style: 2,
-                                required: true,
-                                placeholder: isAccept ? "Next steps or server onboarding notes..." : "State reasons for track rejection..."
-                            }]
-                        }]
-                    }
-                });
-            }
-        }
-
-        // Modal Submit -> Process Multi-recipient Email Dispatch & Close Channel (Type 5)
-        if (interaction.type === 5) {
-            const customId = interaction.data?.custom_id;
-            const reason = interaction.data?.components?.[0]?.components?.[0]?.value || "No feedback provided.";
-            const channelId = interaction.channel?.id;
-
-            try {
-                const channelMessagesRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?limit=15`, {
-                    headers: discordHeaders
-                });
-                const channelMessages = await channelMessagesRes.json();
-
-                let subDetails = "";
-                if (Array.isArray(channelMessages)) {
-                    for (const msg of channelMessages) {
-                        if (msg.content && msg.content.includes("**Song title**:")) {
-                            subDetails = msg.content;
-                            break;
-                        }
-                    }
-                }
-
-                const titleMatch = subDetails.match(/\*\*Song title\*\*: (.*)/);
-                const artistMatch = subDetails.match(/\*\*artist\(s\)\*\*: (.*)/);
-                const emailMatch = subDetails.match(/\*\*email\(s\)\*\*: (.*)/) || subDetails.match(/\*\*email adress\*\*: (.*)/);
-                const fileMatch = subDetails.match(/\*\*mp3\/wav file\*\*: (.*)/);
-
-                const title = titleMatch ? titleMatch[1].trim() : "Unknown Track";
-                const artist = artistMatch ? artistMatch[1].trim() : "Unknown Artist";
-                const rawEmails = emailMatch ? emailMatch[1].trim() : "";
-                const fileLink = fileMatch ? fileMatch[1].trim() : "No File Provided";
-
-                const recipientEmails = rawEmails.split(',').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@'));
-
-                const transporter = nodemailer.createTransport({
-                    host: process.env.SMTP_HOST || "smtp.gmail.com",
-                    port: 465,
-                    secure: true,
-                    auth: {
-                        user: process.env.SMTP_EMAIL,
-                        pass: process.env.SMTP_PASSWORD
-                    }
-                });
-
-                let emailSubject = "";
-                let emailBody = "";
-
-                if (customId === 'modal_accept') {
-                    emailSubject = "Your demo has been accepted! - Lucid.mp3";
-                    emailBody = `Hey,\n\nCongratulations! Our A&R team reviewed your track and approved it for release on Lucid.mp3.\n\n` +
-                                `To proceed with your release, join our server: https://discord.gg/ECMHzfWyrD\n\n` +
-                                `Track Title: ${title}\n` +
-                                `Artist: ${artist}\n` +
-                                `Audio Link: ${fileLink}\n\n` +
-                                `Feedback: ${reason}\n\n` +
-                                `Best regards,\nLucid.mp3 A&R Team`;
-                } else {
-                    emailSubject = "Update on your demo submission - Lucid.mp3";
-                    emailBody = `Hey,\n\nThank you for submitting your demo to Lucid.mp3.\n\n` +
-                                `Our team reviewed "${title}" and decided it is not quite the right fit for our catalog right now.\n\n` +
-                                `Feedback: ${reason}\n\n` +
-                                `Please feel free to submit future demos to us!\n\n` +
-                                `Best regards,\nLucid.mp3 A&R Team`;
-                }
-
-                if (recipientEmails.length > 0) {
-                    for (const targetEmail of recipientEmails) {
-                        try {
-                            await transporter.sendMail({
-                                from: `"Lucid.mp3 A&R" <${process.env.SMTP_EMAIL}>`,
-                                to: targetEmail,
-                                subject: emailSubject,
-                                text: emailBody
-                            });
-                        } catch (mailErr) {
-                            console.error(`Failed to dispatch email to ${targetEmail}:`, mailErr);
-                        }
-                    }
-                }
-
-                await fetch(`https://discord.com/api/v10/channels/${channelId}`, {
-                    method: 'DELETE',
-                    headers: discordHeaders
-                });
-
-                return res.status(200).json({ type: 6 });
-            } catch (err) {
-                return res.status(500).json({ error: err.message });
-            }
-        }
-
-        return res.status(400).send('Unhandled interaction type.');
-    }
-
-    // =========================================================================
-    // SECTION 3: A&R DEMO SUBMISSION PIPELINE & ADMIN LOOKUP
-    // =========================================================================
-    if (isRoute('submitdemo')) {
-        if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-
-        const CATEGORY_ID = '1554160433722691594';
-        const ROLE_1 = '1556218488425812079';
-        const ROLE_2 = '1556249102444925039';
-
-        if (!DISCORD_TOKEN || !UPSTASH_URL || !UPSTASH_TOKEN) {
-            return res.status(500).json({ error: 'Missing Discord Token or Upstash Redis configuration.' });
-        }
-
-        const cookies = cookie.parse(req.headers.cookie || '');
-        let loggedInUserId = null;
-        if (cookies.discord_user) {
-            try {
-                const userObj = JSON.parse(cookies.discord_user);
-                loggedInUserId = userObj.id;
-            } catch (e) {}
-        }
-
-        try {
-            const data = req.body;
-            const title = data["Song title"] || data.title || "Untitled";
-            const artist = data["artist(s)"] || data.artist || "Unknown";
-            const email = data["email adress"] || data.email || "No Email Provided";
-            const fileLink = data["mp3/wav file"] || data.fileUrl || "No File";
-
-            const countRes = await fetch(`${UPSTASH_URL}/incr/submission_counter`, { headers: redisHeaders });
-            const countData = await countRes.json();
-            const nextCount = countData.result || 1;
-
-            const paddedCount = String(nextCount).padStart(4, '0');
-            const submissionId = `lcd-demo-${paddedCount}`;
-
-            const record = {
-                submissionId,
-                title,
-                artist,
-                email,
-                fileLink,
-                discordId: loggedInUserId || "Guest",
-                timestamp: new Date().toISOString()
-            };
-
-            await fetch(`${UPSTASH_URL}/set/submission:${submissionId}`, {
-                method: 'POST',
-                headers: redisHeaders,
-                body: JSON.stringify(record)
-            });
-
-            const formattedFileName = `${title} - ${artist}`;
-            const safeArtist = artist.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
-            const channelName = `web-ticket-${safeArtist}`.substring(0, 100);
-
-            const channelPayload = {
-                name: channelName,
-                type: 0,
-                parent_id: CATEGORY_ID,
-                permission_overwrites: [
-                    { id: GUILD_ID, type: 0, deny: "1024" },
-                    { id: ROLE_1, type: 0, allow: "17408" },
-                    { id: ROLE_2, type: 0, allow: "17408" }
-                ]
-            };
-
-            const createChannelRes = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/channels`, {
-                method: 'POST',
-                headers: discordHeaders,
-                body: JSON.stringify(channelPayload)
-            });
-
-            if (!createChannelRes.ok) {
-                const errText = await createChannelRes.text();
-                return res.status(500).json({ error: `Discord Channel Creation Error: ${errText}` });
-            }
-
-            const channelData = await createChannelRes.json();
-
-            const embedPayload = {
-                content: `<@&${ROLE_1}> <@&${ROLE_2}>`,
-                embeds: [{
-                    title: "Demo Review Request",
-                    description: `New submission received from website.\nSubmission Reference: **${submissionId}**`,
-                    color: 0x2b2d31,
-                    footer: { text: "Powered by Lucid.Mp3 A&R Gateway" }
-                }]
-            };
-
-            await fetch(`https://discord.com/api/v10/channels/${channelData.id}/messages`, {
-                method: 'POST',
-                headers: discordHeaders,
-                body: JSON.stringify(embedPayload)
-            });
-
-            const detailsPayload = {
-                content: `**New Submission (ID: ${submissionId})**\n> **Song title**: ${title}\n> **artist(s)**: ${artist}\n> **File Name**: ${formattedFileName}\n> **email(s)**: ${email}\n> **mp3/wav file**: ${fileLink}`,
-                components: [{
-                    type: 1,
-                    components: [
-                        { type: 2, style: 3, label: "Accept Demo", custom_id: "btn_accept", emoji: { name: "✅" } },
-                        { type: 2, style: 4, label: "Reject (Close Ticket)", custom_id: "btn_reject", emoji: { name: "❌" } }
-                    ]
-                }]
-            };
-
-            await fetch(`https://discord.com/api/v10/channels/${channelData.id}/messages`, {
-                method: 'POST',
-                headers: discordHeaders,
-                body: JSON.stringify(detailsPayload)
-            });
-
-            return res.status(200).json({ success: true, submissionId });
-        } catch (error) {
-            return res.status(500).json({ error: error.message });
-        }
-    }
-
-    if (isRoute('adminsearch')) {
-        if (req.method !== 'GET') return res.status(405).send('Method Not Allowed');
-        const searchId = req.query.id;
-        if (!searchId) return res.status(400).json({ error: 'Missing submission ID parameter.' });
-
-        try {
-            const dbRes = await fetch(`${UPSTASH_URL}/get/submission:${searchId}`, { headers: redisHeaders });
-            const dbData = await dbRes.json();
-
-            if (dbData.result) {
-                const record = typeof dbData.result === 'string' ? JSON.parse(dbData.result) : dbData.result;
-                return res.status(200).json(record);
-            }
-            return res.status(404).json({ error: 'Submission ID not found in database.' });
-        } catch (e) {
-            return res.status(500).json({ error: 'Server database lookup error.' });
-        }
-    }
-
-    // =========================================================================
-    // SECTION 4: CATALOG & RELEASES CRUD MANAGEMENT
-    // =========================================================================
-    if (isRoute('catalog')) {
-        if (!UPSTASH_URL || !UPSTASH_TOKEN) return res.status(500).json({ error: "Missing Upstash database keys" });
-
-        if (req.method === 'POST') {
-            const newItem = JSON.stringify(req.body.item || req.body);
-            await fetch(`${UPSTASH_URL}/rpush/lucid_catalog`, {
-                method: 'POST',
-                headers: redisHeaders,
-                body: newItem
-            });
-            return res.status(201).json({ success: true });
-        }
-
-        if (req.method === 'PUT') {
-            await fetch(`${UPSTASH_URL}/del/lucid_catalog`, { method: 'POST', headers: redisHeaders });
-            const items = Array.isArray(req.body) ? req.body : [];
-            for (const item of items) {
-                await fetch(`${UPSTASH_URL}/rpush/lucid_catalog`, {
-                    method: 'POST',
-                    headers: redisHeaders,
-                    body: JSON.stringify(item)
-                });
-            }
-            return res.status(200).json({ success: true });
-        }
-
-        const dbRes = await fetch(`${UPSTASH_URL}/lrange/lucid_catalog/0/-1`, { headers: redisHeaders });
-        const dbData = await dbRes.json();
-        const catalog = (dbData.result || []).map(item => typeof item === 'string' ? JSON.parse(item) : item);
-        return res.status(200).json(catalog);
-    }
-
-    // =========================================================================
-    // SECTION 5: ARTISTS ROSTER CRUD MANAGEMENT
-    // =========================================================================
-    if (isRoute('artists')) {
-        if (!UPSTASH_URL || !UPSTASH_TOKEN) return res.status(500).json({ error: "Missing Upstash database keys" });
-
-        if (req.method === 'POST') {
-            const newItem = JSON.stringify(req.body.item || req.body);
-            await fetch(`${UPSTASH_URL}/rpush/lucid_artists`, {
-                method: 'POST',
-                headers: redisHeaders,
-                body: newItem
-            });
-            return res.status(201).json({ success: true });
-        }
-
-        if (req.method === 'PUT') {
-            await fetch(`${UPSTASH_URL}/del/lucid_artists`, { method: 'POST', headers: redisHeaders });
-            const items = Array.isArray(req.body) ? req.body : [];
-            for (const item of items) {
-                await fetch(`${UPSTASH_URL}/rpush/lucid_artists`, {
-                    method: 'POST',
-                    headers: redisHeaders,
-                    body: JSON.stringify(item)
-                });
-            }
-            return res.status(200).json({ success: true });
-        }
-
-        const dbRes = await fetch(`${UPSTASH_URL}/lrange/lucid_artists/0/-1`, { headers: redisHeaders });
-        const dbData = await dbRes.json();
-        const artists = (dbData.result || []).map(item => typeof item === 'string' ? JSON.parse(item) : item);
-        return res.status(200).json(artists);
-    }
-
-    // =========================================================================
-    // SECTION 6: PROFILE & IDENTITY ENGINE (CUSTOM TABS, METADATA & BADGES)
+    // 1. PROFILE API (Auto-enriches with Real Discord Info via Bot Token)
     // =========================================================================
     if (isRoute('profile')) {
         if (req.method === 'GET') {
@@ -592,6 +197,21 @@ export default async function handler(req, res) {
             const data = profileData.result ? (typeof profileData.result === 'string' ? JSON.parse(profileData.result) : profileData.result) : null;
 
             if (data) {
+                // Fetch real Discord user details from Discord API if missing
+                if (data.userId && (!data.discordAvatar || !data.discordAvatar.startsWith('http'))) {
+                    try {
+                        const dcRes = await fetch(`https://discord.com/api/v10/users/${data.userId}`, { headers: discordHeaders });
+                        if (dcRes.ok) {
+                            const dcUser = await dcRes.json();
+                            data.discordAvatar = dcUser.avatar 
+                                ? `https://cdn.discordapp.com/avatars/${dcUser.id}/${dcUser.avatar}.${dcUser.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256` 
+                                : `https://cdn.discordapp.com/embed/avatars/0.png`;
+                            data.discordUsername = dcUser.username;
+                            data.discordTag = dcUser.global_name || dcUser.username;
+                        }
+                    } catch(e) {}
+                }
+
                 const handleToRank = resolvedHandle || data.handle || data.username;
                 if (handleToRank) {
                     await fetch(`${UPSTASH_URL}/zincrby/bio_leaderboard/1/${handleToRank.toLowerCase()}`, {
@@ -671,48 +291,94 @@ export default async function handler(req, res) {
     }
 
     // =========================================================================
-    // SECTION 7: LIVE DATASTORE LEADERBOARD ENGINE
+    // 2. DISCORD INTERACTIONS WEBHOOK
     // =========================================================================
-    if (isRoute('leaderboard')) {
-        try {
-            const lbRes = await fetch(`${UPSTASH_URL}/zrevrange/bio_leaderboard/0/9/WITHSCORES`, { headers: redisHeaders });
-            const lbData = await lbRes.json();
-            const rawList = lbData.result || [];
+    if (isRoute('interactions') || (req.headers['x-signature-ed25519'] && req.headers['x-signature-timestamp'])) {
+        if (req.method !== 'POST') return res.status(405).end();
+        const signature = req.headers['x-signature-ed25519'];
+        const timestamp = req.headers['x-signature-timestamp'];
 
-            const leaderboard = [];
-            for (let i = 0; i < rawList.length; i += 2) {
-                const handle = rawList[i];
-                const views = parseInt(rawList[i + 1], 10) || 0;
+        if (!signature || !timestamp || !DISCORD_PUBLIC_KEY) return res.status(401).send('Missing signature headers');
+        if (!verifyKey(rawBody, signature, timestamp, DISCORD_PUBLIC_KEY)) return res.status(401).send('Invalid signature');
 
-                let avatar = 'https://cdn.discordapp.com/embed/avatars/0.png';
-                try {
-                    const uIdRes = await fetch(`${UPSTASH_URL}/get/bio:handle:${handle.toLowerCase()}`, { headers: redisHeaders });
-                    const uIdData = await uIdRes.json();
-                    if (uIdData.result) {
-                        const cleanUid = cleanRedisId(uIdData.result);
-                        const profRes = await fetch(`${UPSTASH_URL}/get/bio:user:${cleanUid}`, { headers: redisHeaders });
-                        const profData = await profRes.json();
-                        const prof = profData.result ? (typeof profData.result === 'string' ? JSON.parse(profData.result) : profData.result) : {};
-                        if (prof.avatarUrl || prof.avatar) avatar = prof.avatarUrl || prof.avatar;
-                    }
-                } catch (e) {}
+        const interaction = typeof req.body === 'object' ? req.body : JSON.parse(rawBody);
 
-                leaderboard.push({
-                    rank: (i / 2) + 1,
-                    handle,
-                    views,
-                    avatar
-                });
-            }
+        if (interaction.type === 1) return res.status(200).json({ type: 1 });
 
-            return res.status(200).json(leaderboard);
-        } catch (e) {
-            return res.status(500).json({ error: "Failed to load datastore leaderboard." });
+        if (interaction.type === 3) {
+            const isAccept = interaction.data?.custom_id === 'btn_accept';
+            return res.status(200).json({
+                type: 9,
+                data: {
+                    title: isAccept ? "Accept Demo Submission" : "Reject Demo Submission",
+                    custom_id: isAccept ? "modal_accept" : "modal_reject",
+                    components: [{
+                        type: 1,
+                        components: [{
+                            type: 4,
+                            custom_id: "reason_input",
+                            label: isAccept ? "Feedback / Next steps:" : "Reason for rejection:",
+                            style: 2,
+                            required: true
+                        }]
+                    }]
+                }
+            });
         }
+
+        if (interaction.type === 5) {
+            const customId = interaction.data?.custom_id;
+            const reason = interaction.data?.components?.[0]?.components?.[0]?.value || "No feedback provided.";
+            const channelId = interaction.channel?.id;
+
+            try {
+                const channelMessagesRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?limit=15`, { headers: discordHeaders });
+                const channelMessages = await channelMessagesRes.json();
+                let subDetails = "";
+                if (Array.isArray(channelMessages)) {
+                    for (const msg of channelMessages) {
+                        if (msg.content && msg.content.includes("**Song title**:")) {
+                            subDetails = msg.content;
+                            break;
+                        }
+                    }
+                }
+
+                const title = (subDetails.match(/\*\*Song title\*\*: (.*)/) || [])[1]?.trim() || "Unknown Track";
+                const artist = (subDetails.match(/\*\*artist\(s\)\*\*: (.*)/) || [])[1]?.trim() || "Unknown Artist";
+                const rawEmails = (subDetails.match(/\*\*email\(s\)\*\*: (.*)/) || subDetails.match(/\*\*email adress\*\*: (.*)/) || [])[1] || "";
+                const fileLink = (subDetails.match(/\*\*mp3\/wav file\*\*: (.*)/) || [])[1]?.trim() || "No File";
+                const recipientEmails = rawEmails.split(',').map(e => e.trim()).filter(e => e.includes('@'));
+
+                const transporter = nodemailer.createTransport({
+                    host: process.env.SMTP_HOST || "smtp.gmail.com",
+                    port: 465,
+                    secure: true,
+                    auth: { user: process.env.SMTP_EMAIL, pass: process.env.SMTP_PASSWORD }
+                });
+
+                const emailSubject = customId === 'modal_accept' ? "Your demo has been accepted! - Lucid.mp3" : "Update on your demo submission - Lucid.mp3";
+                const emailBody = customId === 'modal_accept'
+                    ? `Hey,\n\nYour track "${title}" has been approved! Join our server: https://discord.gg/ECMHzfWyrD\n\nFile: ${fileLink}\nA&R Feedback: ${reason}\n\nLucid.mp3 Team`
+                    : `Hey,\n\nThank you for submitting "${title}". It's not a fit for our catalog right now.\n\nFeedback: ${reason}\n\nLucid.mp3 Team`;
+
+                for (const targetEmail of recipientEmails) {
+                    try {
+                        await transporter.sendMail({ from: `"Lucid.mp3 A&R" <${process.env.SMTP_EMAIL}>`, to: targetEmail, subject: emailSubject, text: emailBody });
+                    } catch (mErr) {}
+                }
+
+                await fetch(`https://discord.com/api/v10/channels/${channelId}`, { method: 'DELETE', headers: discordHeaders });
+                return res.status(200).json({ type: 6 });
+            } catch (err) {
+                return res.status(500).json({ error: err.message });
+            }
+        }
+        return res.status(400).send('Unhandled interaction');
     }
 
     // =========================================================================
-    // SECTION 8: PER-USER ANALYTICS ENGINE (TRACK & QUERY)
+    // 3. ANALYTICS & LEADERBOARD
     // =========================================================================
     if (isRoute('track_event')) {
         const { handle, userId, type, device, referrer } = req.body;
@@ -721,9 +387,7 @@ export default async function handler(req, res) {
         if (!targetId && handle) {
             const uRes = await fetch(`${UPSTASH_URL}/get/bio:handle:${handle.toLowerCase()}`, { headers: redisHeaders });
             const uData = await uRes.json();
-            if (uData.result) {
-                targetId = cleanRedisId(uData.result);
-            }
+            if (uData.result) targetId = cleanRedisId(uData.result);
         }
 
         if (!targetId) return res.status(400).json({ error: "Missing identifier" });
@@ -732,19 +396,12 @@ export default async function handler(req, res) {
             await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:views`, { method: 'POST', headers: redisHeaders });
             await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:views_month`, { method: 'POST', headers: redisHeaders });
 
-            if (device === 'mobile') {
-                await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:dev_mobile`, { method: 'POST', headers: redisHeaders });
-            } else {
-                await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:dev_desktop`, { method: 'POST', headers: redisHeaders });
-            }
+            if (device === 'mobile') await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:dev_mobile`, { method: 'POST', headers: redisHeaders });
+            else await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:dev_desktop`, { method: 'POST', headers: redisHeaders });
 
-            if (referrer === 'discord') {
-                await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:ref_discord`, { method: 'POST', headers: redisHeaders });
-            } else if (referrer === 'tiktok') {
-                await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:ref_tiktok`, { method: 'POST', headers: redisHeaders });
-            } else {
-                await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:ref_direct`, { method: 'POST', headers: redisHeaders });
-            }
+            if (referrer === 'discord') await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:ref_discord`, { method: 'POST', headers: redisHeaders });
+            else if (referrer === 'tiktok') await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:ref_tiktok`, { method: 'POST', headers: redisHeaders });
+            else await fetch(`${UPSTASH_URL}/incr/analytics:${targetId}:ref_direct`, { method: 'POST', headers: redisHeaders });
 
             if (handle) {
                 await fetch(`${UPSTASH_URL}/zincrby/bio_leaderboard/1/${handle.toLowerCase()}`, { method: 'POST', headers: redisHeaders });
@@ -804,8 +461,40 @@ export default async function handler(req, res) {
         });
     }
 
+    if (isRoute('leaderboard')) {
+        try {
+            const lbRes = await fetch(`${UPSTASH_URL}/zrevrange/bio_leaderboard/0/9/WITHSCORES`, { headers: redisHeaders });
+            const lbData = await lbRes.json();
+            const rawList = lbData.result || [];
+
+            const leaderboard = [];
+            for (let i = 0; i < rawList.length; i += 2) {
+                const handle = rawList[i];
+                const views = parseInt(rawList[i + 1], 10) || 0;
+                let avatar = 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+                try {
+                    const uIdRes = await fetch(`${UPSTASH_URL}/get/bio:handle:${handle.toLowerCase()}`, { headers: redisHeaders });
+                    const uIdData = await uIdRes.json();
+                    if (uIdData.result) {
+                        const cleanUid = cleanRedisId(uIdData.result);
+                        const profRes = await fetch(`${UPSTASH_URL}/get/bio:user:${cleanUid}`, { headers: redisHeaders });
+                        const profData = await profRes.json();
+                        const prof = profData.result ? (typeof profData.result === 'string' ? JSON.parse(profData.result) : profData.result) : {};
+                        if (prof.avatar) avatar = prof.avatar;
+                    }
+                } catch (e) {}
+
+                leaderboard.push({ rank: (i / 2) + 1, handle, views, avatar });
+            }
+            return res.status(200).json(leaderboard);
+        } catch (e) {
+            return res.status(500).json({ error: "Failed to load leaderboard." });
+        }
+    }
+
     // =========================================================================
-    // SECTION 9: COMMUNITY TEMPLATES GALLERY ENGINE
+    // 4. COMMUNITY TEMPLATES
     // =========================================================================
     if (isRoute('save_template')) {
         const { name, author, authorId, previewUrl, config: templateConfig } = req.body;
@@ -854,7 +543,6 @@ export default async function handler(req, res) {
                 }
             } catch (err) {}
         }
-
         return res.status(200).json(templates);
     }
 
@@ -863,7 +551,6 @@ export default async function handler(req, res) {
         if (!templateId) return res.status(400).json({ error: "Missing templateId" });
 
         await fetch(`${UPSTASH_URL}/zincrby/templates:by_uses/1/${templateId}`, { method: 'POST', headers: redisHeaders });
-
         const tRes = await (await fetch(`${UPSTASH_URL}/get/template:${templateId}`, { headers: redisHeaders })).json();
         if (!tRes.result) return res.status(404).json({ error: "Template not found" });
 
@@ -872,340 +559,43 @@ export default async function handler(req, res) {
     }
 
     // =========================================================================
-    // SECTION 10: GUILD MEMBERS & ROSTER API
+    // 5. CATALOG & ARTISTS
     // =========================================================================
-    if (isRoute('getroles')) {
-        try {
-            const response = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members?limit=1000`, {
-                method: 'GET',
-                headers: discordHeaders
-            });
-
-            if (!response.ok) return res.status(response.status).send("Discord API Guild Member Query Error");
-
-            const data = await response.json();
-            const humanMembers = data.filter(member => !member.user?.bot);
-
-            return res.status(200).json(humanMembers);
-        } catch (error) {
-            return res.status(500).json({ error: "Failed to fetch guild members." });
-        }
-    }
-
-    // =========================================================================
-    // SECTION 11: DISCORD SERVER MANAGEMENT & MODERATION SUITE
-    // =========================================================================
-    if (isRoute('masterbot') || isRoute('moderate')) {
+    if (isRoute('catalog')) {
         if (req.method === 'POST') {
-            const {
-                command,
-                userId,
-                action: modAction,
-                duration,
-                roleId,
-                reason,
-                channelId,
-                message,
-                title,
-                imageUrl,
-                count,
-                rateLimit,
-                botNick
-            } = req.body;
-
-            const modHeaders = {
-                ...discordHeaders,
-                'X-Audit-Log-Reason': reason || 'Lucid.Mp3 Admin Action'
-            };
-
-            try {
-                // Change Bot Nickname
-                if (command === 'botNick') {
-                    await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members/@me`, {
-                        method: 'PATCH',
-                        headers: discordHeaders,
-                        body: JSON.stringify({ nick: botNick || 'Lucid Bot' })
-                    });
-                    return res.status(200).json({ success: true });
-                }
-
-                // Channel Slowmode
-                if (command === 'slowmode') {
-                    await fetch(`https://discord.com/api/v10/channels/${channelId}`, {
-                        method: 'PATCH',
-                        headers: discordHeaders,
-                        body: JSON.stringify({ rate_limit_per_user: parseInt(rateLimit || 0, 10) })
-                    });
-                    return res.status(200).json({ success: true });
-                }
-
-                // Welcome / Leave Embed Builder
-                if (command === 'welcomeLeave' || action === 'welcomeleave') {
-                    const isWelcome = modAction === 'welcome' || req.body.type === 'welcome';
-                    const userRes = await fetch(`https://discord.com/api/v10/users/${userId}`, { headers: discordHeaders });
-                    const userData = await userRes.json();
-
-                    let avatarUrl = 'https://cdn.discordapp.com/embed/avatars/0.png';
-                    if (userData.id && userData.avatar) {
-                        avatarUrl = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=256`;
-                    }
-
-                    const embed = {
-                        title: isWelcome ? "Member Joined" : "Member Left",
-                        description: isWelcome ? `Welcome <@${userId}> to **Lucid.Mp3**.` : `<@${userId}> has left **Lucid.Mp3**.`,
-                        color: 0x2b2d31,
-                        thumbnail: { url: avatarUrl },
-                        timestamp: new Date().toISOString()
-                    };
-
-                    await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
-                        method: 'POST',
-                        headers: discordHeaders,
-                        body: JSON.stringify({ embeds: [embed] })
-                    });
-                    return res.status(200).json({ success: true });
-                }
-
-                // Announcement Broadcast
-                if (command === 'announce') {
-                    await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
-                        method: 'POST',
-                        headers: discordHeaders,
-                        body: JSON.stringify({ content: message })
-                    });
-                    return res.status(200).json({ success: true });
-                }
-
-                // Embed Broadcast
-                if (command === 'embed') {
-                    const embedObj = {
-                        title: title || "Lucid Announcement",
-                        description: message,
-                        color: 0x2b2d31,
-                        image: imageUrl ? { url: imageUrl } : null,
-                        timestamp: new Date().toISOString()
-                    };
-                    await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
-                        method: 'POST',
-                        headers: discordHeaders,
-                        body: JSON.stringify({ embeds: [embedObj] })
-                    });
-                    return res.status(200).json({ success: true });
-                }
-
-                // Bulk Message Purge
-                if (command === 'purge' || modAction === 'purge') {
-                    const limitCount = Math.min(parseInt(count || 10, 10), 100);
-                    const getRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?limit=${limitCount}`, { headers: discordHeaders });
-                    const messages = await getRes.json();
-
-                    if (!messages || messages.length === 0) return res.status(200).json({ success: true });
-
-                    const messageIds = messages.map(m => m.id);
-                    if (messageIds.length === 1) {
-                        await fetch(`https://discord.com/api/v10/channels/${channelId}/messages/${messageIds[0]}`, {
-                            method: 'DELETE',
-                            headers: discordHeaders
-                        });
-                    } else {
-                        await fetch(`https://discord.com/api/v10/channels/${channelId}/messages/bulk-delete`, {
-                            method: 'POST',
-                            headers: discordHeaders,
-                            body: JSON.stringify({ messages: messageIds })
-                        });
-                    }
-                    return res.status(200).json({ success: true, count: messageIds.length });
-                }
-
-                // Channel Lockdown
-                if (command === 'lockdown') {
-                    const isLock = modAction === 'lock';
-                    const payload = {
-                        type: 0,
-                        deny: isLock ? "2048" : "0",
-                        allow: isLock ? "0" : "2048"
-                    };
-                    await fetch(`https://discord.com/api/v10/channels/${channelId}/permissions/${GUILD_ID}`, {
-                        method: 'PUT',
-                        headers: discordHeaders,
-                        body: JSON.stringify(payload)
-                    });
-                    return res.status(200).json({ success: true });
-                }
-
-                // Moderation Suite
-                if (command === 'moderate' || action === 'moderate') {
-                    let url = '', method = '', bodyPayload = null;
-
-                    if (modAction === 'kick') {
-                        url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`;
-                        method = 'DELETE';
-                    } else if (modAction === 'ban') {
-                        url = `https://discord.com/api/v10/guilds/${GUILD_ID}/bans/${userId}`;
-                        method = 'PUT';
-                    } else if (modAction === 'unban') {
-                        url = `https://discord.com/api/v10/guilds/${GUILD_ID}/bans/${userId}`;
-                        method = 'DELETE';
-                    } else if (modAction === 'timeout') {
-                        url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userId}`;
-                        method = 'PATCH';
-                        const until = new Date(Date.now() + parseInt(duration || 300, 10) * 1000).toISOString();
-                        bodyPayload = JSON.stringify({ communication_disabled_until: until });
-                    } else if (modAction === 'warn') {
-                        await fetch(`${UPSTASH_URL}/rpush/warnings:${userId}`, {
-                            method: 'POST',
-                            headers: redisHeaders,
-                            body: JSON.stringify({
-                                reason: reason || "Administrative warning",
-                                date: new Date().toISOString()
-                            })
-                        });
-                        return res.status(200).json({ success: true });
-                    } else if (modAction === 'warnings') {
-                        const resWarn = await fetch(`${UPSTASH_URL}/lrange/warnings:${userId}/0/-1`, { headers: redisHeaders });
-                        const dataWarn = await resWarn.json();
-                        return res.status(200).json({ success: true, warnings: dataWarn.result || [] });
-                    } else if (modAction === 'clearwarnings') {
-                        await fetch(`${UPSTASH_URL}/del/warnings:${userId}`, { method: 'POST', headers: redisHeaders });
-                        return res.status(200).json({ success: true });
-                    }
-
-                    if (url) {
-                        const modResult = await fetch(url, { method, headers: modHeaders, body: bodyPayload });
-                        if (!modResult.ok) {
-                            const errTxt = await modResult.text();
-                            return res.status(modResult.status).json({ error: errTxt });
-                        }
-                    }
-                    return res.status(200).json({ success: true });
-                }
-            } catch (cmdErr) {
-                return res.status(500).json({ error: cmdErr.message });
-            }
+            await fetch(`${UPSTASH_URL}/rpush/lucid_catalog`, { method: 'POST', headers: redisHeaders, body: JSON.stringify(req.body.item || req.body) });
+            return res.status(201).json({ success: true });
         }
+        const dbRes = await fetch(`${UPSTASH_URL}/lrange/lucid_catalog/0/-1`, { headers: redisHeaders });
+        const dbData = await dbRes.json();
+        return res.status(200).json((dbData.result || []).map(i => typeof i === 'string' ? JSON.parse(i) : i));
     }
 
-    // =========================================================================
-    // SECTION 12: SPOTIFY AUTOMATOR & DISCORD RELEASE ANNOUNCER
-    // =========================================================================
-    if (isRoute('masterbot') || isRoute('spotifysync')) {
-        if (req.method === 'GET' || action.includes('spotifysync')) {
-            const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
-            const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
-            const SPOTIFY_PLAYLIST_ID = process.env.SPOTIFY_PLAYLIST_ID;
-            const CHANNEL_ID = process.env.RELEASES_CHANNEL_ID;
-            const ROLE_ID = process.env.NEW_RELEASE_ROLE_ID;
-
-            if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_PLAYLIST_ID || !DISCORD_TOKEN) {
-                return res.status(500).json({ error: 'Missing Spotify API or Discord Releases credentials.' });
-            }
-
-            try {
-                const authHeader = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
-                const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Basic ${authHeader}`,
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: 'grant_type=client_credentials'
-                });
-
-                const tokenData = await tokenRes.json();
-                if (!tokenData.access_token) {
-                    return res.status(500).json({ error: 'Failed to authenticate with Spotify Web API.' });
-                }
-
-                const playlistRes = await fetch(`https://api.spotify.com/v1/playlists/${SPOTIFY_PLAYLIST_ID}/tracks?limit=30`, {
-                    headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
-                });
-                const playlistData = await playlistRes.json();
-                const items = playlistData.items || [];
-
-                if (items.length === 0) {
-                    return res.status(200).json({ message: 'Spotify playlist empty.' });
-                }
-
-                const currentTracks = items.map(item => {
-                    const track = item.track || item;
-                    if (!track) return null;
-
-                    const trackUrl = track.external_urls?.spotify || (track.id ? `https://open.spotify.com/track/${track.id}` : null);
-                    if (!trackUrl) return null;
-
-                    return {
-                        url: trackUrl,
-                        name: track.name || "Untitled Track",
-                        artists: track.artists ? track.artists.map(a => a.name).join(', ') : "Lucid.mp3 Artist"
-                    };
-                }).filter(Boolean);
-
-                const dbRes = await fetch(`${UPSTASH_URL}/get/spotify_last_checked`, { headers: redisHeaders });
-                const dbData = await dbRes.json();
-                let previouslyPosted = dbData.result ? (typeof dbData.result === 'string' ? JSON.parse(dbData.result) : dbData.result) : [];
-
-                let newTracks = currentTracks.filter(t => !previouslyPosted.includes(t.url));
-
-                if (previouslyPosted.length === 0 && newTracks.length > 3) {
-                    newTracks = newTracks.slice(0, 3);
-                }
-
-                if (newTracks.length === 0) {
-                    return res.status(200).json({ message: 'No new tracks to post.', checked: currentTracks.length });
-                }
-
-                for (const track of newTracks) {
-                    const discordMessage = `<@&${ROLE_ID}>\n\n` +
-                                           `## 💿 **NEW LUCID.MP3 RELEASE**\n\n` +
-                                           `**Track**: ${track.name}\n` +
-                                           `**Artist(s)**: ${track.artists}\n\n` +
-                                           `▶️ **Listen on Spotify**:\n${track.url}`;
-
-                    await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
-                        method: 'POST',
-                        headers: discordHeaders,
-                        body: JSON.stringify({ content: discordMessage })
-                    });
-                }
-
-                const allUrls = currentTracks.map(t => t.url);
-                const updatedMemory = Array.from(new Set([...allUrls, ...previouslyPosted])).slice(0, 500);
-
-                await fetch(`${UPSTASH_URL}/set/spotify_last_checked`, {
-                    method: 'POST',
-                    headers: redisHeaders,
-                    body: JSON.stringify(updatedMemory)
-                });
-
-                return res.status(200).json({ success: true, postedCount: newTracks.length });
-            } catch (error) {
-                return res.status(500).json({ error: error.message });
-            }
+    if (isRoute('artists')) {
+        if (req.method === 'POST') {
+            await fetch(`${UPSTASH_URL}/rpush/lucid_artists`, { method: 'POST', headers: redisHeaders, body: JSON.stringify(req.body.item || req.body) });
+            return res.status(201).json({ success: true });
         }
+        const dbRes = await fetch(`${UPSTASH_URL}/lrange/lucid_artists/0/-1`, { headers: redisHeaders });
+        const dbData = await dbRes.json();
+        return res.status(200).json((dbData.result || []).map(i => typeof i === 'string' ? JSON.parse(i) : i));
     }
 
-    // =========================================================================
-    // SECTION 13: SYSTEM DIAGNOSTICS & DEFAULT 404
-    // =========================================================================
-    if (isRoute('health') || isRoute('ping')) {
-        let redisConnected = false;
-        try {
-            const pingRes = await fetch(`${UPSTASH_URL}/ping`, { headers: redisHeaders });
-            redisConnected = pingRes.ok;
-        } catch (e) {}
-
-        return res.status(200).json({
-            status: "online",
-            uptime: process.uptime(),
-            timestamp: new Date().toISOString(),
-            database: redisConnected ? "connected" : "offline",
-            service: "Lucid.mp3 Unified Core API"
-        });
+    if (isRoute('submitdemo')) {
+        const { title, artist, email, fileUrl } = req.body;
+        const countRes = await (await fetch(`${UPSTASH_URL}/incr/submission_counter`, { headers: redisHeaders })).json();
+        const submissionId = `lcd-demo-${String(countRes.result || 1).padStart(4, '0')}`;
+        const record = { submissionId, title, artist, email, fileLink: fileUrl, timestamp: new Date().toISOString() };
+        await fetch(`${UPSTASH_URL}/set/submission:${submissionId}`, { method: 'POST', headers: redisHeaders, body: JSON.stringify(record) });
+        return res.status(200).json({ success: true, submissionId });
     }
 
-    return res.status(404).json({
-        error: "Endpoint not found",
-        path: pathname,
-        action: action || "none"
-    });
+    if (isRoute('adminsearch')) {
+        const id = req.query.id;
+        const r = await (await fetch(`${UPSTASH_URL}/get/submission:${id}`, { headers: redisHeaders })).json();
+        if (!r.result) return res.status(404).json({ error: "Not found" });
+        return res.status(200).json(typeof r.result === 'string' ? JSON.parse(r.result) : r.result);
+    }
+
+    return res.status(404).json({ error: "Endpoint not found" });
 }
