@@ -79,6 +79,18 @@
         .audio-slider::-webkit-slider-thumb {
             -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #ffffff; cursor: pointer;
         }
+
+        .glow-active {
+            text-shadow: 0 0 16px rgba(255, 255, 255, 0.85), 0 0 32px rgba(255, 255, 255, 0.35);
+        }
+        .effect-chromatic {
+            animation: chromaticShift 2.5s infinite alternate ease-in-out;
+        }
+        @keyframes chromaticShift {
+            0% { text-shadow: -2px 0 red, 2px 0 cyan; }
+            50% { text-shadow: 2px 0 red, -2px 0 cyan; }
+            100% { text-shadow: -1px 0 magenta, 1px 0 green; }
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 relative">
@@ -86,7 +98,7 @@
     <div id="bgContainer"></div>
     <audio id="bgAudio" loop></audio>
 
-    <!-- Autoplay Gate -->
+    <!-- Autoplay Gate Overlay -->
     <div id="gateOverlay" class="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center cursor-pointer">
         <span class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white mb-3 animate-pulse">
             <i class="fa-solid fa-volume-high"></i>
@@ -95,12 +107,12 @@
         <span class="text-[10px] font-mono text-gray-500 uppercase mt-1">Lucid.mp3 Profile Network</span>
     </div>
 
-    <!-- wn3bula Style Card -->
+    <!-- Main Card -->
     <div class="card-container relative my-8">
         <div id="profileBanner" class="bg-banner bg-[#111]">
             <div class="absolute top-3 left-4 text-[10px] font-mono uppercase tracking-widest text-white/80 flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10">
                 <i class="fa-regular fa-calendar"></i>
-                <span id="statJoined">Joined Oct 2025</span>
+                <span id="statJoined">Member</span>
             </div>
 
             <div class="absolute top-3 right-4 flex items-center gap-2">
@@ -116,23 +128,27 @@
         </div>
 
         <div class="flex flex-col items-center px-6 pb-6 text-center">
+            <!-- Overlapping Avatar -->
             <div class="avatar-overlap overflow-hidden shadow-2xl">
                 <img id="profileAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
                 <span id="discordStatusDot" class="w-4 h-4 bg-gray-600 border-2 border-black rounded-full absolute bottom-1 right-1"></span>
             </div>
 
-            <h1 id="profileUsername" class="font-bold text-2xl tracking-tight text-white mt-3 flex items-center gap-2">wn3bula</h1>
+            <h1 id="profileUsername" class="font-bold text-2xl tracking-tight text-white mt-3 flex items-center gap-2">Loading...</h1>
+            
+            <!-- Badges Row -->
             <div id="profileBadgesRow" class="flex items-center justify-center gap-2 mt-1.5 text-sm text-gray-400"></div>
 
-            <span id="profileHandleText" class="text-xs font-mono text-gray-400 mt-2 block">@wn3bula</span>
-            <p id="profileTagline" class="text-xs font-bold text-gray-200 uppercase tracking-widest mt-1">D3LTA OWNER / FREAKYY</p>
-            <p id="profileSubBio" class="text-xs text-gray-400 font-mono mt-0.5">me nebula</p>
+            <span id="profileHandleText" class="text-xs font-mono text-gray-400 mt-2 block"></span>
+            <p id="profileTagline" class="text-xs font-bold text-gray-200 uppercase tracking-widest mt-1 hidden"></p>
+            <p id="profileSubBio" class="text-xs text-gray-400 font-mono mt-0.5 hidden"></p>
 
-            <div id="profileLocationBox" class="flex items-center gap-1 text-[11px] font-mono text-gray-400 mt-2">
+            <div id="profileLocationBox" class="flex items-center gap-1 text-[11px] font-mono text-gray-400 mt-2 hidden">
                 <i class="fa-solid fa-location-dot"></i>
-                <span id="profileLocationText">Austria</span>
+                <span id="profileLocationText"></span>
             </div>
 
+            <!-- Social Links Grid -->
             <div id="profileSocialsGrid" class="flex items-center justify-center gap-2.5 mt-4"></div>
 
             <!-- Discord Presence Dock -->
@@ -143,10 +159,10 @@
                     </div>
                     <div class="truncate">
                         <div class="flex items-center gap-1.5">
-                            <span id="dockUsername" class="text-xs font-bold text-white truncate font-sans">freaky WN3bula | OWNER</span>
+                            <span id="dockUsername" class="text-xs font-bold text-white truncate font-sans">Discord User</span>
                             <span class="text-[9px] border border-[#333] px-1 py-0.5 rounded text-gray-400 font-mono">STATUS</span>
                         </div>
-                        <p id="dockActivity" class="text-[10px] font-mono text-gray-500 truncate mt-0.5">Connecting...</p>
+                        <p id="dockActivity" class="text-[10px] font-mono text-gray-500 truncate mt-0.5">Connecting to Discord gateway...</p>
                     </div>
                 </div>
                 <button onclick="copyDiscordTag()" class="border border-[#333] hover:border-white text-[10px] font-mono uppercase px-3 py-1.5 rounded-lg text-gray-300 hover:text-white transition flex-shrink-0 ml-2">
@@ -154,16 +170,16 @@
                 </button>
             </div>
 
-            <!-- Music Player Dock (Matching Image 3) -->
-            <div id="audioPlayerCard" class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-4 mt-3 flex flex-col gap-3">
+            <!-- Music Player Dock -->
+            <div id="audioPlayerCard" class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-4 mt-3 flex flex-col gap-3 hidden">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3 truncate">
                         <div class="w-12 h-12 rounded-xl bg-[#181818] overflow-hidden border border-[#222] flex-shrink-0">
                             <img id="trackCover" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
                         </div>
                         <div class="truncate text-left">
-                            <h4 id="trackTitle" class="text-xs font-bold text-white truncate">VOLTA</h4>
-                            <p id="trackArtist" class="text-[10px] font-mono text-gray-500 truncate">WN3bula</p>
+                            <h4 id="trackTitle" class="text-xs font-bold text-white truncate">Audio Track</h4>
+                            <p id="trackArtist" class="text-[10px] font-mono text-gray-500 truncate">Artist</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
@@ -177,7 +193,7 @@
                         <i id="playIcon" class="fa-solid fa-play"></i>
                     </button>
                     <input type="range" id="seekSlider" min="0" max="100" value="0" class="audio-slider flex-1 accent-white">
-                    <span id="timeDisplay" class="text-[9px] font-mono text-gray-500">0:00 / 0:25</span>
+                    <span id="timeDisplay" class="text-[9px] font-mono text-gray-500">0:00 / 0:00</span>
                 </div>
             </div>
 
@@ -192,10 +208,11 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         let targetHandle = urlParams.get('handle') || urlParams.get('username') || window.location.pathname.split('/').pop().replace('@', '');
-        if (!targetHandle) targetHandle = 'wn3bula';
+        if (!targetHandle) targetHandle = 'guest';
 
         let audioEl = document.getElementById('bgAudio');
         let profileUserId = null;
+        let PROFILE_DATA = null;
 
         async function sendAnalyticsEvent(type) {
             const isMobile = /Mobi|Android/i.test(navigator.userAgent);
@@ -222,19 +239,51 @@
         async function loadProfile() {
             try {
                 const res = await fetch(`/api/master?action=profile&username=${encodeURIComponent(targetHandle)}`);
-                if (!res.ok) return;
+                if (!res.ok) {
+                    document.getElementById('profileUsername').textContent = `@${targetHandle} is unclaimed`;
+                    document.getElementById('gateOverlay').style.display = 'none';
+                    return;
+                }
+
                 const d = await res.json();
+                PROFILE_DATA = d;
                 profileUserId = d.userId;
 
-                document.title = `@${d.username || targetHandle} | Bio`;
-                document.getElementById('profileUsername').textContent = d.username || targetHandle;
+                const displayName = d.username || targetHandle;
+                document.title = `@${displayName} | Bio`;
+                document.getElementById('profileUsername').textContent = displayName;
                 document.getElementById('profileHandleText').textContent = `@${targetHandle}`;
-                if (d.description) document.getElementById('profileTagline').textContent = d.description;
-                if (d.subBio) document.getElementById('profileSubBio').textContent = d.subBio;
-                if (d.joinedDate) document.getElementById('statJoined').textContent = d.joinedDate;
-                if (d.location) document.getElementById('profileLocationText').textContent = d.location;
 
-                // FIX: Global Custom Cursor Engine
+                // Dynamic bio & tagline (hides if empty, no dummy text)
+                const taglineEl = document.getElementById('profileTagline');
+                if (d.description && d.description.trim()) {
+                    taglineEl.textContent = d.description.trim();
+                    taglineEl.classList.remove('hidden');
+                } else {
+                    taglineEl.classList.add('hidden');
+                }
+
+                const subBioEl = document.getElementById('profileSubBio');
+                if (d.subBio && d.subBio.trim()) {
+                    subBioEl.textContent = d.subBio.trim();
+                    subBioEl.classList.remove('hidden');
+                } else {
+                    subBioEl.classList.add('hidden');
+                }
+
+                const locBox = document.getElementById('profileLocationBox');
+                if (d.location && d.location.trim()) {
+                    document.getElementById('profileLocationText').textContent = d.location.trim();
+                    locBox.classList.remove('hidden');
+                } else {
+                    locBox.classList.add('hidden');
+                }
+
+                if (d.joinedDate && d.joinedDate.trim()) {
+                    document.getElementById('statJoined').textContent = d.joinedDate.trim();
+                }
+
+                // Global custom cursor injection
                 if (d.cursor && d.cursor.trim()) {
                     let cursorStyle = document.getElementById('globalCursorStyle');
                     if (!cursorStyle) {
@@ -245,33 +294,39 @@
                     cursorStyle.innerHTML = `* , *:hover, a, button, input, div, span, p, h1, h2, h3, h4 { cursor: url('${d.cursor.trim()}'), auto !important; }`;
                 }
 
-                // Avatar & Banner
+                // Avatars & Banners
                 const pfp = d.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
                 document.getElementById('profileAvatar').src = pfp;
                 document.getElementById('dockAvatar').src = pfp;
-                document.getElementById('trackCover').src = d.trackCover || pfp;
+                document.getElementById('dockUsername').textContent = d.discordTag || displayName;
 
-                // Video vs Image Background
+                // Background Media (Video or Image)
                 const bgUrl = d.background || '';
                 const bgBox = document.getElementById('bgContainer');
                 if (bgUrl.endsWith('.mp4') || bgUrl.endsWith('.webm')) {
                     bgBox.innerHTML = `<video id="pageBgMedia" autoplay loop muted playsinline src="${bgUrl}"></video>`;
                 } else if (bgUrl) {
                     bgBox.innerHTML = `<div id="pageBgMedia" style="background-image: url('${bgUrl}'); background-size: cover; background-position: center;"></div>`;
-                }
-
-                if (bgUrl && !bgUrl.endsWith('.mp4') && !bgUrl.endsWith('.webm')) {
                     document.getElementById('profileBanner').style.backgroundImage = `url('${bgUrl}')`;
                 }
 
-                // Music Player Metadata
-                if (d.audio) {
-                    audioEl.src = d.audio;
-                    document.getElementById('trackTitle').textContent = d.trackTitle || "VOLTA";
-                    document.getElementById('trackArtist').textContent = d.trackArtist || d.username || "WN3bula";
+                // Music Player
+                if (d.audio && d.audio.trim()) {
+                    audioEl.src = d.audio.trim();
+                    document.getElementById('trackTitle').textContent = d.trackTitle || "Audio Track";
+                    document.getElementById('trackArtist').textContent = d.trackArtist || displayName;
+                    document.getElementById('trackCover').src = d.trackCover || pfp;
+                    document.getElementById('audioPlayerCard').classList.remove('hidden');
+                } else {
+                    document.getElementById('audioPlayerCard').classList.add('hidden');
+                    document.getElementById('gateOverlay').style.display = 'none';
                 }
 
-                // Badges
+                // Visual Shaders
+                if (d.glowUsername) document.getElementById('profileUsername').classList.add('glow-active');
+                if (d.userEffect === 'chromatic') document.getElementById('profileUsername').classList.add('effect-chromatic');
+
+                // Custom Badges
                 const badgesRow = document.getElementById('profileBadgesRow');
                 badgesRow.innerHTML = '';
                 const iconMap = {
@@ -284,15 +339,13 @@
                     fire: 'fa-solid fa-fire text-red-500',
                     gamepad: 'fa-solid fa-gamepad text-indigo-400'
                 };
-                if (Array.isArray(d.iconBadges)) {
+                if (Array.isArray(d.iconBadges) && d.iconBadges.length > 0) {
                     d.iconBadges.forEach(b => {
                         badgesRow.innerHTML += `<i class="${iconMap[b] || 'fa-solid fa-tag'} text-xs"></i>`;
                     });
-                } else {
-                    badgesRow.innerHTML = `<i class="fa-solid fa-crown text-yellow-400 text-xs"></i><i class="fa-solid fa-star text-purple-400 text-xs"></i><i class="fa-solid fa-heart text-pink-500 text-xs"></i><i class="fa-solid fa-paw text-gray-300 text-xs"></i>`;
                 }
 
-                // Socials
+                // Social Links
                 const s = d.socials || {};
                 const sGrid = document.getElementById('profileSocialsGrid');
                 sGrid.innerHTML = '';
@@ -312,21 +365,20 @@
                     }
                 }
 
-                // Dynamic Tabs
+                // Dynamic Tabs (Defaults clean to the user)
                 const customTabs = Array.isArray(d.customTabs) && d.customTabs.length > 0 
                     ? d.customTabs 
                     : [
-                        { title: 'Main', content: 'D3LTA OWNER / FREAKYY\nUnderground sound collective.' },
-                        { title: 'FAV ANIMES', content: '• Tokyo Ghoul\n• Evangelion\n• Lain' },
-                        { title: 'SOCIALS', content: 'Check verified social pills above.' },
-                        { title: 'Priv Info', content: 'DAW: FL Studio 21 • Hardware: Focusrite' }
+                        { title: 'Main', content: d.description || 'Welcome to my official profile page.' }
                     ];
 
                 renderCustomTabs(customTabs);
                 sendAnalyticsEvent('view');
 
                 if (d.userId) connectLanyard(d.userId);
-            } catch (err) {}
+            } catch (err) {
+                console.error("Profile load error:", err);
+            }
         }
 
         function renderCustomTabs(tabs) {
@@ -366,6 +418,14 @@
                         const statusColors = { online: 'bg-green-500', idle: 'bg-yellow-500', dnd: 'bg-red-500', offline: 'bg-gray-600' };
                         document.getElementById('discordStatusDot').className = `w-4 h-4 border-2 border-black rounded-full absolute bottom-1 right-1 ${statusColors[data.discord_status] || 'bg-gray-600'}`;
 
+                        if (data.discord_user) {
+                            const name = data.discord_user.global_name || data.discord_user.username;
+                            document.getElementById('dockUsername').textContent = name;
+                            if (data.discord_user.avatar) {
+                                document.getElementById('dockAvatar').src = `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}.png`;
+                            }
+                        }
+
                         if (data.listening_to_spotify && data.spotify) {
                             document.getElementById('dockActivity').textContent = `Listening to ${data.spotify.song} by ${data.spotify.artist}`;
                         } else if (data.activities && data.activities[0]) {
@@ -380,9 +440,13 @@
 
         function togglePlayAudio() {
             const icon = document.getElementById('playIcon');
+            if (!audioEl.src) return;
             if (audioEl.paused) {
-                audioEl.play();
-                icon.className = 'fa-solid fa-pause';
+                audioEl.play().then(() => {
+                    icon.className = 'fa-solid fa-pause';
+                }).catch(() => {
+                    alert("Audio playback failed. Please verify that the audio file URL is directly accessible.");
+                });
             } else {
                 audioEl.pause();
                 icon.className = 'fa-solid fa-play';
@@ -390,7 +454,7 @@
         }
 
         audioEl.addEventListener('timeupdate', () => {
-            if (audioEl.duration) {
+            if (audioEl.duration && !isNaN(audioEl.duration)) {
                 const pct = (audioEl.currentTime / audioEl.duration) * 100;
                 document.getElementById('seekSlider').value = pct;
                 const formatTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -407,18 +471,24 @@
         });
 
         document.getElementById('seekSlider').addEventListener('input', (e) => {
-            if (audioEl.duration) audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
+            if (audioEl.duration && !isNaN(audioEl.duration)) {
+                audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
+            }
         });
 
         function copyDiscordTag() {
-            navigator.clipboard.writeText(targetHandle);
-            alert("Discord username copied to clipboard!");
+            const tag = (PROFILE_DATA && (PROFILE_DATA.discordTag || PROFILE_DATA.username)) || targetHandle;
+            navigator.clipboard.writeText(tag).then(() => {
+                alert(`Copied Discord user: @${tag}`);
+            });
         }
 
         document.getElementById('gateOverlay').addEventListener('click', function() {
             this.style.display = 'none';
             if (audioEl.src) {
-                audioEl.play().then(() => document.getElementById('playIcon').className = 'fa-solid fa-pause').catch(() => {});
+                audioEl.play().then(() => {
+                    document.getElementById('playIcon').className = 'fa-solid fa-pause';
+                }).catch(() => {});
             }
         });
 
