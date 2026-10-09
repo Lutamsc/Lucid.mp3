@@ -151,7 +151,7 @@
             <!-- Social Links Grid -->
             <div id="profileSocialsGrid" class="flex items-center justify-center gap-2.5 mt-4"></div>
 
-            <!-- Discord Presence Dock -->
+            <!-- Discord Presence Dock (Dynamic User Data) -->
             <div class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-3.5 mt-6 flex items-center justify-between text-left">
                 <div class="flex items-center gap-3 truncate">
                     <div class="w-11 h-11 rounded-full bg-[#181818] overflow-hidden border border-[#262626] flex-shrink-0">
@@ -162,7 +162,7 @@
                             <span id="dockUsername" class="text-xs font-bold text-white truncate font-sans">Discord User</span>
                             <span class="text-[9px] border border-[#333] px-1 py-0.5 rounded text-gray-400 font-mono">STATUS</span>
                         </div>
-                        <p id="dockActivity" class="text-[10px] font-mono text-gray-500 truncate mt-0.5">Connecting to Discord gateway...</p>
+                        <p id="dockActivity" class="text-[10px] font-mono text-gray-500 truncate mt-0.5">Offline on Discord</p>
                     </div>
                 </div>
                 <button onclick="copyDiscordTag()" class="border border-[#333] hover:border-white text-[10px] font-mono uppercase px-3 py-1.5 rounded-lg text-gray-300 hover:text-white transition flex-shrink-0 ml-2">
@@ -170,7 +170,7 @@
                 </button>
             </div>
 
-            <!-- Music Player Dock -->
+            <!-- Music Player Dock (Only Displays When User Has Audio Configured) -->
             <div id="audioPlayerCard" class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-4 mt-3 flex flex-col gap-3 hidden">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3 truncate">
@@ -254,7 +254,7 @@
                 document.getElementById('profileUsername').textContent = displayName;
                 document.getElementById('profileHandleText').textContent = `@${targetHandle}`;
 
-                // Dynamic bio & tagline (hides if empty, no dummy text)
+                // Dynamic Tagline & Sub-bio (Hides completely if empty, no placeholders)
                 const taglineEl = document.getElementById('profileTagline');
                 if (d.description && d.description.trim()) {
                     taglineEl.textContent = d.description.trim();
@@ -283,7 +283,7 @@
                     document.getElementById('statJoined').textContent = d.joinedDate.trim();
                 }
 
-                // Global custom cursor injection
+                // Global Custom Cursor Injection
                 if (d.cursor && d.cursor.trim()) {
                     let cursorStyle = document.getElementById('globalCursorStyle');
                     if (!cursorStyle) {
@@ -294,13 +294,13 @@
                     cursorStyle.innerHTML = `* , *:hover, a, button, input, div, span, p, h1, h2, h3, h4 { cursor: url('${d.cursor.trim()}'), auto !important; }`;
                 }
 
-                // Avatars & Banners
+                // Avatars & Presence Defaults
                 const pfp = d.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
                 document.getElementById('profileAvatar').src = pfp;
                 document.getElementById('dockAvatar').src = pfp;
                 document.getElementById('dockUsername').textContent = d.discordTag || displayName;
 
-                // Background Media (Video or Image)
+                // Background Video or Image
                 const bgUrl = d.background || '';
                 const bgBox = document.getElementById('bgContainer');
                 if (bgUrl.endsWith('.mp4') || bgUrl.endsWith('.webm')) {
@@ -310,7 +310,7 @@
                     document.getElementById('profileBanner').style.backgroundImage = `url('${bgUrl}')`;
                 }
 
-                // Music Player
+                // Audio Player: Only renders if user uploaded a song
                 if (d.audio && d.audio.trim()) {
                     audioEl.src = d.audio.trim();
                     document.getElementById('trackTitle').textContent = d.trackTitle || "Audio Track";
@@ -322,7 +322,7 @@
                     document.getElementById('gateOverlay').style.display = 'none';
                 }
 
-                // Visual Shaders
+                // Shaders & Glow
                 if (d.glowUsername) document.getElementById('profileUsername').classList.add('glow-active');
                 if (d.userEffect === 'chromatic') document.getElementById('profileUsername').classList.add('effect-chromatic');
 
@@ -365,7 +365,7 @@
                     }
                 }
 
-                // Dynamic Tabs (Defaults clean to the user)
+                // Dynamic Tabs
                 const customTabs = Array.isArray(d.customTabs) && d.customTabs.length > 0 
                     ? d.customTabs 
                     : [
@@ -445,7 +445,7 @@
                 audioEl.play().then(() => {
                     icon.className = 'fa-solid fa-pause';
                 }).catch(() => {
-                    alert("Audio playback failed. Please verify that the audio file URL is directly accessible.");
+                    alert("Audio playback failed. Please ensure your audio URL is a direct streamable file.");
                 });
             } else {
                 audioEl.pause();
@@ -479,7 +479,7 @@
         function copyDiscordTag() {
             const tag = (PROFILE_DATA && (PROFILE_DATA.discordTag || PROFILE_DATA.username)) || targetHandle;
             navigator.clipboard.writeText(tag).then(() => {
-                alert(`Copied Discord user: @${tag}`);
+                alert(`Copied Discord username: @${tag}`);
             });
         }
 
