@@ -1,10 +1,10 @@
 {
+  "name": "lucid-mp3",
+  "version": "1.0.0",
   "type": "module",
   "dependencies": {
     "cookie": "^0.6.0",
     "discord-interactions": "^3.4.0",
-    "mongoose": "^8.0.0",
-    "nodemailer": "^6.9.13",
-    "spotify-url-info": "^3.3.3"
+    "nodemailer": "^6.9.13"
   }
 }
