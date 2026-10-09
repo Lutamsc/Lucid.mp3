@@ -41,10 +41,89 @@ export default async function handler(req, res) {
     const UPSTASH_URL = process.env.UPSTASH_URL || process.env.UPSTASH_REDIS_REST_URL;
     const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
+    const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+    const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
     const GUILD_ID = '1554157703067336875';
 
     // Helper to check route matches across rewritten path or query params
     const isRoute = (name) => pathname.includes(name) || action.includes(name);
+
+    // =========================================================================
+    // 0. DISCORD OAUTH2 & SESSION SUITE (Merged from auth.js)
+    // =========================================================================
+    
+    // A. Login Redirect
+    if (isRoute('discord')) {
+        const redirectUri = encodeURIComponent('https://www.lucidmp3.com/api/auth/callback');
+        const discordLoginUrl = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID || '1556227335634817054'}&response_type=code&redirect_uri=${redirectUri}&scope=identify`;
+        return res.redirect(discordLoginUrl);
+    }
+
+    // B. OAuth Callback & Cookie Session Creation
+    if (isRoute('callback')) {
+        const { code } = req.query;
+        if (!code) return res.status(400).send('No code provided from Discord');
+
+        const redirectUri = 'https://www.lucidmp3.com/api/auth/callback';
+
+        try {
+            const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    client_id: CLIENT_ID,
+                    client_secret: CLIENT_SECRET,
+                    grant_type: 'authorization_code',
+                    code: code,
+                    redirect_uri: redirectUri,
+                }),
+            });
+
+            const tokenData = await tokenRes.json();
+            if (!tokenData.access_token) return res.status(400).send('Failed to obtain access token');
+
+            const userRes = await fetch('https://discord.com/api/users/@me', {
+                headers: { Authorization: `Bearer ${tokenData.access_token}` },
+            });
+            const userData = await userRes.json();
+            
+            res.setHeader('Set-Cookie', cookie.serialize('discord_user', JSON.stringify({
+                id: userData.id,
+                username: userData.username,
+                avatar: userData.avatar
+            }), {
+                httpOnly: true,
+                secure: process.env.NODE_ENV !== 'development',
+                maxAge: 60 * 60 * 24 * 7, // 1 week
+                path: '/'
+            }));
+
+            return res.redirect('/');
+        } catch (error) {
+            return res.status(500).send('Authentication error');
+        }
+    }
+
+    // C. Logout
+    if (isRoute('logout')) {
+        res.setHeader('Set-Cookie', 'discord_user=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+        return res.redirect('/');
+    }
+
+    // D. Session Verification (/api/auth/me)
+    if (isRoute('me')) {
+        const cookies = cookie.parse(req.headers.cookie || '');
+        if (!cookies.discord_user) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        try {
+            const user = JSON.parse(cookies.discord_user);
+            return res.status(200).json(user);
+        } catch (e) {
+            return res.status(401).json({ error: 'Invalid session' });
+        }
+    }
 
     // =========================================================================
     // 1. DISCORD INTERACTIONS (Modal popups, Accept/Reject, Nodemailer)
@@ -127,7 +206,6 @@ export default async function handler(req, res) {
             const rawEmails = emailMatch ? emailMatch[1].trim() : "";
             const fileLink = fileMatch ? fileMatch[1].trim() : "Unknown";
 
-            // Split multiple comma-separated emails safely
             const recipientEmails = rawEmails.split(',').map(e => e.trim()).filter(e => e.length > 0);
 
             const transporter = nodemailer.createTransport({
@@ -569,20 +647,20 @@ export default async function handler(req, res) {
     // 9. MASTERBOT (Spotify Automator & Discord Admin Suite)
     // =========================================================================
     if (isRoute('masterbot') || isRoute('spotifysync')) {
-        // Spotify Sync (Triggers on GET requests from cron-job.org or action=spotifysync)
+        // Spotify Sync
         if (req.method === 'GET' || action.includes('spotifysync')) {
-            const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
-            const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+            const CLIENT_ID_SPOT = process.env.SPOTIFY_CLIENT_ID;
+            const CLIENT_SECRET_SPOT = process.env.SPOTIFY_CLIENT_SECRET;
             const PLAYLIST_ID = process.env.SPOTIFY_PLAYLIST_ID;
             const CHANNEL_ID = process.env.RELEASES_CHANNEL_ID; 
             const ROLE_ID = process.env.NEW_RELEASE_ROLE_ID; 
 
-            if (!CLIENT_ID || !CLIENT_SECRET || !PLAYLIST_ID || !DISCORD_TOKEN) {
+            if (!CLIENT_ID_SPOT || !CLIENT_SECRET_SPOT || !PLAYLIST_ID || !DISCORD_TOKEN) {
                 return res.status(500).json({ error: 'Missing Spotify API Environment Variables.' });
             }
 
             try {
-                const authString = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
+                const authString = Buffer.from(`${CLIENT_ID_SPOT}:${CLIENT_SECRET_SPOT}`).toString('base64');
                 const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
                     method: 'POST',
                     headers: { 'Authorization': `Basic ${authString}`, 'Content-Type': 'application/x-www-form-urlencoded' },
