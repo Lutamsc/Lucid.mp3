@@ -96,7 +96,7 @@
 <body class="flex items-center justify-center min-h-screen p-4 relative">
     <div class="noise-layer"></div>
     <div id="bgContainer"></div>
-    <audio id="bgAudio" loop></audio>
+    <audio id="bgAudio" loop preload="auto" crossorigin="anonymous"></audio>
 
     <!-- Autoplay Gate Overlay -->
     <div id="gateOverlay" class="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center cursor-pointer">
@@ -130,7 +130,7 @@
         <div class="flex flex-col items-center px-6 pb-6 text-center">
             <!-- Overlapping Avatar -->
             <div class="avatar-overlap overflow-hidden shadow-2xl">
-                <img id="profileAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
+                <img id="profileAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png';" class="w-full h-full object-cover">
                 <span id="discordStatusDot" class="w-4 h-4 bg-gray-600 border-2 border-black rounded-full absolute bottom-1 right-1"></span>
             </div>
 
@@ -155,7 +155,7 @@
             <div class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-3.5 mt-6 flex items-center justify-between text-left">
                 <div class="flex items-center gap-3 truncate">
                     <div class="w-11 h-11 rounded-full bg-[#181818] overflow-hidden border border-[#262626] flex-shrink-0">
-                        <img id="dockAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
+                        <img id="dockAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png';" class="w-full h-full object-cover">
                     </div>
                     <div class="truncate">
                         <div class="flex items-center gap-1.5">
@@ -175,7 +175,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3 truncate">
                         <div class="w-12 h-12 rounded-xl bg-[#181818] overflow-hidden border border-[#222] flex-shrink-0">
-                            <img id="trackCover" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
+                            <img id="trackCover" src="https://cdn.discordapp.com/embed/avatars/0.png" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png';" class="w-full h-full object-cover">
                         </div>
                         <div class="truncate text-left">
                             <h4 id="trackTitle" class="text-xs font-bold text-white truncate">Audio Track</h4>
@@ -295,7 +295,7 @@
                 }
 
                 // Avatars & Presence Defaults
-                const pfp = d.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
+                const pfp = (d.avatar && d.avatar.startsWith('http')) ? d.avatar : 'https://cdn.discordapp.com/embed/avatars/0.png';
                 document.getElementById('profileAvatar').src = pfp;
                 document.getElementById('dockAvatar').src = pfp;
                 document.getElementById('dockUsername').textContent = d.discordTag || displayName;
@@ -315,7 +315,7 @@
                     audioEl.src = d.audio.trim();
                     document.getElementById('trackTitle').textContent = d.trackTitle || "Audio Track";
                     document.getElementById('trackArtist').textContent = d.trackArtist || displayName;
-                    document.getElementById('trackCover').src = d.trackCover || pfp;
+                    document.getElementById('trackCover').src = (d.trackCover && d.trackCover.startsWith('http')) ? d.trackCover : pfp;
                     document.getElementById('audioPlayerCard').classList.remove('hidden');
                 } else {
                     document.getElementById('audioPlayerCard').classList.add('hidden');
@@ -445,13 +445,20 @@
                 audioEl.play().then(() => {
                     icon.className = 'fa-solid fa-pause';
                 }).catch(() => {
-                    alert("Audio playback failed. Please ensure your audio URL is a direct streamable file.");
+                    alert("Audio playback failed. Please verify that the audio file URL is directly accessible.");
                 });
             } else {
                 audioEl.pause();
                 icon.className = 'fa-solid fa-play';
             }
         }
+
+        audioEl.addEventListener('loadedmetadata', () => {
+            if (audioEl.duration && !isNaN(audioEl.duration)) {
+                const formatTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+                document.getElementById('timeDisplay').textContent = `0:00 / ${formatTime(audioEl.duration)}`;
+            }
+        });
 
         audioEl.addEventListener('timeupdate', () => {
             if (audioEl.duration && !isNaN(audioEl.duration)) {
