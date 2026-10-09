@@ -181,18 +181,6 @@
             background: #666;
         }
 
-        .glow-username-active {
-            text-shadow: 0 0 14px rgba(255, 255, 255, 0.9), 0 0 28px rgba(255, 255, 255, 0.4);
-        }
-        .effect-chromatic {
-            animation: chromaticShift 2.5s infinite alternate ease-in-out;
-        }
-        @keyframes chromaticShift {
-            0% { text-shadow: -2px 0 red, 2px 0 cyan; }
-            50% { text-shadow: 2px 0 red, -2px 0 cyan; }
-            100% { text-shadow: -1px 0 magenta, 1px 0 green; }
-        }
-
         .fade-up {
             opacity: 0;
             transform: translateY(35px);
@@ -211,7 +199,7 @@
     <div id="discordUserWidget" class="fixed bottom-6 left-6 z-50 bg-black/95 border border-[#222] p-3 flex items-center gap-3 backdrop-blur-md text-xs uppercase tracking-widest shadow-2xl">
         <div id="discordUserContent" class="flex items-center gap-3">
             <span class="text-gray-500">Not Logged In</span>
-            <a href="/api/auth/discord" class="border border-white px-3 py-1.5 clean-invert font-oswald text-xs">Login with Discord</a>
+            <a href="/api/master?action=discord" class="border border-white px-3 py-1.5 clean-invert font-oswald text-xs">Login with Discord</a>
         </div>
     </div>
 
@@ -322,20 +310,14 @@
                     </div>
                 </div>
 
-                <!-- Bio Live Simulator Dock -->
                 <div class="lg:col-span-5 flex justify-center">
-                    <div id="heroCardPreview" class="w-full max-w-sm border border-[#333] bg-black/85 backdrop-blur-md p-6 rounded-2xl relative shadow-2xl transition-all">
+                    <div class="w-full max-w-sm border border-[#333] bg-black/85 backdrop-blur-md p-6 rounded-2xl relative shadow-2xl transition-all">
                         <div class="flex flex-col items-center text-center">
                             <div class="w-24 h-24 rounded-full border-2 border-white/20 mb-3 overflow-hidden relative">
-                                <img src="https://cdn.discordapp.com/embed/avatars/0.png" id="heroPfp" class="w-full h-full object-cover">
+                                <img src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
                             </div>
-                            <h4 id="heroUsername" class="font-bold text-xl text-white tracking-wide flex items-center gap-2">
-                                <span>wn3bula</span>
-                            </h4>
-                            <div id="heroBadgesRow" class="flex flex-wrap justify-center gap-1.5 my-3">
-                                <span class="text-[9px] font-mono px-2 py-0.5 border border-white text-black bg-white uppercase font-bold">MEMBER</span>
-                            </div>
-                            <p id="heroBio" class="text-xs text-gray-400 mb-4 font-mono">Underground sound designer</p>
+                            <h4 class="font-bold text-xl text-white tracking-wide">wn3bula</h4>
+                            <p class="text-xs text-gray-400 mt-1 font-mono">D3LTA OWNER / FREAKYY</p>
                         </div>
                     </div>
                 </div>
@@ -406,7 +388,7 @@
             <div class="lg:col-span-4 fade-up">
                 <h2 class="font-oswald text-4xl sm:text-5xl uppercase tracking-tighter mb-4">Submit Demo</h2>
                 <p class="text-sm text-gray-500 uppercase tracking-widest leading-relaxed">
-                    Upload your raw audio.<br>(.mp3 or .wav format).<br>Files are auto-converted to secure, one-time A&R links.
+                    Upload your raw audio.<br>(.mp3 or .wav format).<br>Direct proxy upload to our secure storage.
                 </p>
             </div>
             
@@ -425,7 +407,7 @@
                         <input type="text" id="email" required class="clean-input pb-2 text-lg w-full" placeholder="artist@gmail.com, secondary@gmail.com">
                     </div>
                     <div>
-                        <label for="track_file" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-2 block font-bold">Audio File (MAX 25MB)</label>
+                        <label for="track_file" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-2 block font-bold">Audio File (.MP3 / .WAV)</label>
                         <input type="file" id="track_file" accept=".mp3,.wav" required class="clean-input pb-2 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:border file:border-[#333] file:bg-transparent file:text-white file:text-xs file:uppercase file:tracking-widest cursor-pointer">
                     </div>
                     <button type="submit" id="submitBtn" class="self-start font-oswald text-xl uppercase tracking-widest border border-white px-8 py-4 clean-invert">
@@ -453,13 +435,14 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-up">
+            <!-- Submission Lookup & Content -->
             <div class="flex flex-col gap-6">
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-4 flex items-center gap-2">
                         <i class="fa-solid fa-magnifying-glass"></i> Submission Lookup
                     </h3>
                     <div class="flex flex-col gap-4 mb-4">
-                        <input type="text" id="adminSearchInput" class="clean-input pb-2 text-sm" placeholder="Enter Submission ID (lcd-demo-...)">
+                        <input type="text" id="adminSearchInput" class="clean-input pb-2 text-sm" placeholder="lcd-demo-0001">
                         <button type="button" id="adminSearchBtn" class="font-oswald text-xs uppercase tracking-widest border border-white px-4 py-2.5 clean-invert w-full">Search DB</button>
                     </div>
                     <div id="adminSearchResult" class="bg-black border border-[#222] p-4 text-xs font-mono text-gray-400 tracking-wider">Awaiting query...</div>
@@ -483,6 +466,7 @@
                 </div>
             </div>
 
+            <!-- Moderation -->
             <div class="border border-[#222] bg-[#050505] p-6 flex flex-col gap-6">
                 <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white border-b border-[#222] pb-4 flex items-center gap-2">
                     <i class="fa-solid fa-user-shield"></i> User Moderation
@@ -492,10 +476,10 @@
                     <select id="modAction" class="bg-black border border-[#333] text-xs text-white p-2.5 outline-none w-full">
                         <option value="kick">Kick Member</option>
                         <option value="ban">Ban Member</option>
-                        <option value="softban">Softban Member</option>
                         <option value="timeout">Timeout (5 Mins)</option>
                         <option value="warn">Issue Warning</option>
                         <option value="warnings">Inspect Warnings</option>
+                        <option value="clearwarnings">Clear Warnings</option>
                     </select>
                     <input type="text" id="modReason" class="clean-input pb-2 text-xs" placeholder="Reason (Optional)">
                     <button type="submit" class="font-oswald text-xs uppercase tracking-widest border border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2.5 transition">Execute Action</button>
@@ -503,18 +487,16 @@
                 <div id="modOutputBox" class="hidden bg-black border border-[#222] p-3 text-xs font-mono text-gray-300"></div>
 
                 <div class="border-t border-[#222] pt-4 flex flex-col gap-4">
-                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400">Trigger Welcome Embed</h4>
-                    <form id="discordWelcomeForm" class="flex flex-col gap-2">
-                        <input type="text" id="welcomeChannelId" required class="clean-input pb-2 text-xs" placeholder="Channel ID">
-                        <input type="text" id="welcomeUserId" required class="clean-input pb-2 text-xs" placeholder="User ID">
-                        <div class="flex gap-2">
-                            <button type="submit" data-action="welcome" class="w-1/2 font-oswald text-[10px] uppercase tracking-widest border border-white px-2 py-1.5 clean-invert">Join Embed</button>
-                            <button type="submit" data-action="leave" class="w-1/2 font-oswald text-[10px] uppercase tracking-widest border border-gray-600 px-2 py-1.5 hover:border-white">Leave Embed</button>
-                        </div>
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400">Purge Messages</h4>
+                    <form id="discordPurgeForm" class="flex gap-2">
+                        <input type="text" id="purgeChannelId" required class="clean-input pb-2 text-xs w-2/3" placeholder="Channel ID">
+                        <input type="number" id="purgeCount" required min="1" max="100" class="clean-input pb-2 text-xs w-1/3" placeholder="10">
+                        <button type="submit" class="font-oswald text-[10px] border border-red-500 text-red-500 px-3 py-1 hover:bg-red-500 hover:text-white">Purge</button>
                     </form>
                 </div>
             </div>
 
+            <!-- Staff Badges & Bot Settings -->
             <div class="border border-[#222] bg-[#050505] p-6 flex flex-col gap-6">
                 <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white border-b border-[#222] pb-4 flex items-center gap-2">
                     <i class="fa-solid fa-certificate"></i> Staff Badge Assigner
@@ -539,11 +521,10 @@
                 <div id="adminBadgeStatus" class="text-xs font-mono text-gray-400"></div>
 
                 <div class="border-t border-[#222] pt-4">
-                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Purge Chat</h4>
-                    <form id="discordPurgeForm" class="flex gap-2">
-                        <input type="text" id="purgeChannelId" required class="clean-input pb-2 text-xs w-2/3" placeholder="Channel ID">
-                        <input type="number" id="purgeCount" required min="1" max="100" class="clean-input pb-2 text-xs w-1/3" placeholder="10">
-                        <button type="submit" class="font-oswald text-[10px] border border-red-500 text-red-500 px-3 py-1 hover:bg-red-500 hover:text-white">Purge</button>
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Bot Nickname</h4>
+                    <form id="botNickForm" class="flex gap-2">
+                        <input type="text" id="botNickInput" required class="clean-input pb-2 text-xs flex-1" placeholder="New Bot Nick">
+                        <button type="submit" class="font-oswald text-[10px] border border-white px-3 py-1 clean-invert">Set</button>
                     </form>
                 </div>
             </div>
@@ -621,9 +602,9 @@
                         <span class="text-[10px] text-gray-600 font-mono">All time page visits</span>
                     </div>
                     <div class="border border-[#222] bg-[#050505] p-6">
-                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">This Week</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">This Month</span>
                         <h3 id="statWeekViews" class="font-oswald text-4xl text-white mt-2">0</h3>
-                        <span class="text-[10px] text-gray-600 font-mono">Views this week</span>
+                        <span class="text-[10px] text-gray-600 font-mono">Views this period</span>
                     </div>
                     <div class="border border-[#222] bg-[#050505] p-6">
                         <span class="text-[10px] text-gray-500 uppercase tracking-widest">Link Clicks</span>
@@ -638,27 +619,27 @@
                 <div class="flex justify-between items-end border-b border-[#222] pb-6">
                     <div>
                         <h2 class="font-oswald text-4xl uppercase tracking-tighter">Profile Customizer</h2>
-                        <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Configure audio loops, cursors, visual shaders, badges, and custom tabs.</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Configure audio tracks, custom cursors, shaders, custom badges, and dynamic tabs.</p>
                     </div>
                     <button onclick="saveFullProfileSettings()" class="border border-white bg-white text-black font-oswald uppercase tracking-widest px-6 py-2.5 hover:bg-black hover:text-white transition">
                         Save Changes
                     </button>
                 </div>
 
-                <!-- Assets Uploader (Direct File Upload + URL Input) -->
+                <!-- Assets Uploader (Direct Proxy File Upload + URL Input) -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Assets Uploader</h3>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="border border-[#222] bg-[#080808] p-4 text-center">
                             <i class="fa-solid fa-image text-gray-500 text-xl mb-2"></i>
                             <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Background (Video/Img)</span>
-                            <input type="text" id="custBackground" oninput="updateLiveMockup()" class="clean-input text-xs w-full pb-2 mb-2" placeholder="MP4 / GIF / URL">
+                            <input type="text" id="custBackground" class="clean-input text-xs w-full pb-2 mb-2" placeholder="MP4 / GIF / URL">
                             <input type="file" id="fileBg" accept="image/*,video/mp4,video/webm" class="hidden" onchange="uploadAssetFile(this, 'custBackground')">
                             <button onclick="document.getElementById('fileBg').click()" class="border border-[#333] hover:border-white px-3 py-1 text-[9px] font-mono uppercase text-gray-400 hover:text-white">Upload File</button>
                         </div>
                         <div class="border border-[#222] bg-[#080808] p-4 text-center">
                             <i class="fa-solid fa-music text-gray-500 text-xl mb-2"></i>
-                            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Audio</span>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Audio Track</span>
                             <input type="text" id="custAudio" class="clean-input text-xs w-full pb-2 mb-2" placeholder="Direct MP3 Link">
                             <input type="file" id="fileAudio" accept="audio/mp3,audio/wav" class="hidden" onchange="uploadAssetFile(this, 'custAudio')">
                             <button onclick="document.getElementById('fileAudio').click()" class="border border-[#333] hover:border-white px-3 py-1 text-[9px] font-mono uppercase text-gray-400 hover:text-white">Upload File</button>
@@ -666,7 +647,7 @@
                         <div class="border border-[#222] bg-[#080808] p-4 text-center">
                             <i class="fa-solid fa-user text-gray-500 text-xl mb-2"></i>
                             <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Profile Avatar</span>
-                            <input type="text" id="custAvatar" oninput="updateLiveMockup()" class="clean-input text-xs w-full pb-2 mb-2" placeholder="Avatar URL">
+                            <input type="text" id="custAvatar" class="clean-input text-xs w-full pb-2 mb-2" placeholder="Avatar URL">
                             <input type="file" id="fileAvatar" accept="image/*" class="hidden" onchange="uploadAssetFile(this, 'custAvatar')">
                             <button onclick="document.getElementById('fileAvatar').click()" class="border border-[#333] hover:border-white px-3 py-1 text-[9px] font-mono uppercase text-gray-400 hover:text-white">Upload File</button>
                         </div>
@@ -680,52 +661,102 @@
                     </div>
                 </div>
 
-                <!-- Custom Bio Content Tabs Builder -->
+                <!-- Music Player Metadata (Fixes 'Background audio' glitch) -->
+                <div class="border border-[#222] bg-[#050505] p-6">
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Music Player Track Metadata</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Title</label>
+                            <input type="text" id="custTrackTitle" class="clean-input text-xs w-full pb-2" placeholder="VOLTA">
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Artist</label>
+                            <input type="text" id="custTrackArtist" class="clean-input text-xs w-full pb-2" placeholder="WN3bula">
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Cover Image URL</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="custTrackCover" class="clean-input text-xs flex-1 pb-2" placeholder="Image URL">
+                                <input type="file" id="fileTrackCover" accept="image/*" class="hidden" onchange="uploadAssetFile(this, 'custTrackCover')">
+                                <button onclick="document.getElementById('fileTrackCover').click()" class="border border-[#333] px-2 text-[9px] font-mono uppercase text-gray-400">File</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Identity, Taglines & Sub-bios -->
+                <div class="border border-[#222] bg-[#050505] p-6">
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Identity & Bio Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Tagline (Uppercase)</label>
+                            <input type="text" id="custBioText" class="clean-input text-xs w-full pb-2" placeholder="D3LTA OWNER / FREAKYY">
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Sub-Bio</label>
+                            <input type="text" id="custSubBio" class="clean-input text-xs w-full pb-2" placeholder="me nebula">
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Location</label>
+                            <input type="text" id="custLocationText" class="clean-input text-xs w-full pb-2" placeholder="Austria">
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Joined Date Text</label>
+                            <input type="text" id="custJoinedDate" class="clean-input text-xs w-full pb-2" placeholder="Joined Oct 2025">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Icon Badges Selection (👑, ⭐, 💜, 🐾, etc.) -->
+                <div class="border border-[#222] bg-[#050505] p-6">
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-4 border-b border-[#222] pb-3">Icon Badges (wn3bula Style)</h3>
+                    <div class="flex flex-wrap gap-4 text-xs font-mono">
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="crown" class="accent-white"> 👑 Crown
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="star" class="accent-white"> ⭐ Star
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="heart" class="accent-white"> 💜 Heart
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="paw" class="accent-white"> 🐾 Paw
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="skull" class="accent-white"> 💀 Skull
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="sparkles" class="accent-white"> ✨ Sparkles
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="fire" class="accent-white"> 🔥 Fire
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="gamepad" class="accent-white"> 🎮 Gamepad
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Custom Content Tabs Builder -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <div class="flex justify-between items-center border-b border-[#222] pb-3 mb-4">
                         <div>
                             <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white">Profile Content Tabs</h3>
-                            <p class="text-[10px] text-gray-500 uppercase">Create as many custom tabs as you want (e.g. Fav Animes, Gear, Priv Info)</p>
+                            <p class="text-[10px] text-gray-500 uppercase">Create your custom tabs (e.g. Main, FAV ANIMES, SOCIALS, Priv Info)</p>
                         </div>
                         <button onclick="addNewCustomTabField()" class="border border-white px-3 py-1 text-xs font-mono uppercase clean-invert">+ Add Tab</button>
                     </div>
                     <div id="customTabsEditorList" class="flex flex-col gap-4"></div>
                 </div>
 
-                <!-- Card Properties & Sliders -->
+                <!-- Shaders & Glow Settings -->
                 <div class="border border-[#222] bg-[#050505] p-6">
-                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Card Properties & Sliders</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Bio Description</label>
-                            <input type="text" id="custBioText" oninput="updateLiveMockup()" class="clean-input text-xs w-full pb-2" placeholder="Underground sound designer">
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Location</label>
-                            <input type="text" id="custLocationText" oninput="updateLiveMockup()" class="clean-input text-xs w-full pb-2" placeholder="Vienna, Austria">
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">
-                                Profile Opacity (<span id="valOpacity">80</span>%)
-                            </label>
-                            <input type="range" id="custOpacityRange" min="20" max="100" value="80" oninput="document.getElementById('valOpacity').textContent = this.value; updateLiveMockup();" class="w-full accent-white">
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">
-                                Profile Blur (<span id="valBlur">20</span>px)
-                            </label>
-                            <input type="range" id="custBlurRange" min="0" max="60" value="20" oninput="document.getElementById('valBlur').textContent = this.value; updateLiveMockup();" class="w-full accent-white">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Shaders & Effects -->
-                <div class="border border-[#222] bg-[#050505] p-6">
-                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Shaders & Glow Settings</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Shaders & Visual FX</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Background Effects</label>
-                            <select id="custBgEffect" onchange="updateLiveMockup()" class="bg-black border border-[#333] text-xs text-white p-2.5 w-full outline-none">
+                            <select id="custBgEffect" class="bg-black border border-[#333] text-xs text-white p-2.5 w-full outline-none">
                                 <option value="none">None</option>
                                 <option value="rain">Dark Rain</option>
                                 <option value="scanline">Scanline Glitch</option>
@@ -733,7 +764,7 @@
                         </div>
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Username Effects</label>
-                            <select id="custUserEffect" onchange="updateLiveMockup()" class="bg-black border border-[#333] text-xs text-white p-2.5 w-full outline-none">
+                            <select id="custUserEffect" class="bg-black border border-[#333] text-xs text-white p-2.5 w-full outline-none">
                                 <option value="none">None</option>
                                 <option value="chromatic">Chromatic Wave</option>
                             </select>
@@ -742,47 +773,21 @@
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Glow Settings</label>
                             <div class="flex gap-2">
                                 <label class="border border-[#333] p-2 text-[10px] uppercase flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" id="glowUserToggle" onchange="updateLiveMockup()" class="accent-white"> Username
+                                    <input type="checkbox" id="glowUserToggle" class="accent-white"> Username
                                 </label>
                                 <label class="border border-[#333] p-2 text-[10px] uppercase flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" id="glowSocialsToggle" onchange="updateLiveMockup()" class="accent-white"> Socials
-                                </label>
-                                <label class="border border-[#333] p-2 text-[10px] uppercase flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" id="glowBadgesToggle" onchange="updateLiveMockup()" class="accent-white"> Badges
+                                    <input type="checkbox" id="glowSocialsToggle" class="accent-white"> Socials
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Color Customization -->
-                <div class="border border-[#222] bg-[#050505] p-6">
-                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Color Customization</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 block mb-1">Accent Color</label>
-                            <input type="color" id="custAccentColor" value="#1b1b1b" oninput="updateLiveMockup()" class="w-full h-8 bg-transparent cursor-pointer">
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 block mb-1">Text Color</label>
-                            <input type="color" id="custTextColor" value="#ffffff" oninput="updateLiveMockup()" class="w-full h-8 bg-transparent cursor-pointer">
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 block mb-1">Background Color</label>
-                            <input type="color" id="custCardBgColor" value="#080808" oninput="updateLiveMockup()" class="w-full h-8 bg-transparent cursor-pointer">
-                        </div>
-                        <div>
-                            <label class="text-[10px] uppercase text-gray-500 block mb-1">Icon Color</label>
-                            <input type="color" id="custIconColor" value="#ffffff" oninput="updateLiveMockup()" class="w-full h-8 bg-transparent cursor-pointer">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Socials & Share as Template -->
+                <!-- Publish Design as Community Template -->
                 <div class="border border-[#222] bg-[#080808] p-6 flex justify-between items-center">
                     <div>
                         <h4 class="text-xs font-bold uppercase tracking-widest text-white">Share Your Creation</h4>
-                        <p class="text-[10px] text-gray-500 uppercase mt-0.5">Publish your colors, shaders, and tabs to the Community Templates board</p>
+                        <p class="text-[10px] text-gray-500 uppercase mt-0.5">Publish your custom theme to the Community Templates board</p>
                     </div>
                     <button onclick="publishCurrentDesignAsTemplate()" class="border border-purple-500 text-purple-400 hover:bg-purple-600 hover:text-white px-5 py-2 text-xs font-mono uppercase transition">
                         Publish as Template ↗
@@ -796,8 +801,8 @@
                 <div class="flex flex-col gap-4">
                     <div class="border border-[#222] bg-[#080808] p-6">
                         <span class="text-[10px] font-mono px-2 py-0.5 bg-purple-900/40 text-purple-300 border border-purple-700/50 uppercase">v1.0.0 • PRODUCTION</span>
-                        <h4 class="font-bold text-white mt-2 flex items-center gap-2"><i class="fa-solid fa-code"></i> Live Platform Launch</h4>
-                        <p class="text-xs text-gray-400 mt-1">Full Upstash Redis database persistence, dynamic per-user analytics, and automated Spotify tracker activated.</p>
+                        <h4 class="font-bold text-white mt-2 flex items-center gap-2"><i class="fa-solid fa-code"></i> Platform Launch</h4>
+                        <p class="text-xs text-gray-400 mt-1">Full Upstash Redis database persistence, direct proxy file uploading, dynamic tabs, and wn3bula aesthetic activated.</p>
                     </div>
                 </div>
             </div>
@@ -812,7 +817,6 @@
                     <span class="text-xs font-mono border border-[#333] px-3 py-1 text-gray-400">Real Database Stats</span>
                 </div>
 
-                <!-- Real Metrics -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="border border-[#222] bg-[#080808] p-5">
                         <span class="text-[10px] text-gray-500 uppercase block font-mono">TOTAL VIEWS</span>
@@ -831,24 +835,23 @@
                     </div>
                     <div class="border border-[#222] bg-[#080808] p-5">
                         <span class="text-[10px] text-gray-500 uppercase block font-mono">AVG TIME ON PAGE</span>
-                        <h3 id="statAvgDuration" class="font-oswald text-4xl text-white mt-1">--</h3>
-                        <span id="statBounceRate" class="text-[10px] text-gray-600 font-mono">Live Session Pulse</span>
+                        <h3 id="statAvgDuration" class="font-oswald text-4xl text-white mt-1">42s</h3>
+                        <span class="text-[10px] text-gray-600 font-mono">Live Session Pulse</span>
                     </div>
                 </div>
 
-                <!-- Breakdown Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="border border-[#222] bg-[#080808] p-6">
                         <h4 class="text-xs uppercase font-bold text-gray-400 mb-2 font-mono flex items-center gap-2">
                             <i class="fa-solid fa-mobile-screen"></i> DEVICE BREAKDOWN
                         </h4>
-                        <p id="statDeviceBreakdown" class="text-xs font-mono text-gray-300">Awaiting first visitor...</p>
+                        <p id="statDeviceBreakdown" class="text-xs font-mono text-gray-300">Awaiting visitor traffic...</p>
                     </div>
                     <div class="border border-[#222] bg-[#080808] p-6">
                         <h4 class="text-xs uppercase font-bold text-gray-400 mb-2 font-mono flex items-center gap-2">
                             <i class="fa-solid fa-globe"></i> TOP TRAFFIC SOURCES
                         </h4>
-                        <p id="statTrafficSources" class="text-xs font-mono text-gray-300">Awaiting first visitor...</p>
+                        <p id="statTrafficSources" class="text-xs font-mono text-gray-300">Awaiting visitor traffic...</p>
                     </div>
                 </div>
             </div>
@@ -912,7 +915,7 @@
     </footer>
 
     <!-- ======================================================== -->
-    <!-- MASTER CLIENT-SIDE SCRIPT LOGIC                          -->
+    <!-- MASTER CLIENT-SIDE LOGIC                                 -->
     <!-- ======================================================== -->
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
@@ -922,9 +925,10 @@
         let ARTISTS = [];
 
         let CURRENT_CUSTOM_TABS = [
-            { title: 'Main', content: 'Underground producer & sound designer.' },
-            { title: 'Fav Animes', content: '• Tokyo Ghoul\n• Serial Experiments Lain' },
-            { title: 'Priv Info', content: 'DAW: FL Studio 21\nHardware: Focusrite Scarlett' }
+            { title: 'Main', content: 'D3LTA OWNER / FREAKYY\nUnderground sound collective.' },
+            { title: 'FAV ANIMES', content: '• Tokyo Ghoul\n• Evangelion\n• Lain' },
+            { title: 'SOCIALS', content: 'Check verified social pills above.' },
+            { title: 'Priv Info', content: 'DAW: FL Studio 21 • Hardware: Focusrite' }
         ];
 
         function escapeHtml(val) {
@@ -992,33 +996,45 @@
             if (tabId === 'customize') renderTabsEditor();
         }
 
-        // 1. Direct File Upload Engine
+        // Direct Proxy File Upload (Base64 -> /api/master?action=upload)
         async function uploadAssetFile(input, targetInputId) {
             const file = input.files[0];
             if (!file) return;
 
             const btn = input.nextElementSibling;
-            const originalText = btn.textContent;
-            btn.textContent = "Uploading...";
+            const originalText = btn ? btn.textContent : "Upload File";
+            if (btn) btn.textContent = "Uploading...";
 
-            try {
-                const sData = await (await fetch('https://api.gofile.io/servers')).json();
-                const formData = new FormData();
-                formData.append('file', file);
-                const upRes = await (await fetch(`https://${sData.data.servers[0].name}.gofile.io/contents/uploadfile`, { method: 'POST', body: formData })).json();
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const res = await fetch('/api/master?action=upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fileData: e.target.result,
+                            fileName: file.name
+                        })
+                    });
 
-                if (upRes.data && upRes.data.downloadPage) {
-                    document.getElementById(targetInputId).value = upRes.data.downloadPage;
-                    updateLiveMockup();
-                    btn.textContent = "Done!";
+                    const data = await res.json();
+                    if (data.success && data.url) {
+                        document.getElementById(targetInputId).value = data.url;
+                        if (btn) btn.textContent = "Uploaded!";
+                    } else {
+                        alert("Upload failed: " + (data.error || "Server error"));
+                        if (btn) btn.textContent = "Failed";
+                    }
+                } catch(err) {
+                    alert("Upload failed: " + err.message);
+                    if (btn) btn.textContent = "Failed";
                 }
-            } catch(e) {
-                btn.textContent = "Failed";
-            }
-            setTimeout(() => btn.textContent = originalText, 2500);
+                setTimeout(() => { if (btn) btn.textContent = originalText; }, 2500);
+            };
+            reader.readAsDataURL(file);
         }
 
-        // 2. Dynamic Custom Tabs Editor
+        // Dynamic Custom Tabs Editor
         function renderTabsEditor() {
             const list = document.getElementById('customTabsEditorList');
             if (!list) return;
@@ -1043,7 +1059,7 @@
             renderTabsEditor();
         }
 
-        // 3. Real Per-User Analytics Engine
+        // Real Per-User Analytics Engine
         async function fetchUserAnalytics() {
             if (!CURRENT_USER) return;
             try {
@@ -1071,23 +1087,29 @@
             } catch(e) {}
         }
 
-        // 4. Community Templates Engine
+        // Community Templates Engine
         async function publishCurrentDesignAsTemplate() {
             if (!CURRENT_USER) return alert("Please log in first.");
             const name = prompt("Enter a name for your community design:");
             if (!name) return;
+
+            const selectedIconBadges = Array.from(document.querySelectorAll('input[name="iconBadgeCheck"]:checked')).map(cb => cb.value);
 
             const config = {
                 background: document.getElementById('custBackground').value,
                 audio: document.getElementById('custAudio').value,
                 avatar: document.getElementById('custAvatar').value,
                 cursor: document.getElementById('custCursor').value,
-                opacity: document.getElementById('custOpacityRange').value,
-                blur: document.getElementById('custBlurRange').value,
+                trackTitle: document.getElementById('custTrackTitle').value,
+                trackArtist: document.getElementById('custTrackArtist').value,
+                trackCover: document.getElementById('custTrackCover').value,
+                joinedDate: document.getElementById('custJoinedDate').value,
+                subBio: document.getElementById('custSubBio').value,
+                description: document.getElementById('custBioText').value,
+                location: document.getElementById('custLocationText').value,
                 bgEffect: document.getElementById('custBgEffect').value,
                 userEffect: document.getElementById('custUserEffect').value,
-                textColor: document.getElementById('custTextColor').value,
-                cardBgColor: document.getElementById('custCardBgColor').value,
+                iconBadges: selectedIconBadges,
                 customTabs: CURRENT_CUSTOM_TABS
             };
 
@@ -1164,23 +1186,32 @@
                 if (c.audio) document.getElementById('custAudio').value = c.audio;
                 if (c.avatar) document.getElementById('custAvatar').value = c.avatar;
                 if (c.cursor) document.getElementById('custCursor').value = c.cursor;
-                if (c.opacity) document.getElementById('custOpacityRange').value = c.opacity;
-                if (c.blur) document.getElementById('custBlurRange').value = c.blur;
+                if (c.trackTitle) document.getElementById('custTrackTitle').value = c.trackTitle;
+                if (c.trackArtist) document.getElementById('custTrackArtist').value = c.trackArtist;
+                if (c.trackCover) document.getElementById('custTrackCover').value = c.trackCover;
+                if (c.joinedDate) document.getElementById('custJoinedDate').value = c.joinedDate;
+                if (c.subBio) document.getElementById('custSubBio').value = c.subBio;
+                if (c.description) document.getElementById('custBioText').value = c.description;
+                if (c.location) document.getElementById('custLocationText').value = c.location;
                 if (c.bgEffect) document.getElementById('custBgEffect').value = c.bgEffect;
                 if (c.userEffect) document.getElementById('custUserEffect').value = c.userEffect;
-                if (c.textColor) document.getElementById('custTextColor').value = c.textColor;
-                if (c.cardBgColor) document.getElementById('custCardBgColor').value = c.cardBgColor;
+
+                if (Array.isArray(c.iconBadges)) {
+                    document.querySelectorAll('input[name="iconBadgeCheck"]').forEach(cb => {
+                        cb.checked = c.iconBadges.includes(cb.value);
+                    });
+                }
+
                 if (Array.isArray(c.customTabs)) {
                     CURRENT_CUSTOM_TABS = c.customTabs;
                     renderTabsEditor();
                 }
 
-                updateLiveMockup();
-                alert('Template applied! Click "Save Changes" to publish to your live link.');
+                alert('Template applied! Click "Save Changes" to publish.');
             }
         }
 
-        // 5. Profile Loading & Mockup
+        // Profile Loading
         async function loadProfileFromDatastore() {
             if (!CURRENT_USER) return;
             const defaultHandle = CURRENT_USER.username.toLowerCase();
@@ -1204,56 +1235,37 @@
                     document.getElementById('custAvatar').value = data.avatar || '';
                     document.getElementById('custCursor').value = data.cursor || '';
 
+                    document.getElementById('custTrackTitle').value = data.trackTitle || '';
+                    document.getElementById('custTrackArtist').value = data.trackArtist || '';
+                    document.getElementById('custTrackCover').value = data.trackCover || '';
+                    document.getElementById('custJoinedDate').value = data.joinedDate || '';
+                    document.getElementById('custSubBio').value = data.subBio || '';
                     document.getElementById('custBioText').value = data.description || '';
                     document.getElementById('custLocationText').value = data.location || '';
-                    document.getElementById('custOpacityRange').value = data.opacity || 80;
-                    document.getElementById('custBlurRange').value = data.blur || 20;
 
                     document.getElementById('custBgEffect').value = data.bgEffect || 'none';
                     document.getElementById('custUserEffect').value = data.userEffect || 'none';
                     document.getElementById('glowUserToggle').checked = !!data.glowUsername;
                     document.getElementById('glowSocialsToggle').checked = !!data.glowSocials;
-                    document.getElementById('glowBadgesToggle').checked = !!data.glowBadges;
 
-                    document.getElementById('custAccentColor').value = data.accentColor || '#1b1b1b';
-                    document.getElementById('custTextColor').value = data.textColor || '#ffffff';
-                    document.getElementById('custCardBgColor').value = data.cardBgColor || '#080808';
-                    document.getElementById('custIconColor').value = data.iconColor || '#ffffff';
+                    if (Array.isArray(data.iconBadges)) {
+                        document.querySelectorAll('input[name="iconBadgeCheck"]').forEach(cb => {
+                            cb.checked = data.iconBadges.includes(cb.value);
+                        });
+                    }
 
                     if (Array.isArray(data.customTabs) && data.customTabs.length > 0) {
                         CURRENT_CUSTOM_TABS = data.customTabs;
                     }
                     renderTabsEditor();
-                    updateLiveMockup();
                 }
             } catch(e) {}
         }
 
-        function updateLiveMockup() {
-            const bio = document.getElementById('custBioText').value || 'Underground sound designer';
-            const textColor = document.getElementById('custTextColor').value;
-            const customAvatar = document.getElementById('custAvatar').value;
-
-            document.getElementById('heroBio').textContent = bio;
-            document.getElementById('heroBio').style.color = textColor;
-            document.getElementById('heroUsername').style.color = textColor;
-
-            if (customAvatar) {
-                document.getElementById('heroPfp').src = customAvatar;
-            } else if (CURRENT_USER && CURRENT_USER.avatar) {
-                document.getElementById('heroPfp').src = `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png`;
-            }
-
-            const glowUser = document.getElementById('glowUserToggle').checked;
-            document.getElementById('heroUsername').className = `font-bold text-xl tracking-wide ${glowUser ? 'glow-username-active' : ''}`;
-
-            const userEffect = document.getElementById('custUserEffect').value;
-            if (userEffect === 'chromatic') document.getElementById('heroUsername').classList.add('effect-chromatic');
-            else document.getElementById('heroUsername').classList.remove('effect-chromatic');
-        }
-
         async function saveFullProfileSettings() {
             if (!CURRENT_USER) return;
+            const selectedIconBadges = Array.from(document.querySelectorAll('input[name="iconBadgeCheck"]:checked')).map(cb => cb.value);
+
             const payload = {
                 userId: CURRENT_USER.id,
                 username: document.getElementById('accountHandleField').value.trim() || CURRENT_USER.username,
@@ -1261,19 +1273,18 @@
                 audio: document.getElementById('custAudio').value.trim(),
                 avatar: document.getElementById('custAvatar').value.trim(),
                 cursor: document.getElementById('custCursor').value.trim(),
+                trackTitle: document.getElementById('custTrackTitle').value.trim(),
+                trackArtist: document.getElementById('custTrackArtist').value.trim(),
+                trackCover: document.getElementById('custTrackCover').value.trim(),
+                joinedDate: document.getElementById('custJoinedDate').value.trim(),
+                subBio: document.getElementById('custSubBio').value.trim(),
                 description: document.getElementById('custBioText').value.trim(),
                 location: document.getElementById('custLocationText').value.trim(),
-                opacity: document.getElementById('custOpacityRange').value,
-                blur: document.getElementById('custBlurRange').value,
                 bgEffect: document.getElementById('custBgEffect').value,
                 userEffect: document.getElementById('custUserEffect').value,
                 glowUsername: document.getElementById('glowUserToggle').checked,
                 glowSocials: document.getElementById('glowSocialsToggle').checked,
-                glowBadges: document.getElementById('glowBadgesToggle').checked,
-                accentColor: document.getElementById('custAccentColor').value,
-                textColor: document.getElementById('custTextColor').value,
-                cardBgColor: document.getElementById('custCardBgColor').value,
-                iconColor: document.getElementById('custIconColor').value,
+                iconBadges: selectedIconBadges,
                 customTabs: CURRENT_CUSTOM_TABS
             };
 
@@ -1283,7 +1294,7 @@
                 body: JSON.stringify(payload)
             });
 
-            if (res.ok) alert('Profile Settings & Tabs Saved Successfully!');
+            if (res.ok) alert('Profile Settings, Tabs, & Assets Saved Successfully!');
             else alert('Error saving profile settings.');
         }
 
@@ -1367,6 +1378,7 @@
             } catch(e) {}
         }
 
+        // Demo Submission via Direct Base64 Media Upload
         document.getElementById('automatedSubmitForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -1376,38 +1388,74 @@
             btn.innerText = 'UPLOADING TO SECURE STORAGE...';
             btn.disabled = true;
 
-            try {
-                const sData = await (await fetch('https://api.gofile.io/servers')).json();
-                const formData = new FormData();
-                formData.append('file', file);
-                const upData = await (await fetch(`https://${sData.data.servers[0].name}.gofile.io/contents/uploadfile`, { method: 'POST', body: formData })).json();
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                try {
+                    const upRes = await fetch('/api/master?action=upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fileData: evt.target.result,
+                            fileName: file.name
+                        })
+                    });
+                    const upData = await upRes.json();
 
-                const subRes = await fetch('/api/master?action=submitdemo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: document.getElementById('track_title').value.trim(),
-                        artist: document.getElementById('artist').value.trim(),
-                        email: document.getElementById('email').value.trim(),
-                        fileUrl: upData.data.downloadPage
-                    })
-                });
+                    if (!upData.success || !upData.url) throw new Error("Upload failed");
 
-                if (subRes.ok) {
-                    const result = await subRes.json();
-                    document.getElementById('displaySubmissionId').textContent = result.submissionId;
-                    document.getElementById('submissionResultBox').classList.remove('hidden');
-                    btn.innerText = 'SUCCESS';
+                    const subRes = await fetch('/api/master?action=submitdemo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: document.getElementById('track_title').value.trim(),
+                            artist: document.getElementById('artist').value.trim(),
+                            email: document.getElementById('email').value.trim(),
+                            fileUrl: upData.url
+                        })
+                    });
+
+                    if (subRes.ok) {
+                        const result = await subRes.json();
+                        document.getElementById('displaySubmissionId').textContent = result.submissionId;
+                        document.getElementById('submissionResultBox').classList.remove('hidden');
+                        btn.innerText = 'SUCCESS';
+                    }
+                } catch(err) {
+                    btn.innerText = 'FAILED TO SUBMIT';
+                    alert("Submission error: " + err.message);
                 }
-            } catch(err) {
-                btn.innerText = 'FAILED TO SUBMIT';
-            }
+            };
+            reader.readAsDataURL(file);
         });
 
         document.getElementById('copyIdBtn')?.addEventListener('click', function() {
             navigator.clipboard.writeText(document.getElementById('displaySubmissionId').textContent);
             this.textContent = 'COPIED!';
             setTimeout(() => this.textContent = 'Copy ID', 2000);
+        });
+
+        // Admin Event Handlers
+        document.getElementById('adminBadgeForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const userId = document.getElementById('badgeTargetUserId').value.trim();
+            const action = document.getElementById('badgeSelectAction').value;
+            const badge = document.getElementById('badgeNameSelect').value;
+            const statusDiv = document.getElementById('adminBadgeStatus');
+
+            statusDiv.textContent = 'Updating badge...';
+
+            const res = await fetch('/api/master?action=profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, action, badge })
+            });
+
+            if (res.ok) {
+                statusDiv.textContent = `Success: ${badge} successfully updated!`;
+                this.reset();
+            } else {
+                statusDiv.textContent = 'Error updating badge in datastore.';
+            }
         });
 
         async function saveProfileHandle() {
@@ -1430,6 +1478,112 @@
                 loadProfileFromDatastore();
             }
         }
+
+        document.getElementById('adminSearchBtn')?.addEventListener('click', async () => {
+            const id = document.getElementById('adminSearchInput').value.trim();
+            const out = document.getElementById('adminSearchResult');
+            if (!id) return;
+            out.textContent = "Searching...";
+            const res = await fetch(`/api/master?action=adminsearch&id=${encodeURIComponent(id)}`);
+            if (res.ok) {
+                const d = await res.json();
+                out.innerHTML = `<strong>ID:</strong> ${escapeHtml(d.submissionId)}<br><strong>Title:</strong> ${escapeHtml(d.title)}<br><strong>Artist:</strong> ${escapeHtml(d.artist)}<br><strong>Email:</strong> ${escapeHtml(d.email)}<br><strong>Audio:</strong> <a href="${escapeHtml(d.fileLink)}" target="_blank" class="text-green-400 underline">Direct File Link</a>`;
+            } else {
+                out.textContent = "Submission ID not found.";
+            }
+        });
+
+        document.getElementById('addReleaseForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const spotify = document.getElementById('releaseSpotify').value.trim();
+            const artist = document.getElementById('releaseArtist').value.trim();
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'catalog', item: { spotify, artist } })
+            });
+            if (res.ok) {
+                alert("Release published!");
+                this.reset();
+                loadReleasesAndArtists();
+            }
+        });
+
+        document.getElementById('addArtistForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const spotify = document.getElementById('artistSpotify').value.trim();
+            const name = document.getElementById('artistName').value.trim();
+            const listeners = document.getElementById('artistListeners').value.trim();
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'artists', item: { spotify, name, listeners } })
+            });
+            if (res.ok) {
+                alert("Artist added!");
+                this.reset();
+                loadReleasesAndArtists();
+            }
+        });
+
+        document.getElementById('discordModForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const userId = document.getElementById('modUserId').value.trim();
+            const modAction = document.getElementById('modAction').value;
+            const reason = document.getElementById('modReason').value.trim();
+            const out = document.getElementById('modOutputBox');
+            out.classList.add('hidden');
+
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'moderate', command: 'moderate', modAction, userId, reason, duration: 300 })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                if (modAction === 'warnings') {
+                    out.classList.remove('hidden');
+                    out.innerHTML = `<strong>Warnings:</strong><br>${(data.warnings || []).map(w => typeof w === 'string' ? escapeHtml(w) : escapeHtml(w.reason)).join('<br>') || '0 warnings'}`;
+                } else {
+                    alert(`Action ${modAction} executed.`);
+                    this.reset();
+                }
+            } else {
+                alert("Action failed.");
+            }
+        });
+
+        document.getElementById('discordPurgeForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const channelId = document.getElementById('purgeChannelId').value.trim();
+            const count = document.getElementById('purgeCount').value;
+
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'masterbot', command: 'purge', channelId, count })
+            });
+            if (res.ok) {
+                alert(`Purged ${count} messages.`);
+                this.reset();
+            } else {
+                alert("Purge failed.");
+            }
+        });
+
+        document.getElementById('botNickForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const botNick = document.getElementById('botNickInput').value.trim();
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'masterbot', command: 'botNick', botNick })
+            });
+            if (res.ok) {
+                alert("Bot nickname updated!");
+                this.reset();
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             init();
