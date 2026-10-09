@@ -311,13 +311,13 @@
                 </div>
 
                 <div class="lg:col-span-5 flex justify-center">
-                    <div class="w-full max-w-sm border border-[#333] bg-black/85 backdrop-blur-md p-6 rounded-2xl relative shadow-2xl transition-all">
+                    <div id="heroCardPreview" class="w-full max-w-sm border border-[#333] bg-black/85 backdrop-blur-md p-6 rounded-2xl relative shadow-2xl transition-all">
                         <div class="flex flex-col items-center text-center">
                             <div class="w-24 h-24 rounded-full border-2 border-white/20 mb-3 overflow-hidden relative">
-                                <img src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
+                                <img src="https://cdn.discordapp.com/embed/avatars/0.png" id="heroPfp" class="w-full h-full object-cover">
                             </div>
-                            <h4 class="font-bold text-xl text-white tracking-wide">wn3bula</h4>
-                            <p class="text-xs text-gray-400 mt-1 font-mono">D3LTA OWNER / FREAKYY</p>
+                            <h4 id="heroUsername" class="font-bold text-xl text-white tracking-wide">Creator</h4>
+                            <p id="heroBio" class="text-xs text-gray-400 mt-1 font-mono">Underground sound designer</p>
                         </div>
                     </div>
                 </div>
@@ -382,7 +382,7 @@
         </div>
     </section>
 
-    <!-- Submit Demo Section (Updated: No Gofile) -->
+    <!-- Submit Demo Section -->
     <section id="submit" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
             <div class="lg:col-span-4 fade-up">
@@ -626,14 +626,14 @@
                     </button>
                 </div>
 
-                <!-- Assets Uploader -->
+                <!-- Assets Uploader (Direct Multi-CDN Streaming Uploader) -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Assets Uploader</h3>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="border border-[#222] bg-[#080808] p-4 text-center">
                             <i class="fa-solid fa-image text-gray-500 text-xl mb-2"></i>
                             <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Background (Video/Img)</span>
-                            <input type="text" id="custBackground" class="clean-input text-xs w-full pb-2 mb-2" placeholder="MP4 / GIF / URL">
+                            <input type="text" id="custBackground" class="clean-input text-xs w-full pb-2 mb-2" placeholder="MP4 / GIF / Direct URL">
                             <input type="file" id="fileBg" accept="image/*,video/mp4,video/webm" class="hidden" onchange="uploadAssetFile(this, 'custBackground')">
                             <button onclick="document.getElementById('fileBg').click()" class="border border-[#333] hover:border-white px-3 py-1 text-[9px] font-mono uppercase text-gray-400 hover:text-white">Upload File</button>
                         </div>
@@ -667,11 +667,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Title</label>
-                            <input type="text" id="custTrackTitle" class="clean-input text-xs w-full pb-2" placeholder="VOLTA">
+                            <input type="text" id="custTrackTitle" class="clean-input text-xs w-full pb-2" placeholder="Your Track Name">
                         </div>
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Artist</label>
-                            <input type="text" id="custTrackArtist" class="clean-input text-xs w-full pb-2" placeholder="WN3bula">
+                            <input type="text" id="custTrackArtist" class="clean-input text-xs w-full pb-2" placeholder="Your Artist Name">
                         </div>
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Cover Image URL</label>
@@ -684,32 +684,32 @@
                     </div>
                 </div>
 
-                <!-- Identity & Sub-bios -->
+                <!-- Identity Details (Sub-bio, Location, Joined Date, Discord Tag) -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Identity & Bio Details</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Tagline (Uppercase)</label>
-                            <input type="text" id="custBioText" class="clean-input text-xs w-full pb-2" placeholder="D3LTA OWNER / FREAKYY">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Tagline</label>
+                            <input type="text" id="custBioText" class="clean-input text-xs w-full pb-2" placeholder="Enter your tagline">
                         </div>
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Sub-Bio</label>
-                            <input type="text" id="custSubBio" class="clean-input text-xs w-full pb-2" placeholder="me nebula">
+                            <input type="text" id="custSubBio" class="clean-input text-xs w-full pb-2" placeholder="Enter secondary bio">
                         </div>
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Location</label>
-                            <input type="text" id="custLocationText" class="clean-input text-xs w-full pb-2" placeholder="Austria">
+                            <input type="text" id="custLocationText" class="clean-input text-xs w-full pb-2" placeholder="Enter location">
                         </div>
                         <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Joined Date Text</label>
-                            <input type="text" id="custJoinedDate" class="clean-input text-xs w-full pb-2" placeholder="Joined Oct 2025">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Discord Tag / Username</label>
+                            <input type="text" id="custDiscordTag" class="clean-input text-xs w-full pb-2" placeholder="Your Discord handle">
                         </div>
                     </div>
                 </div>
 
                 <!-- Icon Badges Selection -->
                 <div class="border border-[#222] bg-[#050505] p-6">
-                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-4 border-b border-[#222] pb-3">Icon Badges (wn3bula Style)</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-4 border-b border-[#222] pb-3">Icon Badges</h3>
                     <div class="flex flex-wrap gap-4 text-xs font-mono">
                         <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
                             <input type="checkbox" name="iconBadgeCheck" value="crown" class="accent-white"> 👑 Crown
@@ -802,7 +802,7 @@
                     <div class="border border-[#222] bg-[#080808] p-6">
                         <span class="text-[10px] font-mono px-2 py-0.5 bg-purple-900/40 text-purple-300 border border-purple-700/50 uppercase">v1.0.0 • PRODUCTION</span>
                         <h4 class="font-bold text-white mt-2 flex items-center gap-2"><i class="fa-solid fa-code"></i> Platform Launch</h4>
-                        <p class="text-xs text-gray-400 mt-1">Full Upstash Redis database persistence, direct proxy file uploading, dynamic tabs, and wn3bula aesthetic activated.</p>
+                        <p class="text-xs text-gray-400 mt-1">Full Upstash Redis persistence, direct stream media uploading, dynamic tabs, and custom bio card activated.</p>
                     </div>
                 </div>
             </div>
@@ -925,10 +925,7 @@
         let ARTISTS = [];
 
         let CURRENT_CUSTOM_TABS = [
-            { title: 'Main', content: 'D3LTA OWNER / FREAKYY\nUnderground sound collective.' },
-            { title: 'FAV ANIMES', content: '• Tokyo Ghoul\n• Evangelion\n• Lain' },
-            { title: 'SOCIALS', content: 'Check verified social pills above.' },
-            { title: 'Priv Info', content: 'DAW: FL Studio 21 • Hardware: Focusrite' }
+            { title: 'Main', content: 'Welcome to my official profile page.' }
         ];
 
         function escapeHtml(val) {
@@ -996,7 +993,7 @@
             if (tabId === 'customize') renderTabsEditor();
         }
 
-        // Direct Proxy File Upload (Base64 -> /api/master?action=upload)
+        // Direct Multi-Provider Client-Side Upload (No 4.5MB Vercel Limits & Full Audio Range Streaming)
         async function uploadAssetFile(input, targetInputId) {
             const file = input.files[0];
             if (!file) return;
@@ -1005,33 +1002,77 @@
             const originalText = btn ? btn.textContent : "Upload File";
             if (btn) btn.textContent = "Uploading...";
 
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const res = await fetch('/api/master?action=upload', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            fileData: e.target.result,
-                            fileName: file.name
-                        })
-                    });
+            try {
+                let uploadedUrl = null;
 
-                    const data = await res.json();
-                    if (data.success && data.url) {
-                        document.getElementById(targetInputId).value = data.url;
-                        if (btn) btn.textContent = "Uploaded!";
-                    } else {
-                        alert("Upload failed: " + (data.error || "Server error"));
-                        if (btn) btn.textContent = "Failed";
+                // Provider 1: qu.ax (Open developer API, supports video/audio/images up to 256MB)
+                try {
+                    const fd = new FormData();
+                    fd.append('files[]', file);
+                    const qRes = await fetch('https://qu.ax/api/upload', { method: 'POST', body: fd });
+                    const qText = await qRes.text();
+                    if (qText.startsWith('{')) {
+                        const qData = JSON.parse(qText);
+                        if (qData.success && qData.files && qData.files[0]?.url) {
+                            uploadedUrl = qData.files[0].url;
+                        }
                     }
-                } catch(err) {
-                    alert("Upload failed: " + err.message);
+                } catch(e) {}
+
+                // Provider 2: pomf2.lain.la fallback
+                if (!uploadedUrl) {
+                    try {
+                        const fd = new FormData();
+                        fd.append('files[]', file);
+                        const pRes = await fetch('https://pomf2.lain.la/upload.php', { method: 'POST', body: fd });
+                        const pText = await pRes.text();
+                        if (pText.startsWith('{')) {
+                            const pData = JSON.parse(pText);
+                            if (pData.success && pData.files && pData.files[0]?.url) {
+                                uploadedUrl = pData.files[0].url;
+                            }
+                        }
+                    } catch(e) {}
+                }
+
+                // Provider 3: tmpfiles.org direct stream fallback
+                if (!uploadedUrl) {
+                    try {
+                        const fd = new FormData();
+                        fd.append('file', file);
+                        const tRes = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: fd });
+                        const tText = await tRes.text();
+                        if (tText.startsWith('{')) {
+                            const tData = JSON.parse(tText);
+                            if (tData.data?.url) {
+                                uploadedUrl = tData.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                            }
+                        }
+                    } catch(e) {}
+                }
+
+                if (uploadedUrl) {
+                    document.getElementById(targetInputId).value = uploadedUrl;
+
+                    // Automatically populate track metadata from audio file
+                    if (targetInputId === 'custAudio') {
+                        const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+                        const titleField = document.getElementById('custTrackTitle');
+                        const artistField = document.getElementById('custTrackArtist');
+                        if (titleField && !titleField.value) titleField.value = cleanName;
+                        if (artistField && !artistField.value && CURRENT_USER) artistField.value = CURRENT_USER.username;
+                    }
+
+                    if (btn) btn.textContent = "Uploaded!";
+                } else {
+                    alert("Upload services are busy. Please paste a direct streamable link into the input.");
                     if (btn) btn.textContent = "Failed";
                 }
-                setTimeout(() => { if (btn) btn.textContent = originalText; }, 2500);
-            };
-            reader.readAsDataURL(file);
+            } catch(err) {
+                alert("Upload failed: " + err.message);
+                if (btn) btn.textContent = "Failed";
+            }
+            setTimeout(() => { if (btn) btn.textContent = originalText; }, 2500);
         }
 
         // Dynamic Custom Tabs Editor
@@ -1103,10 +1144,10 @@
                 trackTitle: document.getElementById('custTrackTitle').value,
                 trackArtist: document.getElementById('custTrackArtist').value,
                 trackCover: document.getElementById('custTrackCover').value,
-                joinedDate: document.getElementById('custJoinedDate').value,
-                subBio: document.getElementById('custSubBio').value,
                 description: document.getElementById('custBioText').value,
+                subBio: document.getElementById('custSubBio').value,
                 location: document.getElementById('custLocationText').value,
+                discordTag: document.getElementById('custDiscordTag').value,
                 bgEffect: document.getElementById('custBgEffect').value,
                 userEffect: document.getElementById('custUserEffect').value,
                 iconBadges: selectedIconBadges,
@@ -1189,10 +1230,10 @@
                 if (c.trackTitle) document.getElementById('custTrackTitle').value = c.trackTitle;
                 if (c.trackArtist) document.getElementById('custTrackArtist').value = c.trackArtist;
                 if (c.trackCover) document.getElementById('custTrackCover').value = c.trackCover;
-                if (c.joinedDate) document.getElementById('custJoinedDate').value = c.joinedDate;
                 if (c.subBio) document.getElementById('custSubBio').value = c.subBio;
                 if (c.description) document.getElementById('custBioText').value = c.description;
                 if (c.location) document.getElementById('custLocationText').value = c.location;
+                if (c.discordTag) document.getElementById('custDiscordTag').value = c.discordTag;
                 if (c.bgEffect) document.getElementById('custBgEffect').value = c.bgEffect;
                 if (c.userEffect) document.getElementById('custUserEffect').value = c.userEffect;
 
@@ -1238,10 +1279,10 @@
                     document.getElementById('custTrackTitle').value = data.trackTitle || '';
                     document.getElementById('custTrackArtist').value = data.trackArtist || '';
                     document.getElementById('custTrackCover').value = data.trackCover || '';
-                    document.getElementById('custJoinedDate').value = data.joinedDate || '';
                     document.getElementById('custSubBio').value = data.subBio || '';
                     document.getElementById('custBioText').value = data.description || '';
                     document.getElementById('custLocationText').value = data.location || '';
+                    document.getElementById('custDiscordTag').value = data.discordTag || '';
 
                     document.getElementById('custBgEffect').value = data.bgEffect || 'none';
                     document.getElementById('custUserEffect').value = data.userEffect || 'none';
@@ -1266,20 +1307,24 @@
             if (!CURRENT_USER) return;
             const selectedIconBadges = Array.from(document.querySelectorAll('input[name="iconBadgeCheck"]:checked')).map(cb => cb.value);
 
+            // Default avatar automatically to user's real Discord avatar if empty
+            const enteredAvatar = document.getElementById('custAvatar').value.trim();
+            const resolvedAvatar = enteredAvatar || (CURRENT_USER.avatar ? `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png');
+
             const payload = {
                 userId: CURRENT_USER.id,
                 username: document.getElementById('accountHandleField').value.trim() || CURRENT_USER.username,
                 background: document.getElementById('custBackground').value.trim(),
                 audio: document.getElementById('custAudio').value.trim(),
-                avatar: document.getElementById('custAvatar').value.trim(),
+                avatar: resolvedAvatar,
                 cursor: document.getElementById('custCursor').value.trim(),
-                trackTitle: document.getElementById('custTrackTitle').value.trim(),
-                trackArtist: document.getElementById('custTrackArtist').value.trim(),
-                trackCover: document.getElementById('custTrackCover').value.trim(),
-                joinedDate: document.getElementById('custJoinedDate').value.trim(),
+                trackTitle: document.getElementById('custTrackTitle').value.trim() || "Audio Track",
+                trackArtist: document.getElementById('custTrackArtist').value.trim() || CURRENT_USER.username,
+                trackCover: document.getElementById('custTrackCover').value.trim() || resolvedAvatar,
                 subBio: document.getElementById('custSubBio').value.trim(),
                 description: document.getElementById('custBioText').value.trim(),
                 location: document.getElementById('custLocationText').value.trim(),
+                discordTag: document.getElementById('custDiscordTag').value.trim() || CURRENT_USER.username,
                 bgEffect: document.getElementById('custBgEffect').value,
                 userEffect: document.getElementById('custUserEffect').value,
                 glowUsername: document.getElementById('glowUserToggle').checked,
@@ -1321,7 +1366,7 @@
                         <div class="border border-[#222] bg-[#080808] p-4 flex items-center justify-between hover:border-white transition">
                             <div class="flex items-center gap-4">
                                 <span class="font-bold text-gray-400 font-mono w-6">#${item.rank}</span>
-                                <img src="${escapeHtml(item.avatar)}" class="w-8 h-8 rounded-full border border-[#333] object-cover">
+                                <img src="${escapeHtml(item.avatar)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" class="w-8 h-8 rounded-full border border-[#333] object-cover">
                                 <span class="font-bold text-white font-mono">@${escapeHtml(item.handle)}</span>
                             </div>
                             <span class="text-xs font-mono text-gray-400">${item.views.toLocaleString()} views</span>
@@ -1370,7 +1415,7 @@
                     const data = await widgetRes.json();
                     document.getElementById('discord-members').innerHTML = (data.members || []).slice(0, 15).map(m => `
                         <div class="flex items-center gap-3 p-2 hover:bg-[#111] transition">
-                            <img src="${escapeHtml(m.avatar_url)}" class="w-8 h-8 rounded-full border border-[#222]">
+                            <img src="${escapeHtml(m.avatar_url)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" class="w-8 h-8 rounded-full border border-[#222]">
                             <span class="text-xs font-semibold text-gray-300 font-mono">${escapeHtml(m.username)}</span>
                         </div>
                     `).join('');
@@ -1378,7 +1423,7 @@
             } catch(e) {}
         }
 
-        // Demo Submission via Direct Base64 Media Upload
+        // Demo Submission via Direct Upload
         document.getElementById('automatedSubmitForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -1388,44 +1433,45 @@
             btn.innerText = 'UPLOADING TO SECURE STORAGE...';
             btn.disabled = true;
 
-            const reader = new FileReader();
-            reader.onload = async function(evt) {
+            try {
+                let directUrl = null;
                 try {
-                    const upRes = await fetch('/api/master?action=upload', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            fileData: evt.target.result,
-                            fileName: file.name
-                        })
-                    });
-                    const upData = await upRes.json();
+                    const fd = new FormData();
+                    fd.append('files[]', file);
+                    const qRes = await fetch('https://qu.ax/api/upload', { method: 'POST', body: fd });
+                    const qData = await qRes.json();
+                    if (qData.success && qData.files && qData.files[0]?.url) directUrl = qData.files[0].url;
+                } catch(err) {}
 
-                    if (!upData.success || !upData.url) throw new Error("Upload failed");
-
-                    const subRes = await fetch('/api/master?action=submitdemo', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title: document.getElementById('track_title').value.trim(),
-                            artist: document.getElementById('artist').value.trim(),
-                            email: document.getElementById('email').value.trim(),
-                            fileUrl: upData.url
-                        })
-                    });
-
-                    if (subRes.ok) {
-                        const result = await subRes.json();
-                        document.getElementById('displaySubmissionId').textContent = result.submissionId;
-                        document.getElementById('submissionResultBox').classList.remove('hidden');
-                        btn.innerText = 'SUCCESS';
-                    }
-                } catch(err) {
-                    btn.innerText = 'FAILED TO SUBMIT';
-                    alert("Submission error: " + err.message);
+                if (!directUrl) {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    const tRes = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: fd });
+                    const tData = await tRes.json();
+                    if (tData.data?.url) directUrl = tData.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
                 }
-            };
-            reader.readAsDataURL(file);
+
+                const subRes = await fetch('/api/master?action=submitdemo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: document.getElementById('track_title').value.trim(),
+                        artist: document.getElementById('artist').value.trim(),
+                        email: document.getElementById('email').value.trim(),
+                        fileUrl: directUrl || 'Direct Upload Received'
+                    })
+                });
+
+                if (subRes.ok) {
+                    const result = await subRes.json();
+                    document.getElementById('displaySubmissionId').textContent = result.submissionId;
+                    document.getElementById('submissionResultBox').classList.remove('hidden');
+                    btn.innerText = 'SUCCESS';
+                }
+            } catch(err) {
+                btn.innerText = 'FAILED TO SUBMIT';
+                alert("Submission error: " + err.message);
+            }
         });
 
         document.getElementById('copyIdBtn')?.addEventListener('click', function() {
