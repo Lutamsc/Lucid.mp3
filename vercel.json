@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/auth/:action*", "destination": "/api/auth" },
     { "source": "/api/:match*", "destination": "/api/master" },
     { "source": "/@:handle", "destination": "/profile.html?handle=:handle" }
   ]
