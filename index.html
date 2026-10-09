@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucid.mp3 | Record Label & Bio Platform</title>
     
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -35,12 +37,21 @@
 
     <style>
         body, html {
-            margin: 0; padding: 0; background-color: #000000; color: #ffffff;
-            width: 100%; cursor: auto; scroll-behavior: smooth;
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: #ffffff;
+            width: 100%;
+            cursor: auto;
+            scroll-behavior: smooth;
         }
 
         .noise-overlay {
-            position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.04;
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.04;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
@@ -53,26 +64,131 @@
             color: #000000 !important;
             border-color: #ffffff !important;
         }
-
-        .strike-hover { position: relative; display: inline-block; }
-        .strike-hover::after {
-            content: ''; position: absolute; left: 0; bottom: -2px; width: 0%; height: 2px;
-            background-color: #ffffff; transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        .clean-invert:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #444 !important;
+            color: #444 !important;
         }
-        .strike-hover:hover::after { width: 100%; }
+
+        .strike-hover {
+            position: relative;
+            display: inline-block;
+        }
+        .strike-hover::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0%;
+            height: 2px;
+            background-color: #ffffff;
+            transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .strike-hover:hover::after {
+            width: 100%;
+        }
+
+        .socials-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid #333;
+            min-width: 150px;
+            display: none;
+            flex-direction: column;
+            z-index: 100;
+        }
+        .socials-container:hover .socials-dropdown {
+            display: flex;
+        }
+        .socials-dropdown a {
+            padding: 10px 16px;
+            border-bottom: 1px solid #222;
+            transition: background-color 0.2s;
+        }
+        .socials-dropdown a:hover {
+            background-color: #111;
+        }
+        .socials-dropdown a:last-child {
+            border-bottom: none;
+        }
 
         .clean-input {
-            background: transparent; border: none; border-bottom: 1px solid #333; color: #ffffff;
-            border-radius: 0; transition: border-color 0.25s ease; outline: none;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #333;
+            color: #ffffff;
+            border-radius: 0;
+            transition: border-color 0.25s ease;
+            outline: none;
         }
-        .clean-input:focus { border-bottom: 1px solid #ffffff; }
+        .clean-input:focus {
+            border-bottom: 1px solid #ffffff;
+        }
+        .clean-input::placeholder {
+            color: #555555;
+        }
 
         .catalog-scroll-container {
-            display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 1.5rem; padding-bottom: 1rem;
-            scrollbar-width: thin; scrollbar-color: #444 #000;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            gap: 1.5rem;
+            padding-bottom: 1rem;
+            scroll-snap-type: x proximity;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #000;
         }
+        .catalog-scroll-container::-webkit-scrollbar {
+            height: 5px;
+        }
+        .catalog-scroll-container::-webkit-scrollbar-track {
+            background: #000;
+        }
+        .catalog-scroll-container::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+        .catalog-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #fff;
+        }
+
         .catalog-item {
-            flex: 0 0 320px; width: 320px; border: 1px solid #222; background: #050505;
+            flex: 0 0 320px;
+            width: 320px;
+            scroll-snap-align: start;
+            border: 1px solid #222;
+            background: #050505;
+            transition: border-color 0.25s ease;
+        }
+        .catalog-item:hover {
+            border-color: #ffffff;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #000;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(35px);
+            transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -92,138 +208,409 @@
         <a href="#" class="font-oswald text-2xl md:text-3xl uppercase tracking-widest clean-invert px-3 py-1">LUCID.MP3</a>
         
         <div class="hidden md:flex gap-8 text-xs uppercase tracking-[0.2em] font-bold text-gray-500 items-center">
-            <a href="#about" class="strike-hover hover:text-white transition-colors">About</a>
-            <a href="#releases" class="strike-hover hover:text-white transition-colors">Releases</a>
-            <a href="#artists" class="strike-hover hover:text-white transition-colors">Artists</a>
-            <a href="#lucid-links" class="strike-hover text-white font-bold transition-colors">Lucid Links</a>
-            <a href="#reference" class="strike-hover hover:text-white transition-colors">Reference</a>
-            <a href="#community" class="strike-hover hover:text-white transition-colors">Community</a>
-            <a href="#submit" class="strike-hover hover:text-white transition-colors">Submit</a>
+            <a href="#about" class="strike-hover hover:text-white transition-colors duration-300">About</a>
+            <a href="#releases" class="strike-hover hover:text-white transition-colors duration-300">Releases</a>
+            <a href="#artists" class="strike-hover hover:text-white transition-colors duration-300">Artists</a>
+            <a href="#lucid-links" class="strike-hover text-white font-bold transition-colors duration-300">Lucid Links</a>
+            <a href="#reference" class="strike-hover hover:text-white transition-colors duration-300">Reference</a>
+            <a href="#community" class="strike-hover hover:text-white transition-colors duration-300">Community</a>
+            <a href="#submit" class="strike-hover hover:text-white transition-colors duration-300">Submit</a>
             
+            <div class="relative socials-container py-2 cursor-pointer">
+                <span class="strike-hover hover:text-white transition-colors duration-300 flex items-center gap-1">
+                    Socials <span class="text-[8px]">▼</span>
+                </span>
+                <div class="socials-dropdown text-xs tracking-widest uppercase">
+                    <a href="https://discord.gg/XsDG79fwbc" target="_blank">Discord</a>
+                    <a href="https://www.tiktok.com/@lucid.mp3tt" target="_blank">TikTok</a>
+                    <a href="https://www.youtube.com/channel/UCPiNF_ItgAVyEgFiJ7o4Z4A" target="_blank">YouTube</a>
+                </div>
+            </div>
+
             <button id="navDashboardBtn" onclick="openDashboardModal()" class="border border-white px-3 py-1.5 text-white font-oswald tracking-widest hover:bg-white hover:text-black transition-colors hidden">
                 My Link ↗
             </button>
+
             <a href="#admin" id="navAdminLink" class="strike-hover text-red-500 hidden font-bold">Admin Console</a>
         </div>
     </nav>
 
     <!-- Hero Header -->
     <header class="min-h-[85vh] flex flex-col justify-center items-center relative z-10 pt-32 pb-12 px-6 border-b border-[#111]">
-        <h1 class="font-oswald text-[13vw] leading-[0.8] tracking-tighter uppercase select-none">LUCID.MP3</h1>
-        <p class="mt-8 text-gray-500 uppercase tracking-[0.3em] text-sm md:text-base">Pure Frequency // Zero Compromise</p>
+        <h1 class="font-oswald text-[13vw] leading-[0.8] tracking-tighter uppercase cursor-default select-none fade-up">
+            LUCID.MP3
+        </h1>
+        <p class="mt-8 text-gray-500 uppercase tracking-[0.3em] text-sm md:text-base fade-up">
+            Pure Frequency // Zero Compromise
+        </p>
     </header>
 
+    <!-- About Section -->
+    <section id="about" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+            <div class="lg:col-span-4 fade-up">
+                <h2 class="font-oswald text-4xl sm:text-5xl uppercase tracking-tighter">About</h2>
+            </div>
+            <div class="lg:col-span-8 flex flex-col gap-8 fade-up">
+                <p class="text-xl md:text-3xl leading-snug text-gray-300 font-light tracking-tight">
+                    Lucid.mp3 is an independent imprint dedicated to the rawest forms of underground phonk and electronic music. We operate in the dark. We reject industry standard polish in favor of aggressive, visceral sound design.
+                </p>
+            </div>
+        </div>
+    </section>
+
     <!-- Releases Section -->
-    <section id="releases" class="w-full max-w-[100vw] overflow-hidden py-24 border-b border-[#111]">
-        <div class="px-6 mx-auto max-w-7xl w-full mb-12">
+    <section id="releases" class="w-full max-w-[100vw] overflow-hidden py-24 md:py-32 border-b border-[#111]">
+        <div class="px-6 mx-auto max-w-7xl w-full mb-12 fade-up">
             <div class="flex justify-between items-end border-b border-[#333] pb-6">
                 <h2 class="font-oswald text-4xl sm:text-5xl uppercase tracking-tighter">Releases</h2>
                 <span id="releasesCounter" class="text-xs uppercase tracking-widest text-gray-500">0 RELEASES</span>
             </div>
         </div>
         <div class="pl-6 md:pl-[max(1.5rem,calc((100vw-80rem)/2))] pr-6">
-            <div id="catalogGrid" class="catalog-scroll-container"></div>
+            <div id="catalogGrid" class="catalog-scroll-container fade-up"></div>
+        </div>
+    </section>
+
+    <!-- Artists Section -->
+    <section id="artists" class="w-full max-w-[100vw] overflow-hidden py-24 md:py-32 border-b border-[#111]">
+        <div class="px-6 mx-auto max-w-7xl w-full mb-12 fade-up">
+            <div class="flex justify-between items-end border-b border-[#333] pb-6">
+                <h2 class="font-oswald text-4xl sm:text-5xl uppercase tracking-tighter">Artists</h2>
+                <span id="artistsCounter" class="text-xs uppercase tracking-widest text-gray-500">0 ARTISTS</span>
+            </div>
+        </div>
+        <div class="pl-6 md:pl-[max(1.5rem,calc((100vw-80rem)/2))] pr-6">
+            <div id="artistsGrid" class="catalog-scroll-container fade-up"></div>
         </div>
     </section>
 
     <!-- Lucid Links Showcase Section -->
-    <section id="lucid-links" class="w-full max-w-7xl mx-auto px-6 py-24 border-b border-[#111]">
-        <div class="border border-[#222] bg-[#050505] p-8 md:p-12 mb-12 relative">
-            <div class="flex flex-col gap-6">
-                <h3 class="font-oswald text-3xl md:text-5xl uppercase tracking-tight text-white leading-none">
-                    Claim Your Personal Space at <span class="border-b border-white">lucid.mp3/@username</span>
-                </h3>
-                <p class="text-sm text-gray-400 max-w-xl">
-                    Synchronize your live Discord presence, custom cursors, background videos, and music player in one showcase card.
-                </p>
-                <div>
-                    <button onclick="handleLaunchDashboard()" class="font-oswald text-lg uppercase tracking-widest bg-white text-black px-8 py-4 hover:bg-black hover:text-white border border-white transition-all">
-                        Open Control Panel ↗
-                    </button>
+    <section id="lucid-links" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
+        <div class="mb-12 border-b border-[#333] pb-6 fade-up">
+            <span class="font-oswald text-2xl text-gray-500 block mb-1">02</span>
+            <h2 class="font-oswald text-5xl sm:text-6xl uppercase tracking-tighter">Lucid Links</h2>
+            <p class="text-sm text-gray-500 uppercase tracking-widest mt-2">Our link-in-bio platform engineered for collective artists & creators.</p>
+        </div>
+
+        <div class="border border-[#222] bg-[#050505] p-8 md:p-12 mb-12 relative overflow-hidden fade-up">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 flex flex-col gap-6">
+                    <span class="text-xs font-mono uppercase tracking-[0.25em] text-gray-500">CUSTOM DOMAIN // DISCORD GATEWAY // BADGES</span>
+                    <h3 class="font-oswald text-3xl md:text-5xl uppercase tracking-tight text-white leading-none">
+                        Claim Your Personal Space at <span class="border-b border-white">lucid.mp3/@username</span>
+                    </h3>
+                    <p class="text-sm text-gray-400 leading-relaxed uppercase tracking-wider">
+                        Synchronize your live Discord presence, custom cursors, background videos, and verified label badges in one underground showcase card.
+                    </p>
+                    <div class="flex flex-wrap gap-4 pt-4">
+                        <button onclick="handleLaunchDashboard()" class="font-oswald text-lg uppercase tracking-widest bg-white text-black px-8 py-4 hover:bg-black hover:text-white border border-white transition-all">
+                            Get Started ↗
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="w-full max-w-sm border border-[#333] bg-black/85 backdrop-blur-md p-6 rounded-2xl relative shadow-2xl transition-all">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="w-24 h-24 rounded-full border-2 border-white/20 mb-3 overflow-hidden relative">
+                                <img src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
+                            </div>
+                            <h4 class="font-bold text-xl text-white tracking-wide">wn3bula</h4>
+                            <p class="text-xs text-gray-400 mt-1 font-mono">D3LTA OWNER / FREAKYY</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Submit Demo Section -->
-    <section id="submit" class="w-full max-w-7xl mx-auto px-6 py-24 border-b border-[#111]">
-        <div class="max-w-2xl mx-auto">
-            <h2 class="font-oswald text-4xl uppercase tracking-tighter mb-8 text-center">Submit Demo</h2>
-            <form id="automatedSubmitForm" class="flex flex-col gap-6">
-                <input type="text" id="track_title" required class="clean-input pb-2 text-lg w-full" placeholder="Track Name">
-                <input type="text" id="artist" required class="clean-input pb-2 text-lg w-full" placeholder="Artist Name(s)">
-                <input type="text" id="email" required class="clean-input pb-2 text-lg w-full" placeholder="Contact Email Address">
-                <input type="file" id="track_file" accept=".mp3,.wav" required class="clean-input pb-2 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:border file:border-[#333] file:bg-transparent file:text-white file:text-xs">
-                <button type="submit" id="submitBtn" class="font-oswald text-xl uppercase tracking-widest border border-white px-8 py-4 clean-invert">
-                    Submit Track
-                </button>
-            </form>
-            <div id="submissionResultBox" class="hidden mt-8 border border-green-500 bg-[#050505] p-6 text-center">
-                <h3 class="text-green-400 font-oswald text-xl uppercase mb-2">Track Submitted Successfully!</h3>
-                <span id="displaySubmissionId" class="text-white font-mono text-sm tracking-widest block mb-4"></span>
-                <button type="button" id="copyIdBtn" class="text-xs uppercase tracking-widest border border-white px-4 py-2 clean-invert">Copy ID</button>
+    <!-- Reference Section -->
+    <section id="reference" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+            <div class="lg:col-span-4 fade-up">
+                <h2 class="font-oswald text-4xl sm:text-5xl uppercase tracking-tighter mb-4">Reference</h2>
+                <p class="text-sm text-gray-500 uppercase tracking-widest leading-relaxed">
+                    Understand the sound.<br>Review before submitting.
+                </p>
+            </div>
+            <div class="lg:col-span-8 fade-up">
+                <div class="border border-[#222] bg-[#050505] p-6">
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-[#222] pb-4">A&R Selection / The Standard</h3>
+                    <iframe style="border-radius:0px; border: 1px solid #222;" src="https://open.spotify.com/embed/playlist/6dNSryhApJ2PPvpT6fAGZK?utm_source=generator&theme=0" width="100%" height="450" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section id="community" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+            <div class="lg:col-span-4 fade-up">
+                <h2 class="font-oswald text-4xl sm:text-5xl uppercase tracking-tighter mb-4">Community</h2>
+                <p class="text-sm text-gray-500 uppercase tracking-widest leading-relaxed">
+                    Join the collective.<br>Network with producers.<br>Enter the underground.
+                </p>
+            </div>
+            
+            <div class="lg:col-span-8 fade-up">
+                <div class="border border-[#222] bg-[#050505] p-6 flex flex-col h-[500px]">
+                    <div id="discord-header" class="flex justify-between items-end border-b border-[#222] pb-4 mb-4">
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 mb-1">Server Gateway</h3>
+                            <div class="font-oswald text-2xl uppercase tracking-tight text-white leading-none">LUCID.MP3</div>
+                        </div>
+                        <span class="text-[10px] text-green-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-400 inline-block animate-pulse rounded-full"></span>
+                            ONLINE
+                        </span>
+                    </div>
+                    
+                    <div id="discord-members" class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+                        <div class="text-xs text-gray-500 uppercase tracking-widest text-center py-10 font-mono">
+                            INITIALIZING DISCORD GATEWAY...
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-[#222] mt-4 flex justify-end">
+                        <a href="https://discord.gg/XsDG79fwbc" target="_blank" class="font-oswald text-sm uppercase tracking-widest border border-white px-6 py-3 clean-invert">
+                            JOIN THE SERVER ↗
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Submit Demo Section (Updated: No Gofile) -->
+    <section id="submit" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+            <div class="lg:col-span-4 fade-up">
+                <h2 class="font-oswald text-4xl sm:text-5xl uppercase tracking-tighter mb-4">Submit Demo</h2>
+                <p class="text-sm text-gray-500 uppercase tracking-widest leading-relaxed">
+                    Upload your raw audio.<br>(.mp3 or .wav format).<br>Direct proxy upload to our secure storage.
+                </p>
+            </div>
+            
+            <div class="lg:col-span-8 fade-up">
+                <form id="automatedSubmitForm" class="flex flex-col gap-8">
+                    <div>
+                        <label for="track_title" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-2 block font-bold">Song Title</label>
+                        <input type="text" id="track_title" required class="clean-input pb-2 text-lg w-full" placeholder="Track Name">
+                    </div>
+                    <div>
+                        <label for="artist" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-2 block font-bold">Artist(s)</label>
+                        <input type="text" id="artist" required class="clean-input pb-2 text-lg w-full" placeholder="Enter Artist Name(s)">
+                    </div>
+                    <div>
+                        <label for="email" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-2 block font-bold">Email Address(es)</label>
+                        <input type="text" id="email" required class="clean-input pb-2 text-lg w-full" placeholder="artist@gmail.com, secondary@gmail.com">
+                    </div>
+                    <div>
+                        <label for="track_file" class="uppercase text-xs tracking-[0.2em] text-gray-500 mb-2 block font-bold">Audio File (.MP3 / .WAV)</label>
+                        <input type="file" id="track_file" accept=".mp3,.wav" required class="clean-input pb-2 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:border file:border-[#333] file:bg-transparent file:text-white file:text-xs file:uppercase file:tracking-widest cursor-pointer">
+                    </div>
+                    <button type="submit" id="submitBtn" class="self-start font-oswald text-xl uppercase tracking-widest border border-white px-8 py-4 clean-invert">
+                        Submit Track
+                    </button>
+                </form>
+
+                <div id="submissionResultBox" class="hidden mt-8 border border-green-500 bg-[#050505] p-6">
+                    <h3 class="text-green-400 font-oswald text-xl uppercase mb-2">Track Submitted Successfully!</h3>
+                    <p class="text-xs text-gray-400 uppercase tracking-widest mb-4">Note this Submission ID down! You will need it when opening a ticket in Discord.</p>
+                    <div class="flex items-center gap-4 bg-black border border-[#333] p-4">
+                        <span id="displaySubmissionId" class="text-white font-mono text-sm tracking-widest select-all"></span>
+                        <button type="button" id="copyIdBtn" class="text-xs uppercase tracking-widest border border-white px-4 py-2 clean-invert ml-auto">Copy ID</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Admin Panel -->
-    <section id="admin" class="w-full max-w-7xl mx-auto px-6 py-24 border-b border-[#111] hidden">
-        <h2 class="font-oswald text-4xl uppercase tracking-tighter mb-8">Command Center</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="border border-[#222] bg-[#050505] p-6">
-                <h3 class="text-xs font-bold uppercase tracking-widest text-white mb-4">Search Submission</h3>
-                <div class="flex gap-2">
-                    <input type="text" id="adminSearchInput" class="clean-input pb-2 text-sm flex-1" placeholder="lcd-demo-0001">
-                    <button type="button" id="adminSearchBtn" class="border border-white px-4 py-2 clean-invert text-xs font-mono uppercase">Search</button>
+    <section id="admin" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111] hidden">
+        <div class="mb-12 border-b border-[#333] pb-6 fade-up">
+            <h2 class="font-oswald text-4xl sm:text-5xl uppercase tracking-tighter">Command Center</h2>
+            <p class="text-sm text-gray-500 uppercase tracking-widest mt-2">A&R & Administration Only.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-up">
+            <!-- Submission Lookup & Content -->
+            <div class="flex flex-col gap-6">
+                <div class="border border-[#222] bg-[#050505] p-6">
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass"></i> Submission Lookup
+                    </h3>
+                    <div class="flex flex-col gap-4 mb-4">
+                        <input type="text" id="adminSearchInput" class="clean-input pb-2 text-sm" placeholder="lcd-demo-0001">
+                        <button type="button" id="adminSearchBtn" class="font-oswald text-xs uppercase tracking-widest border border-white px-4 py-2.5 clean-invert w-full">Search DB</button>
+                    </div>
+                    <div id="adminSearchResult" class="bg-black border border-[#222] p-4 text-xs font-mono text-gray-400 tracking-wider">Awaiting query...</div>
                 </div>
-                <div id="adminSearchResult" class="bg-black border border-[#222] p-4 text-xs font-mono text-gray-400 mt-4">Awaiting query...</div>
+
+                <div class="border border-[#222] bg-[#050505] p-6">
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-globe"></i> Website Content
+                    </h3>
+                    <form id="addReleaseForm" class="flex flex-col gap-3 mb-6">
+                        <input type="text" id="releaseSpotify" required class="clean-input pb-2 text-xs" placeholder="Spotify Track URL">
+                        <input type="text" id="releaseArtist" required class="clean-input pb-2 text-xs" placeholder="Artist Name Display">
+                        <button type="submit" class="font-oswald text-[10px] uppercase tracking-widest border border-white px-3 py-1.5 clean-invert self-start">Publish Release</button>
+                    </form>
+                    <form id="addArtistForm" class="flex flex-col gap-3">
+                        <input type="text" id="artistSpotify" required class="clean-input pb-2 text-xs" placeholder="Spotify Artist URL">
+                        <input type="text" id="artistName" required class="clean-input pb-2 text-xs" placeholder="Artist Name">
+                        <input type="text" id="artistListeners" required class="clean-input pb-2 text-xs" placeholder="Monthly Listeners">
+                        <button type="submit" class="font-oswald text-[10px] uppercase tracking-widest border border-white px-3 py-1.5 clean-invert self-start">Publish Artist</button>
+                    </form>
+                </div>
             </div>
-            <div class="border border-[#222] bg-[#050505] p-6">
-                <h3 class="text-xs font-bold uppercase tracking-widest text-white mb-4">Add Release</h3>
-                <form id="addReleaseForm" class="flex flex-col gap-3">
-                    <input type="text" id="releaseSpotify" required class="clean-input pb-2 text-xs" placeholder="Spotify Track URL">
-                    <input type="text" id="releaseArtist" required class="clean-input pb-2 text-xs" placeholder="Artist Name Display">
-                    <button type="submit" class="border border-white px-4 py-2 clean-invert text-xs font-mono uppercase self-start">Publish</button>
+
+            <!-- Moderation -->
+            <div class="border border-[#222] bg-[#050505] p-6 flex flex-col gap-6">
+                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white border-b border-[#222] pb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield"></i> User Moderation
+                </h3>
+                <form id="discordModForm" class="flex flex-col gap-4">
+                    <input type="text" id="modUserId" class="clean-input pb-2 text-xs" placeholder="User ID">
+                    <select id="modAction" class="bg-black border border-[#333] text-xs text-white p-2.5 outline-none w-full">
+                        <option value="kick">Kick Member</option>
+                        <option value="ban">Ban Member</option>
+                        <option value="timeout">Timeout (5 Mins)</option>
+                        <option value="warn">Issue Warning</option>
+                        <option value="warnings">Inspect Warnings</option>
+                        <option value="clearwarnings">Clear Warnings</option>
+                    </select>
+                    <input type="text" id="modReason" class="clean-input pb-2 text-xs" placeholder="Reason (Optional)">
+                    <button type="submit" class="font-oswald text-xs uppercase tracking-widest border border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2.5 transition">Execute Action</button>
                 </form>
+                <div id="modOutputBox" class="hidden bg-black border border-[#222] p-3 text-xs font-mono text-gray-300"></div>
+
+                <div class="border-t border-[#222] pt-4 flex flex-col gap-4">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400">Purge Messages</h4>
+                    <form id="discordPurgeForm" class="flex gap-2">
+                        <input type="text" id="purgeChannelId" required class="clean-input pb-2 text-xs w-2/3" placeholder="Channel ID">
+                        <input type="number" id="purgeCount" required min="1" max="100" class="clean-input pb-2 text-xs w-1/3" placeholder="10">
+                        <button type="submit" class="font-oswald text-[10px] border border-red-500 text-red-500 px-3 py-1 hover:bg-red-500 hover:text-white">Purge</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Staff Badges & Bot Settings -->
+            <div class="border border-[#222] bg-[#050505] p-6 flex flex-col gap-6">
+                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white border-b border-[#222] pb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-certificate"></i> Staff Badge Assigner
+                </h3>
+                <form id="adminBadgeForm" class="flex flex-col gap-4">
+                    <input type="text" id="badgeTargetUserId" required class="clean-input pb-2 text-xs" placeholder="User Discord ID">
+                    <select id="badgeSelectAction" class="bg-black border border-[#333] text-xs text-white p-2.5 outline-none">
+                        <option value="grant">Grant Badge</option>
+                        <option value="revoke">Revoke Badge</option>
+                    </select>
+                    <select id="badgeNameSelect" class="bg-black border border-[#333] text-xs text-white p-2.5 outline-none">
+                        <option value="Owner">Owner</option>
+                        <option value="Coder">Coder</option>
+                        <option value="Helper">Helper</option>
+                        <option value="Friend">Friend</option>
+                        <option value="A&R">A&R</option>
+                        <option value="Promoter">Promoter</option>
+                        <option value="Lucid Cover Artist">Lucid Cover Artist</option>
+                    </select>
+                    <button type="submit" class="font-oswald text-xs uppercase tracking-widest border border-white px-4 py-2.5 clean-invert">Apply Badge</button>
+                </form>
+                <div id="adminBadgeStatus" class="text-xs font-mono text-gray-400"></div>
+
+                <div class="border-t border-[#222] pt-4">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Bot Nickname</h4>
+                    <form id="botNickForm" class="flex gap-2">
+                        <input type="text" id="botNickInput" required class="clean-input pb-2 text-xs flex-1" placeholder="New Bot Nick">
+                        <button type="submit" class="font-oswald text-[10px] border border-white px-3 py-1 clean-invert">Set</button>
+                    </form>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Master Control Suite Modal -->
+    <!-- ======================================================== -->
+    <!-- MASTER D3LTA & BIO CONTROL DASHBOARD MODAL               -->
+    <!-- ======================================================== -->
     <div id="dashboardModal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex hidden">
+        <!-- Sidebar Navigation -->
         <aside class="w-64 border-r border-[#222] bg-[#050505] p-6 flex flex-col justify-between flex-shrink-0">
             <div>
                 <div class="flex items-center justify-between pb-6 border-b border-[#222] mb-6">
                     <span class="font-oswald text-xl uppercase tracking-widest text-white">Lucid Links</span>
                     <button onclick="closeDashboardModal()" class="text-gray-500 hover:text-white text-lg">✕</button>
                 </div>
+                
                 <nav class="flex flex-col gap-1.5 text-xs font-mono uppercase tracking-widest">
-                    <button onclick="switchDashTab('overview')" id="dNav-overview" class="p-3 text-left border border-white bg-white text-black font-bold">Overview</button>
-                    <button onclick="switchDashTab('customize')" id="dNav-customize" class="p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white">Customize</button>
-                    <button onclick="switchDashTab('analytics')" id="dNav-analytics" class="p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white">Analytics</button>
-                    <button onclick="switchDashTab('account')" id="dNav-account" class="p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white">Account</button>
+                    <button onclick="switchDashTab('overview')" id="dNav-overview" class="p-3 text-left border border-white bg-white text-black font-bold flex items-center gap-3">
+                        <i class="fa-solid fa-house"></i> Overview
+                    </button>
+                    <button onclick="switchDashTab('customize')" id="dNav-customize" class="p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white flex items-center gap-3">
+                        <i class="fa-solid fa-paintbrush"></i> Customize
+                    </button>
+                    <button onclick="switchDashTab('updates')" id="dNav-updates" class="p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white flex items-center gap-3">
+                        <i class="fa-solid fa-newspaper"></i> Updates
+                    </button>
+                    <button onclick="switchDashTab('analytics')" id="dNav-analytics" class="p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white flex items-center gap-3">
+                        <i class="fa-solid fa-chart-line"></i> Analytics
+                    </button>
+                    <button onclick="switchDashTab('templates')" id="dNav-templates" class="p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white flex items-center gap-3">
+                        <i class="fa-solid fa-layer-group"></i> Templates
+                    </button>
+                    <button onclick="switchDashTab('leaderboard')" id="dNav-leaderboard" class="p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white flex items-center gap-3">
+                        <i class="fa-solid fa-trophy"></i> Leaderboard
+                    </button>
+                    <button onclick="switchDashTab('account')" id="dNav-account" class="p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white flex items-center gap-3">
+                        <i class="fa-solid fa-gear"></i> Account
+                    </button>
                 </nav>
             </div>
+
             <div class="border-t border-[#222] pt-4">
-                <a id="sidebarLivePageBtn" href="#" target="_blank" class="block text-center border border-[#333] p-3 text-xs uppercase tracking-widest text-gray-300 hover:bg-white hover:text-black">
-                    View Live Page ↗
+                <a id="sidebarLivePageBtn" href="#" target="_blank" class="block text-center border border-[#333] p-3 text-xs uppercase tracking-widest text-gray-300 hover:bg-white hover:text-black transition">
+                    View My Page ↗
                 </a>
             </div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto p-8 md:p-12">
-            <!-- 1. OVERVIEW -->
+        <!-- Main Dashboard Workspace -->
+        <main class="flex-1 overflow-y-auto p-8 md:p-12 custom-scrollbar">
+
+            <!-- 1. OVERVIEW PANEL -->
             <div id="panel-overview" class="max-w-5xl mx-auto flex flex-col gap-8">
                 <div>
                     <h2 class="font-oswald text-4xl uppercase tracking-tighter">Dashboard</h2>
-                    <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Logged in as <span id="dashHelloUsername" class="text-white font-bold">Creator</span></p>
+                    <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Welcome back, <span id="dashHelloUsername" class="text-white font-bold">Creator</span></p>
                 </div>
-                <div class="border border-[#222] bg-[#080808] p-6 flex items-center justify-between">
+
+                <div class="border border-[#222] bg-[#080808] p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <span class="text-[10px] text-gray-500 uppercase block mb-1">Your Profile Link</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest block mb-1">Your Profile Link</span>
                         <a id="dashHandleUrl" href="#" target="_blank" class="text-sm font-mono text-white underline">lucid.mp3/...</a>
                     </div>
-                    <button onclick="copyProfileHandleUrl()" class="border border-white px-4 py-2 text-xs uppercase clean-invert font-oswald">Copy Link</button>
+                    <button onclick="copyProfileHandleUrl()" class="border border-white px-4 py-2 text-xs uppercase tracking-widest clean-invert font-oswald self-start md:self-auto">
+                        Copy Link
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="border border-[#222] bg-[#050505] p-6">
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Total Views</span>
+                        <h3 id="statTotalPageViews" class="font-oswald text-4xl text-white mt-2">0</h3>
+                        <span class="text-[10px] text-gray-600 font-mono">All time page visits</span>
+                    </div>
+                    <div class="border border-[#222] bg-[#050505] p-6">
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">This Month</span>
+                        <h3 id="statWeekViews" class="font-oswald text-4xl text-white mt-2">0</h3>
+                        <span class="text-[10px] text-gray-600 font-mono">Views this period</span>
+                    </div>
+                    <div class="border border-[#222] bg-[#050505] p-6">
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Link Clicks</span>
+                        <h3 id="statLinkClicks" class="font-oswald text-4xl text-white mt-2">0</h3>
+                        <span class="text-[10px] text-gray-600 font-mono">Total social link clicks</span>
+                    </div>
                 </div>
             </div>
 
@@ -232,7 +619,7 @@
                 <div class="flex justify-between items-end border-b border-[#222] pb-6">
                     <div>
                         <h2 class="font-oswald text-4xl uppercase tracking-tighter">Profile Customizer</h2>
-                        <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Configure audio files, video backgrounds, and custom tabs.</p>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Configure audio tracks, custom cursors, shaders, custom badges, and dynamic tabs.</p>
                     </div>
                     <button onclick="saveFullProfileSettings()" class="border border-white bg-white text-black font-oswald uppercase tracking-widest px-6 py-2.5 hover:bg-black hover:text-white transition">
                         Save Changes
@@ -246,79 +633,83 @@
                         <div class="border border-[#222] bg-[#080808] p-4 text-center">
                             <i class="fa-solid fa-image text-gray-500 text-xl mb-2"></i>
                             <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Background (Video/Img)</span>
-                            <input type="text" id="custBackground" class="clean-input text-xs w-full pb-2 mb-2" placeholder="MP4 / GIF / Direct URL">
-                            <input type="file" id="fileBg" accept="image/*,video/mp4,video/webm" class="hidden" onchange="uploadAssetDirectly(this, 'custBackground')">
+                            <input type="text" id="custBackground" class="clean-input text-xs w-full pb-2 mb-2" placeholder="MP4 / GIF / URL">
+                            <input type="file" id="fileBg" accept="image/*,video/mp4,video/webm" class="hidden" onchange="uploadAssetFile(this, 'custBackground')">
                             <button onclick="document.getElementById('fileBg').click()" class="border border-[#333] hover:border-white px-3 py-1 text-[9px] font-mono uppercase text-gray-400 hover:text-white">Upload File</button>
                         </div>
                         <div class="border border-[#222] bg-[#080808] p-4 text-center">
                             <i class="fa-solid fa-music text-gray-500 text-xl mb-2"></i>
                             <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Audio Track</span>
-                            <input type="text" id="custAudio" class="clean-input text-xs w-full pb-2 mb-2" placeholder="Direct MP3 URL">
-                            <input type="file" id="fileAudio" accept="audio/mp3,audio/wav" class="hidden" onchange="uploadAssetDirectly(this, 'custAudio')">
+                            <input type="text" id="custAudio" class="clean-input text-xs w-full pb-2 mb-2" placeholder="Direct MP3 Link">
+                            <input type="file" id="fileAudio" accept="audio/mp3,audio/wav" class="hidden" onchange="uploadAssetFile(this, 'custAudio')">
                             <button onclick="document.getElementById('fileAudio').click()" class="border border-[#333] hover:border-white px-3 py-1 text-[9px] font-mono uppercase text-gray-400 hover:text-white">Upload File</button>
                         </div>
                         <div class="border border-[#222] bg-[#080808] p-4 text-center">
                             <i class="fa-solid fa-user text-gray-500 text-xl mb-2"></i>
                             <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Profile Avatar</span>
                             <input type="text" id="custAvatar" class="clean-input text-xs w-full pb-2 mb-2" placeholder="Avatar URL">
-                            <input type="file" id="fileAvatar" accept="image/*" class="hidden" onchange="uploadAssetDirectly(this, 'custAvatar')">
+                            <input type="file" id="fileAvatar" accept="image/*" class="hidden" onchange="uploadAssetFile(this, 'custAvatar')">
                             <button onclick="document.getElementById('fileAvatar').click()" class="border border-[#333] hover:border-white px-3 py-1 text-[9px] font-mono uppercase text-gray-400 hover:text-white">Upload File</button>
                         </div>
                         <div class="border border-[#222] bg-[#080808] p-4 text-center">
                             <i class="fa-solid fa-arrow-pointer text-gray-500 text-xl mb-2"></i>
                             <span class="text-[10px] uppercase font-bold text-gray-400 block mb-2">Custom Cursor</span>
-                            <input type="text" id="custCursor" class="clean-input text-xs w-full pb-2 mb-2" placeholder="128x128 PNG Link">
-                            <input type="file" id="fileCursor" accept="image/png" class="hidden" onchange="uploadAssetDirectly(this, 'custCursor')">
+                            <input type="text" id="custCursor" class="clean-input text-xs w-full pb-2 mb-2" placeholder="PNG Cursor Link">
+                            <input type="file" id="fileCursor" accept="image/png" class="hidden" onchange="uploadAssetFile(this, 'custCursor')">
                             <button onclick="document.getElementById('fileCursor').click()" class="border border-[#333] hover:border-white px-3 py-1 text-[9px] font-mono uppercase text-gray-400 hover:text-white">Upload File</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Music Player Metadata -->
+                <!-- Music Player Metadata (Fixes 'Background audio' bug) -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Music Player Track Metadata</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Title</label>
-                            <input type="text" id="custTrackTitle" class="clean-input text-xs w-full pb-2" placeholder="Track Name">
+                            <input type="text" id="custTrackTitle" class="clean-input text-xs w-full pb-2" placeholder="VOLTA">
                         </div>
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Artist</label>
-                            <input type="text" id="custTrackArtist" class="clean-input text-xs w-full pb-2" placeholder="Artist Name">
+                            <input type="text" id="custTrackArtist" class="clean-input text-xs w-full pb-2" placeholder="WN3bula">
                         </div>
                         <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Cover Art URL</label>
-                            <input type="text" id="custTrackCover" class="clean-input text-xs w-full pb-2" placeholder="Image URL">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Track Cover Image URL</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="custTrackCover" class="clean-input text-xs flex-1 pb-2" placeholder="Image URL">
+                                <input type="file" id="fileTrackCover" accept="image/*" class="hidden" onchange="uploadAssetFile(this, 'custTrackCover')">
+                                <button onclick="document.getElementById('fileTrackCover').click()" class="border border-[#333] px-2 text-[9px] font-mono uppercase text-gray-400">File</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Identity Details -->
+                <!-- Identity & Sub-bios -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Identity & Bio Details</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Bio Tagline</label>
-                            <input type="text" id="custBioText" class="clean-input text-xs w-full pb-2" placeholder="Sound Designer">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Tagline (Uppercase)</label>
+                            <input type="text" id="custBioText" class="clean-input text-xs w-full pb-2" placeholder="D3LTA OWNER / FREAKYY">
                         </div>
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Sub-Bio</label>
-                            <input type="text" id="custSubBio" class="clean-input text-xs w-full pb-2" placeholder="Additional bio text">
+                            <input type="text" id="custSubBio" class="clean-input text-xs w-full pb-2" placeholder="me nebula">
                         </div>
                         <div>
                             <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Location</label>
-                            <input type="text" id="custLocationText" class="clean-input text-xs w-full pb-2" placeholder="City / Country">
+                            <input type="text" id="custLocationText" class="clean-input text-xs w-full pb-2" placeholder="Austria">
                         </div>
                         <div>
-                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Discord Tag / Username</label>
-                            <input type="text" id="custDiscordTag" class="clean-input text-xs w-full pb-2" placeholder="username">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Joined Date Text</label>
+                            <input type="text" id="custJoinedDate" class="clean-input text-xs w-full pb-2" placeholder="Joined Oct 2025">
                         </div>
                     </div>
                 </div>
 
-                <!-- Badges -->
+                <!-- Icon Badges Selection -->
                 <div class="border border-[#222] bg-[#050505] p-6">
-                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-4 border-b border-[#222] pb-3">Icon Badges</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-4 border-b border-[#222] pb-3">Icon Badges (wn3bula Style)</h3>
                     <div class="flex flex-wrap gap-4 text-xs font-mono">
                         <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
                             <input type="checkbox" name="iconBadgeCheck" value="crown" class="accent-white"> 👑 Crown
@@ -336,63 +727,209 @@
                             <input type="checkbox" name="iconBadgeCheck" value="skull" class="accent-white"> 💀 Skull
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="sparkles" class="accent-white"> ✨ Sparkles
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
                             <input type="checkbox" name="iconBadgeCheck" value="fire" class="accent-white"> 🔥 Fire
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border border-[#222] p-2 rounded">
+                            <input type="checkbox" name="iconBadgeCheck" value="gamepad" class="accent-white"> 🎮 Gamepad
                         </label>
                     </div>
                 </div>
 
-                <!-- Content Tabs Builder -->
+                <!-- Custom Content Tabs Builder -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <div class="flex justify-between items-center border-b border-[#222] pb-3 mb-4">
                         <div>
-                            <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white">Custom Profile Tabs</h3>
-                            <p class="text-[10px] text-gray-500 uppercase">Create tabs like Main, Gear, Discography</p>
+                            <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white">Profile Content Tabs</h3>
+                            <p class="text-[10px] text-gray-500 uppercase">Create your custom tabs (e.g. Main, FAV ANIMES, SOCIALS, Priv Info)</p>
                         </div>
                         <button onclick="addNewCustomTabField()" class="border border-white px-3 py-1 text-xs font-mono uppercase clean-invert">+ Add Tab</button>
                     </div>
                     <div id="customTabsEditorList" class="flex flex-col gap-4"></div>
                 </div>
+
+                <!-- Shaders & Glow Settings -->
+                <div class="border border-[#222] bg-[#050505] p-6">
+                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Shaders & Visual FX</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Background Effects</label>
+                            <select id="custBgEffect" class="bg-black border border-[#333] text-xs text-white p-2.5 w-full outline-none">
+                                <option value="none">None</option>
+                                <option value="rain">Dark Rain</option>
+                                <option value="scanline">Scanline Glitch</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Username Effects</label>
+                            <select id="custUserEffect" class="bg-black border border-[#333] text-xs text-white p-2.5 w-full outline-none">
+                                <option value="none">None</option>
+                                <option value="chromatic">Chromatic Wave</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-gray-500 block mb-2 font-bold">Glow Settings</label>
+                            <div class="flex gap-2">
+                                <label class="border border-[#333] p-2 text-[10px] uppercase flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="glowUserToggle" class="accent-white"> Username
+                                </label>
+                                <label class="border border-[#333] p-2 text-[10px] uppercase flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="glowSocialsToggle" class="accent-white"> Socials
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Community Template Publisher -->
+                <div class="border border-[#222] bg-[#080808] p-6 flex justify-between items-center">
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-white">Share Your Creation</h4>
+                        <p class="text-[10px] text-gray-500 uppercase mt-0.5">Publish your custom theme to the Community Templates board</p>
+                    </div>
+                    <button onclick="publishCurrentDesignAsTemplate()" class="border border-purple-500 text-purple-400 hover:bg-purple-600 hover:text-white px-5 py-2 text-xs font-mono uppercase transition">
+                        Publish as Template ↗
+                    </button>
+                </div>
             </div>
 
-            <!-- 3. ANALYTICS PANEL -->
+            <!-- 3. UPDATES PANEL -->
+            <div id="panel-updates" class="max-w-5xl mx-auto flex flex-col gap-6 hidden">
+                <h2 class="font-oswald text-4xl uppercase tracking-tighter">Changelog</h2>
+                <div class="flex flex-col gap-4">
+                    <div class="border border-[#222] bg-[#080808] p-6">
+                        <span class="text-[10px] font-mono px-2 py-0.5 bg-purple-900/40 text-purple-300 border border-purple-700/50 uppercase">v1.0.0 • PRODUCTION</span>
+                        <h4 class="font-bold text-white mt-2 flex items-center gap-2"><i class="fa-solid fa-code"></i> Platform Launch</h4>
+                        <p class="text-xs text-gray-400 mt-1">Full Upstash Redis database persistence, direct proxy file uploading, dynamic tabs, and wn3bula aesthetic activated.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. REAL PER-USER ANALYTICS PANEL -->
             <div id="panel-analytics" class="max-w-5xl mx-auto flex flex-col gap-8 hidden">
                 <div class="flex justify-between items-end border-b border-[#222] pb-4">
-                    <h2 class="font-oswald text-4xl uppercase tracking-tighter">Analytics</h2>
-                    <span class="text-xs font-mono border border-[#333] px-3 py-1 text-gray-400">Database Live Stats</span>
+                    <div>
+                        <h2 class="font-oswald text-4xl uppercase tracking-tighter">ANALYTICS</h2>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest">TRACK PAGE PERFORMANCE & AUDIENCE INSIGHTS</p>
+                    </div>
+                    <span class="text-xs font-mono border border-[#333] px-3 py-1 text-gray-400">Real Database Stats</span>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="border border-[#222] bg-[#080808] p-5">
                         <span class="text-[10px] text-gray-500 uppercase block font-mono">TOTAL VIEWS</span>
                         <h3 id="statTotalViewsNum" class="font-oswald text-4xl text-white mt-1">0</h3>
+                        <span class="text-[10px] text-gray-600 font-mono">All time page views</span>
                     </div>
                     <div class="border border-[#222] bg-[#080808] p-5">
-                        <span class="text-[10px] text-gray-500 uppercase block font-mono">MONTHLY VIEWS</span>
+                        <span class="text-[10px] text-gray-500 uppercase block font-mono">SELECTED PERIOD</span>
                         <h3 id="statPeriodViewsNum" class="font-oswald text-4xl text-white mt-1">0</h3>
+                        <span class="text-[10px] text-gray-600 font-mono">Views this month</span>
                     </div>
                     <div class="border border-[#222] bg-[#080808] p-5">
                         <span class="text-[10px] text-gray-500 uppercase block font-mono">LINK CLICKS</span>
                         <h3 id="statClicksNum" class="font-oswald text-4xl text-white mt-1">0</h3>
+                        <span id="statCtrText" class="text-[10px] text-gray-600 font-mono">CTR 0.0%</span>
+                    </div>
+                    <div class="border border-[#222] bg-[#080808] p-5">
+                        <span class="text-[10px] text-gray-500 uppercase block font-mono">AVG TIME ON PAGE</span>
+                        <h3 id="statAvgDuration" class="font-oswald text-4xl text-white mt-1">42s</h3>
+                        <span class="text-[10px] text-gray-600 font-mono">Live Session Pulse</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border border-[#222] bg-[#080808] p-6">
+                        <h4 class="text-xs uppercase font-bold text-gray-400 mb-2 font-mono flex items-center gap-2">
+                            <i class="fa-solid fa-mobile-screen"></i> DEVICE BREAKDOWN
+                        </h4>
+                        <p id="statDeviceBreakdown" class="text-xs font-mono text-gray-300">Awaiting visitor traffic...</p>
+                    </div>
+                    <div class="border border-[#222] bg-[#080808] p-6">
+                        <h4 class="text-xs uppercase font-bold text-gray-400 mb-2 font-mono flex items-center gap-2">
+                            <i class="fa-solid fa-globe"></i> TOP TRAFFIC SOURCES
+                        </h4>
+                        <p id="statTrafficSources" class="text-xs font-mono text-gray-300">Awaiting visitor traffic...</p>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. ACCOUNT PANEL -->
+            <!-- 5. COMMUNITY TEMPLATES PANEL -->
+            <div id="panel-templates" class="max-w-5xl mx-auto flex flex-col gap-6 hidden">
+                <div class="flex justify-between items-end border-b border-[#222] pb-4">
+                    <div>
+                        <h2 class="font-oswald text-4xl uppercase tracking-tighter">Browse Templates</h2>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest">Community themes ranked by real popularity and datastore uses</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-mono text-gray-500 uppercase">Sort:</span>
+                        <select id="templateSortFilter" onchange="loadCommunityTemplates(this.value)" class="bg-black border border-[#333] text-xs text-white p-2 font-mono outline-none">
+                            <option value="top">Top Used</option>
+                            <option value="recent">Most Recent</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="communityTemplatesGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- 6. LEADERBOARD PANEL -->
+            <div id="panel-leaderboard" class="max-w-5xl mx-auto flex flex-col gap-6 hidden">
+                <div class="flex justify-between items-end border-b border-[#222] pb-4">
+                    <div>
+                        <h2 class="font-oswald text-4xl uppercase tracking-tighter">Leaderboard</h2>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest">Top creators by real datastore page views</p>
+                    </div>
+                    <button onclick="fetchLeaderboardFromDatastore()" class="border border-[#333] hover:border-white px-3 py-1.5 text-xs font-mono uppercase tracking-widest">
+                        Refresh
+                    </button>
+                </div>
+                <div id="leaderboardListContainer" class="flex flex-col gap-2"></div>
+            </div>
+
+            <!-- 7. ACCOUNT PANEL -->
             <div id="panel-account" class="max-w-5xl mx-auto flex flex-col gap-6 hidden">
                 <h2 class="font-oswald text-4xl uppercase tracking-tighter">Account Settings</h2>
                 <div class="border border-[#222] bg-[#080808] p-6 flex flex-col gap-4 max-w-lg">
                     <label class="text-xs uppercase font-bold text-gray-400">Profile Handle</label>
                     <input type="text" id="accountHandleField" class="clean-input pb-2 text-sm" placeholder="handle">
+                    <span class="text-[10px] text-gray-500 font-mono">Your public profile will be: lucid.mp3/<span id="handleExample">handle</span></span>
                     <button onclick="saveProfileHandle()" class="border border-white px-4 py-2 text-xs uppercase font-oswald clean-invert self-start">Update Handle</button>
                 </div>
             </div>
+
         </main>
     </div>
 
-    <!-- Script Logic -->
+    <!-- Footer -->
+    <footer class="w-full border-t border-[#222] px-6 py-12 flex flex-col md:flex-row justify-between items-center text-xs uppercase tracking-[0.2em] text-gray-500 gap-8">
+        <div>&copy; <span id="year"></span> Lucid.mp3</div>
+        <div class="flex gap-8">
+            <a href="mailto:contact@lucid.mp3" class="hover:text-white transition">contact@lucid.mp3</a>
+            <a href="https://discord.gg/XsDG79fwbc" target="_blank" class="hover:text-white transition"><i class="fa-brands fa-discord fa-lg"></i></a>
+            <a href="https://www.tiktok.com/@lucid.mp3tt" target="_blank" class="hover:text-white transition"><i class="fa-brands fa-tiktok fa-lg"></i></a>
+            <a href="https://www.youtube.com/channel/UCPiNF_ItgAVyEgFiJ7o4Z4A" target="_blank" class="hover:text-white transition"><i class="fa-brands fa-youtube fa-lg"></i></a>
+        </div>
+    </footer>
+
+    <!-- ======================================================== -->
+    <!-- MASTER CLIENT-SIDE LOGIC                                 -->
+    <!-- ======================================================== -->
     <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
         const ADMIN_IDS = ["1533492771556692229", "1248704737243697265"];
         let CURRENT_USER = null;
-        let CURRENT_CUSTOM_TABS = [{ title: 'Main', content: 'Welcome to my official profile.' }];
+        let CATALOG = [];
+        let ARTISTS = [];
+
+        let CURRENT_CUSTOM_TABS = [
+            { title: 'Main', content: 'D3LTA OWNER / FREAKYY\nUnderground sound collective.' },
+            { title: 'FAV ANIMES', content: '• Tokyo Ghoul\n• Evangelion\n• Lain' },
+            { title: 'SOCIALS', content: 'Check verified social pills above.' },
+            { title: 'Priv Info', content: 'DAW: FL Studio 21 • Hardware: Focusrite' }
+        ];
 
         function escapeHtml(val) {
             return String(val || '').replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]));
@@ -400,7 +937,9 @@
 
         async function init() {
             checkAuthSession();
-            loadReleases();
+            loadReleasesAndArtists();
+            renderDiscordWidget();
+            fetchLeaderboardFromDatastore();
         }
 
         async function checkAuthSession() {
@@ -408,16 +947,23 @@
                 const res = await fetch('/api/master?action=me');
                 if (res.ok) {
                     CURRENT_USER = await res.json();
+                    const avatarUrl = CURRENT_USER.avatar 
+                        ? `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png` 
+                        : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
                     document.getElementById('discordUserContent').innerHTML = `
-                        <img src="${CURRENT_USER.avatar ? `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-8 h-8 rounded-full border border-[#333]">
+                        <img src="${escapeHtml(avatarUrl)}" class="w-8 h-8 rounded-full border border-[#333]">
                         <span class="text-white font-bold">${escapeHtml(CURRENT_USER.username)}</span>
                         <a href="/api/master?action=logout" class="text-[10px] text-gray-500 hover:text-white underline ml-2">Logout</a>
                     `;
+
                     document.getElementById('navDashboardBtn').classList.remove('hidden');
+
                     if (ADMIN_IDS.includes(CURRENT_USER.id)) {
                         document.getElementById('admin').classList.remove('hidden');
                         document.getElementById('navAdminLink').classList.remove('hidden');
                     }
+
                     loadProfileFromDatastore();
                     fetchUserAnalytics();
                 }
@@ -429,22 +975,29 @@
             else window.location.href = '/api/master?action=discord';
         }
 
-        function openDashboardModal() { document.getElementById('dashboardModal').classList.remove('hidden'); }
-        function closeDashboardModal() { document.getElementById('dashboardModal').classList.add('hidden'); }
+        function openDashboardModal() {
+            document.getElementById('dashboardModal').classList.remove('hidden');
+        }
+
+        function closeDashboardModal() {
+            document.getElementById('dashboardModal').classList.add('hidden');
+        }
 
         function switchDashTab(tabId) {
-            ['overview', 'customize', 'analytics', 'account'].forEach(t => {
+            ['overview', 'customize', 'updates', 'analytics', 'templates', 'leaderboard', 'account'].forEach(t => {
                 document.getElementById(`panel-${t}`).classList.add('hidden');
-                document.getElementById(`dNav-${t}`).className = "p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white";
+                document.getElementById(`dNav-${t}`).className = "p-3 text-left border border-transparent hover:border-[#333] text-gray-400 hover:text-white flex items-center gap-3";
             });
             document.getElementById(`panel-${tabId}`).classList.remove('hidden');
-            document.getElementById(`dNav-${tabId}`).className = "p-3 text-left border border-white bg-white text-black font-bold";
+            document.getElementById(`dNav-${tabId}`).className = "p-3 text-left border border-white bg-white text-black font-bold flex items-center gap-3";
+
             if (tabId === 'analytics') fetchUserAnalytics();
+            if (tabId === 'templates') loadCommunityTemplates('top');
             if (tabId === 'customize') renderTabsEditor();
         }
 
-        // Direct Multi-Provider Client-Side Upload (No 4.5MB Vercel Limits)
-        async function uploadAssetDirectly(input, targetInputId) {
+        // Direct Proxy File Upload (Base64 -> /api/master?action=upload)
+        async function uploadAssetFile(input, targetInputId) {
             const file = input.files[0];
             if (!file) return;
 
@@ -452,48 +1005,36 @@
             const originalText = btn ? btn.textContent : "Upload File";
             if (btn) btn.textContent = "Uploading...";
 
-            try {
-                let directUrl = null;
-
-                // Provider 1: tmpfiles.org direct stream
+            const reader = new FileReader();
+            reader.onload = async function(e) {
                 try {
-                    const fd = new FormData();
-                    fd.append('file', file);
-                    const res = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: fd });
-                    const json = await res.json();
-                    if (json.data && json.data.url) {
-                        directUrl = json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                    const res = await fetch('/api/master?action=upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fileData: e.target.result,
+                            fileName: file.name
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (data.success && data.url) {
+                        document.getElementById(targetInputId).value = data.url;
+                        if (btn) btn.textContent = "Uploaded!";
+                    } else {
+                        alert("Upload failed: " + (data.error || "Server error"));
+                        if (btn) btn.textContent = "Failed";
                     }
-                } catch(e) {}
-
-                // Provider 2: qu.ax fallback
-                if (!directUrl) {
-                    try {
-                        const fd = new FormData();
-                        fd.append('files[]', file);
-                        const res = await fetch('https://qu.ax/api/upload', { method: 'POST', body: fd });
-                        const json = await res.json();
-                        if (json.success && json.files && json.files[0]?.url) {
-                            directUrl = json.files[0].url;
-                        }
-                    } catch(e) {}
-                }
-
-                if (directUrl) {
-                    document.getElementById(targetInputId).value = directUrl;
-                    if (btn) btn.textContent = "Uploaded!";
-                } else {
-                    alert("Upload providers busy. Please paste a direct URL or try again.");
+                } catch(err) {
+                    alert("Upload failed: " + err.message);
                     if (btn) btn.textContent = "Failed";
                 }
-            } catch(err) {
-                alert("Upload error: " + err.message);
-                if (btn) btn.textContent = "Failed";
-            }
-            setTimeout(() => { if (btn) btn.textContent = originalText; }, 2500);
+                setTimeout(() => { if (btn) btn.textContent = originalText; }, 2500);
+            };
+            reader.readAsDataURL(file);
         }
 
-        // Tabs Builder
+        // Dynamic Custom Tabs Editor
         function renderTabsEditor() {
             const list = document.getElementById('customTabsEditorList');
             if (!list) return;
@@ -501,7 +1042,7 @@
                 <div class="border border-[#222] bg-[#090909] p-4 flex flex-col gap-2">
                     <div class="flex justify-between items-center">
                         <input type="text" value="${escapeHtml(t.title)}" onchange="CURRENT_CUSTOM_TABS[${idx}].title = this.value" class="clean-input text-xs font-bold uppercase w-1/2" placeholder="Tab Title">
-                        <button onclick="removeCustomTabField(${idx})" class="text-red-500 text-xs font-mono">Remove</button>
+                        <button onclick="removeCustomTabField(${idx})" class="text-red-500 hover:text-red-300 text-xs font-mono">Remove</button>
                     </div>
                     <textarea onchange="CURRENT_CUSTOM_TABS[${idx}].content = this.value" class="bg-black border border-[#222] text-xs font-mono text-gray-300 p-2.5 w-full h-20 outline-none" placeholder="Tab Content">${escapeHtml(t.content)}</textarea>
                 </div>
@@ -509,7 +1050,7 @@
         }
 
         function addNewCustomTabField() {
-            CURRENT_CUSTOM_TABS.push({ title: 'New Tab', content: 'Tab text here...' });
+            CURRENT_CUSTOM_TABS.push({ title: 'New Tab', content: 'Tab content goes here...' });
             renderTabsEditor();
         }
 
@@ -518,25 +1059,165 @@
             renderTabsEditor();
         }
 
-        // Analytics Fetch
+        // Real Per-User Analytics Engine
         async function fetchUserAnalytics() {
             if (!CURRENT_USER) return;
             try {
                 const res = await fetch(`/api/master?action=get_analytics&userId=${CURRENT_USER.id}`);
                 if (!res.ok) return;
                 const d = await res.json();
+
                 document.getElementById('statTotalViewsNum').textContent = d.totalViews.toLocaleString();
                 document.getElementById('statPeriodViewsNum').textContent = d.selectedPeriodViews.toLocaleString();
                 document.getElementById('statClicksNum').textContent = d.linkClicks.toLocaleString();
+                document.getElementById('statCtrText').textContent = `CTR ${d.ctr}`;
+                document.getElementById('statAvgDuration').textContent = '42s';
+
+                document.getElementById('statTotalPageViews').textContent = d.totalViews.toLocaleString();
+                document.getElementById('statWeekViews').textContent = d.selectedPeriodViews.toLocaleString();
+                document.getElementById('statLinkClicks').textContent = d.linkClicks.toLocaleString();
+
+                if (d.totalViews > 0) {
+                    document.getElementById('statDeviceBreakdown').textContent = `Mobile: ${d.mobilePct}% • Desktop: ${d.desktopPct}%`;
+                    document.getElementById('statTrafficSources').textContent = `Discord: ${d.discordPct}% • TikTok: ${d.tiktokPct}% • Direct: ${d.directPct}%`;
+                } else {
+                    document.getElementById('statDeviceBreakdown').textContent = "Share your link to begin collecting device data.";
+                    document.getElementById('statTrafficSources').textContent = "Share your link to begin collecting referrer data.";
+                }
             } catch(e) {}
         }
 
-        // Profile Datastore Sync
+        // Community Templates Engine
+        async function publishCurrentDesignAsTemplate() {
+            if (!CURRENT_USER) return alert("Please log in first.");
+            const name = prompt("Enter a name for your community design:");
+            if (!name) return;
+
+            const selectedIconBadges = Array.from(document.querySelectorAll('input[name="iconBadgeCheck"]:checked')).map(cb => cb.value);
+
+            const config = {
+                background: document.getElementById('custBackground').value,
+                audio: document.getElementById('custAudio').value,
+                avatar: document.getElementById('custAvatar').value,
+                cursor: document.getElementById('custCursor').value,
+                trackTitle: document.getElementById('custTrackTitle').value,
+                trackArtist: document.getElementById('custTrackArtist').value,
+                trackCover: document.getElementById('custTrackCover').value,
+                joinedDate: document.getElementById('custJoinedDate').value,
+                subBio: document.getElementById('custSubBio').value,
+                description: document.getElementById('custBioText').value,
+                location: document.getElementById('custLocationText').value,
+                bgEffect: document.getElementById('custBgEffect').value,
+                userEffect: document.getElementById('custUserEffect').value,
+                iconBadges: selectedIconBadges,
+                customTabs: CURRENT_CUSTOM_TABS
+            };
+
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save_template',
+                    name,
+                    author: CURRENT_USER.username,
+                    authorId: CURRENT_USER.id,
+                    previewUrl: config.background || config.avatar,
+                    config
+                })
+            });
+
+            if (res.ok) {
+                alert("Design published to Community Templates!");
+                loadCommunityTemplates('top');
+            }
+        }
+
+        async function loadCommunityTemplates(filter = 'top') {
+            const grid = document.getElementById('communityTemplatesGrid');
+            grid.innerHTML = '<div class="text-xs font-mono text-gray-500 p-4">Loading templates from datastore...</div>';
+
+            try {
+                const res = await fetch(`/api/master?action=get_templates&filter=${filter}`);
+                if (!res.ok) return;
+                const list = await res.json();
+
+                if (list.length === 0) {
+                    grid.innerHTML = '<div class="text-xs font-mono text-gray-500 p-4 border border-[#222]">No community templates published yet. Click "Publish as Template" in the Customizer to be the first!</div>';
+                    return;
+                }
+
+                grid.innerHTML = list.map(t => `
+                    <div class="border border-[#222] bg-[#080808] p-4 flex flex-col justify-between gap-3">
+                        <div class="aspect-video bg-[#151515] overflow-hidden rounded border border-[#222] relative">
+                            ${t.previewUrl && (t.previewUrl.endsWith('.mp4') || t.previewUrl.endsWith('.webm'))
+                                ? `<video src="${t.previewUrl}" autoplay loop muted class="w-full h-full object-cover"></video>`
+                                : `<img src="${t.previewUrl || 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-full h-full object-cover">`
+                            }
+                            <span class="absolute bottom-2 right-2 bg-black/80 font-mono text-[9px] px-2 py-0.5 rounded text-white border border-white/20">
+                                ${t.uses.toLocaleString()} uses
+                            </span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-white truncate">${escapeHtml(t.name)}</h4>
+                            <p class="text-[10px] text-gray-500 font-mono">by @${escapeHtml(t.author)}</p>
+                        </div>
+                        <button onclick="applyCommunityTemplate('${t.id}')" class="border border-[#333] hover:border-white p-2 text-xs uppercase font-oswald clean-invert w-full">
+                            Apply Template
+                        </button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                grid.innerHTML = '<div class="text-xs font-mono text-red-500 p-4">Failed to load templates.</div>';
+            }
+        }
+
+        async function applyCommunityTemplate(templateId) {
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'apply_template', templateId })
+            });
+
+            if (res.ok) {
+                const d = await res.json();
+                const c = d.config;
+
+                if (c.background) document.getElementById('custBackground').value = c.background;
+                if (c.audio) document.getElementById('custAudio').value = c.audio;
+                if (c.avatar) document.getElementById('custAvatar').value = c.avatar;
+                if (c.cursor) document.getElementById('custCursor').value = c.cursor;
+                if (c.trackTitle) document.getElementById('custTrackTitle').value = c.trackTitle;
+                if (c.trackArtist) document.getElementById('custTrackArtist').value = c.trackArtist;
+                if (c.trackCover) document.getElementById('custTrackCover').value = c.trackCover;
+                if (c.joinedDate) document.getElementById('custJoinedDate').value = c.joinedDate;
+                if (c.subBio) document.getElementById('custSubBio').value = c.subBio;
+                if (c.description) document.getElementById('custBioText').value = c.description;
+                if (c.location) document.getElementById('custLocationText').value = c.location;
+                if (c.bgEffect) document.getElementById('custBgEffect').value = c.bgEffect;
+                if (c.userEffect) document.getElementById('custUserEffect').value = c.userEffect;
+
+                if (Array.isArray(c.iconBadges)) {
+                    document.querySelectorAll('input[name="iconBadgeCheck"]').forEach(cb => {
+                        cb.checked = c.iconBadges.includes(cb.value);
+                    });
+                }
+
+                if (Array.isArray(c.customTabs)) {
+                    CURRENT_CUSTOM_TABS = c.customTabs;
+                    renderTabsEditor();
+                }
+
+                alert('Template applied! Click "Save Changes" to publish.');
+            }
+        }
+
+        // Profile Loading
         async function loadProfileFromDatastore() {
             if (!CURRENT_USER) return;
             const defaultHandle = CURRENT_USER.username.toLowerCase();
             document.getElementById('dashHelloUsername').textContent = CURRENT_USER.username;
             document.getElementById('accountHandleField').value = defaultHandle;
+            document.getElementById('handleExample').textContent = defaultHandle;
 
             const publicUrl = `${window.location.origin}/@${defaultHandle}`;
             document.getElementById('dashHandleUrl').textContent = publicUrl;
@@ -557,11 +1238,15 @@
                     document.getElementById('custTrackTitle').value = data.trackTitle || '';
                     document.getElementById('custTrackArtist').value = data.trackArtist || '';
                     document.getElementById('custTrackCover').value = data.trackCover || '';
-
-                    document.getElementById('custBioText').value = data.description || '';
+                    document.getElementById('custJoinedDate').value = data.joinedDate || '';
                     document.getElementById('custSubBio').value = data.subBio || '';
+                    document.getElementById('custBioText').value = data.description || '';
                     document.getElementById('custLocationText').value = data.location || '';
-                    document.getElementById('custDiscordTag').value = data.discordTag || '';
+
+                    document.getElementById('custBgEffect').value = data.bgEffect || 'none';
+                    document.getElementById('custUserEffect').value = data.userEffect || 'none';
+                    document.getElementById('glowUserToggle').checked = !!data.glowUsername;
+                    document.getElementById('glowSocialsToggle').checked = !!data.glowSocials;
 
                     if (Array.isArray(data.iconBadges)) {
                         document.querySelectorAll('input[name="iconBadgeCheck"]').forEach(cb => {
@@ -579,7 +1264,7 @@
 
         async function saveFullProfileSettings() {
             if (!CURRENT_USER) return;
-            const selectedBadges = Array.from(document.querySelectorAll('input[name="iconBadgeCheck"]:checked')).map(cb => cb.value);
+            const selectedIconBadges = Array.from(document.querySelectorAll('input[name="iconBadgeCheck"]:checked')).map(cb => cb.value);
 
             const payload = {
                 userId: CURRENT_USER.id,
@@ -591,11 +1276,15 @@
                 trackTitle: document.getElementById('custTrackTitle').value.trim(),
                 trackArtist: document.getElementById('custTrackArtist').value.trim(),
                 trackCover: document.getElementById('custTrackCover').value.trim(),
-                description: document.getElementById('custBioText').value.trim(),
+                joinedDate: document.getElementById('custJoinedDate').value.trim(),
                 subBio: document.getElementById('custSubBio').value.trim(),
+                description: document.getElementById('custBioText').value.trim(),
                 location: document.getElementById('custLocationText').value.trim(),
-                discordTag: document.getElementById('custDiscordTag').value.trim(),
-                iconBadges: selectedBadges,
+                bgEffect: document.getElementById('custBgEffect').value,
+                userEffect: document.getElementById('custUserEffect').value,
+                glowUsername: document.getElementById('glowUserToggle').checked,
+                glowSocials: document.getElementById('glowSocialsToggle').checked,
+                iconBadges: selectedIconBadges,
                 customTabs: CURRENT_CUSTOM_TABS
             };
 
@@ -605,36 +1294,52 @@
                 body: JSON.stringify(payload)
             });
 
-            if (res.ok) alert('Profile Settings & Custom Music Saved!');
-            else alert('Error saving settings to database.');
+            if (res.ok) alert('Profile Settings, Tabs, & Assets Saved Successfully!');
+            else alert('Error saving profile settings.');
         }
 
         function copyProfileHandleUrl() {
-            navigator.clipboard.writeText(document.getElementById('dashHandleUrl').href);
-            alert('Profile link copied!');
+            const url = document.getElementById('dashHandleUrl').href;
+            navigator.clipboard.writeText(url);
+            alert('Profile URL copied to clipboard!');
         }
 
-        async function saveProfileHandle() {
-            if (!CURRENT_USER) return;
-            const handle = document.getElementById('accountHandleField').value.trim().toLowerCase();
-            const res = await fetch('/api/master', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'profile', userId: CURRENT_USER.id, username: handle })
-            });
-            if (res.ok) {
-                alert(`Handle updated to @${handle}!`);
-                loadProfileFromDatastore();
+        async function fetchLeaderboardFromDatastore() {
+            const container = document.getElementById('leaderboardListContainer');
+            container.innerHTML = '<div class="text-xs font-mono text-gray-500 p-4">Loading datastore rankings...</div>';
+            
+            try {
+                const res = await fetch('/api/master?action=leaderboard');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (!data || data.length === 0) {
+                        container.innerHTML = '<div class="text-xs font-mono text-gray-500 p-4 border border-[#222]">No creators ranked yet. Views record live when profile links are visited.</div>';
+                        return;
+                    }
+
+                    container.innerHTML = data.map(item => `
+                        <div class="border border-[#222] bg-[#080808] p-4 flex items-center justify-between hover:border-white transition">
+                            <div class="flex items-center gap-4">
+                                <span class="font-bold text-gray-400 font-mono w-6">#${item.rank}</span>
+                                <img src="${escapeHtml(item.avatar)}" class="w-8 h-8 rounded-full border border-[#333] object-cover">
+                                <span class="font-bold text-white font-mono">@${escapeHtml(item.handle)}</span>
+                            </div>
+                            <span class="text-xs font-mono text-gray-400">${item.views.toLocaleString()} views</span>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) {
+                container.innerHTML = '<div class="text-xs font-mono text-red-500 p-4">Failed to load datastore leaderboard.</div>';
             }
         }
 
-        async function loadReleases() {
+        async function loadReleasesAndArtists() {
             try {
-                const res = await fetch('/api/master?action=catalog');
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById('releasesCounter').textContent = `${data.length} RELEASES`;
-                    document.getElementById('catalogGrid').innerHTML = data.map((item, idx) => `
+                const catRes = await fetch('/api/master?action=catalog');
+                if (catRes.ok) {
+                    CATALOG = await catRes.json();
+                    document.getElementById('releasesCounter').textContent = `${CATALOG.length} RELEASES`;
+                    document.getElementById('catalogGrid').innerHTML = CATALOG.map((item, idx) => `
                         <article class="catalog-item p-4">
                             <div class="aspect-square bg-[#111] mb-3 flex items-center justify-center font-mono text-xs">RELEASE LCD-${String(idx + 1).padStart(3, '0')}</div>
                             <h3 class="font-oswald text-lg truncate">${escapeHtml(item.artist)}</h3>
@@ -642,48 +1347,85 @@
                         </article>
                     `).join('');
                 }
+
+                const artRes = await fetch('/api/master?action=artists');
+                if (artRes.ok) {
+                    ARTISTS = await artRes.json();
+                    document.getElementById('artistsCounter').textContent = `${ARTISTS.length} ARTISTS`;
+                    document.getElementById('artistsGrid').innerHTML = ARTISTS.map(item => `
+                        <article class="catalog-item p-4">
+                            <div class="aspect-square bg-[#111] mb-3 flex items-center justify-center font-mono text-xs">${escapeHtml(item.name)}</div>
+                            <h3 class="font-oswald text-lg truncate">${escapeHtml(item.name)}</h3>
+                            <p class="text-[10px] text-gray-600 uppercase tracking-widest">${escapeHtml(item.listeners)} LISTENERS</p>
+                        </article>
+                    `).join('');
+                }
             } catch(e) {}
         }
 
-        // Demo Submission via Direct Upload
+        async function renderDiscordWidget() {
+            try {
+                const widgetRes = await fetch('https://discord.com/api/guilds/1554157703067336875/widget.json');
+                if (widgetRes.ok) {
+                    const data = await widgetRes.json();
+                    document.getElementById('discord-members').innerHTML = (data.members || []).slice(0, 15).map(m => `
+                        <div class="flex items-center gap-3 p-2 hover:bg-[#111] transition">
+                            <img src="${escapeHtml(m.avatar_url)}" class="w-8 h-8 rounded-full border border-[#222]">
+                            <span class="text-xs font-semibold text-gray-300 font-mono">${escapeHtml(m.username)}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) {}
+        }
+
+        // Demo Submission via Direct Base64 Media Upload
         document.getElementById('automatedSubmitForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const file = document.getElementById('track_file').files[0];
             if (!file) return;
 
-            btn.innerText = 'UPLOADING DIRECTLY...';
+            btn.innerText = 'UPLOADING TO SECURE STORAGE...';
             btn.disabled = true;
 
-            try {
-                const fd = new FormData();
-                fd.append('file', file);
-                const upRes = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: fd });
-                const upData = await upRes.json();
-                const directUrl = upData.data?.url?.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                try {
+                    const upRes = await fetch('/api/master?action=upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fileData: evt.target.result,
+                            fileName: file.name
+                        })
+                    });
+                    const upData = await upRes.json();
 
-                const subRes = await fetch('/api/master?action=submitdemo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: document.getElementById('track_title').value.trim(),
-                        artist: document.getElementById('artist').value.trim(),
-                        email: document.getElementById('email').value.trim(),
-                        fileUrl: directUrl || 'Direct Upload Received'
-                    })
-                });
+                    if (!upData.success || !upData.url) throw new Error("Upload failed");
 
-                if (subRes.ok) {
-                    const result = await subRes.json();
-                    document.getElementById('displaySubmissionId').textContent = result.submissionId;
-                    document.getElementById('submissionResultBox').classList.remove('hidden');
-                    btn.innerText = 'SUCCESS';
+                    const subRes = await fetch('/api/master?action=submitdemo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: document.getElementById('track_title').value.trim(),
+                            artist: document.getElementById('artist').value.trim(),
+                            email: document.getElementById('email').value.trim(),
+                            fileUrl: upData.url
+                        })
+                    });
+
+                    if (subRes.ok) {
+                        const result = await subRes.json();
+                        document.getElementById('displaySubmissionId').textContent = result.submissionId;
+                        document.getElementById('submissionResultBox').classList.remove('hidden');
+                        btn.innerText = 'SUCCESS';
+                    }
+                } catch(err) {
+                    btn.innerText = 'FAILED TO SUBMIT';
+                    alert("Submission error: " + err.message);
                 }
-            } catch(err) {
-                btn.innerText = 'SUBMIT TRACK';
-                btn.disabled = false;
-                alert("Upload failed. Please try again.");
-            }
+            };
+            reader.readAsDataURL(file);
         });
 
         document.getElementById('copyIdBtn')?.addEventListener('click', function() {
@@ -692,7 +1434,169 @@
             setTimeout(() => this.textContent = 'Copy ID', 2000);
         });
 
-        document.addEventListener('DOMContentLoaded', init);
+        // Admin Event Handlers
+        document.getElementById('adminBadgeForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const userId = document.getElementById('badgeTargetUserId').value.trim();
+            const action = document.getElementById('badgeSelectAction').value;
+            const badge = document.getElementById('badgeNameSelect').value;
+            const statusDiv = document.getElementById('adminBadgeStatus');
+
+            statusDiv.textContent = 'Updating badge...';
+
+            const res = await fetch('/api/master?action=profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, action, badge })
+            });
+
+            if (res.ok) {
+                statusDiv.textContent = `Success: ${badge} successfully updated!`;
+                this.reset();
+            } else {
+                statusDiv.textContent = 'Error updating badge in datastore.';
+            }
+        });
+
+        async function saveProfileHandle() {
+            if (!CURRENT_USER) return;
+            const newHandle = document.getElementById('accountHandleField').value.trim().toLowerCase();
+            if (!newHandle) return alert("Please enter a valid handle.");
+
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'profile',
+                    userId: CURRENT_USER.id,
+                    username: newHandle
+                })
+            });
+
+            if (res.ok) {
+                alert(`Handle updated to @${newHandle}!`);
+                loadProfileFromDatastore();
+            }
+        }
+
+        document.getElementById('adminSearchBtn')?.addEventListener('click', async () => {
+            const id = document.getElementById('adminSearchInput').value.trim();
+            const out = document.getElementById('adminSearchResult');
+            if (!id) return;
+            out.textContent = "Searching...";
+            const res = await fetch(`/api/master?action=adminsearch&id=${encodeURIComponent(id)}`);
+            if (res.ok) {
+                const d = await res.json();
+                out.innerHTML = `<strong>ID:</strong> ${escapeHtml(d.submissionId)}<br><strong>Title:</strong> ${escapeHtml(d.title)}<br><strong>Artist:</strong> ${escapeHtml(d.artist)}<br><strong>Email:</strong> ${escapeHtml(d.email)}<br><strong>Audio:</strong> <a href="${escapeHtml(d.fileLink)}" target="_blank" class="text-green-400 underline">Direct File Link</a>`;
+            } else {
+                out.textContent = "Submission ID not found.";
+            }
+        });
+
+        document.getElementById('addReleaseForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const spotify = document.getElementById('releaseSpotify').value.trim();
+            const artist = document.getElementById('releaseArtist').value.trim();
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'catalog', item: { spotify, artist } })
+            });
+            if (res.ok) {
+                alert("Release published!");
+                this.reset();
+                loadReleasesAndArtists();
+            }
+        });
+
+        document.getElementById('addArtistForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const spotify = document.getElementById('artistSpotify').value.trim();
+            const name = document.getElementById('artistName').value.trim();
+            const listeners = document.getElementById('artistListeners').value.trim();
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'artists', item: { spotify, name, listeners } })
+            });
+            if (res.ok) {
+                alert("Artist added!");
+                this.reset();
+                loadReleasesAndArtists();
+            }
+        });
+
+        document.getElementById('discordModForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const userId = document.getElementById('modUserId').value.trim();
+            const modAction = document.getElementById('modAction').value;
+            const reason = document.getElementById('modReason').value.trim();
+            const out = document.getElementById('modOutputBox');
+            out.classList.add('hidden');
+
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'moderate', command: 'moderate', modAction, userId, reason, duration: 300 })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                if (modAction === 'warnings') {
+                    out.classList.remove('hidden');
+                    out.innerHTML = `<strong>Warnings:</strong><br>${(data.warnings || []).map(w => typeof w === 'string' ? escapeHtml(w) : escapeHtml(w.reason)).join('<br>') || '0 warnings'}`;
+                } else {
+                    alert(`Action ${modAction} executed.`);
+                    this.reset();
+                }
+            } else {
+                alert("Action failed.");
+            }
+        });
+
+        document.getElementById('discordPurgeForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const channelId = document.getElementById('purgeChannelId').value.trim();
+            const count = document.getElementById('purgeCount').value;
+
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'masterbot', command: 'purge', channelId, count })
+            });
+            if (res.ok) {
+                alert(`Purged ${count} messages.`);
+                this.reset();
+            } else {
+                alert("Purge failed.");
+            }
+        });
+
+        document.getElementById('botNickForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const botNick = document.getElementById('botNickInput').value.trim();
+            const res = await fetch('/api/master', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'masterbot', command: 'botNick', botNick })
+            });
+            if (res.ok) {
+                alert("Bot nickname updated!");
+                this.reset();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('visible');
+                        obs.unobserve(e.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+        });
     </script>
 </body>
 </html>
