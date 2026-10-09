@@ -31,17 +31,25 @@ export default async function handler(req, res) {
 
     const urlObj = new URL(req.url, 'http://localhost');
     const pathname = urlObj.pathname.toLowerCase();
-    const action = (req.query.action || req.query.route || req.body?.action || '').toLowerCase();
+
+    // Extract match param from Vercel rewrite /api/:match*
+    let matchParam = req.query.match || '';
+    if (Array.isArray(matchParam)) matchParam = matchParam.join('/');
+
+    const action = (req.query.action || req.query.route || matchParam || req.body?.action || '').toLowerCase();
 
     const UPSTASH_URL = process.env.UPSTASH_URL || process.env.UPSTASH_REDIS_REST_URL;
     const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
     const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
     const GUILD_ID = '1554157703067336875';
 
+    // Helper to check route matches across rewritten path or query params
+    const isRoute = (name) => pathname.includes(name) || action.includes(name);
+
     // =========================================================================
     // 1. DISCORD INTERACTIONS (Modal popups, Accept/Reject, Nodemailer)
     // =========================================================================
-    if (pathname.endsWith('/interactions') || action === 'interactions' || (req.headers['x-signature-ed25519'] && req.headers['x-signature-timestamp'])) {
+    if (isRoute('interactions') || (req.headers['x-signature-ed25519'] && req.headers['x-signature-timestamp'])) {
         if (req.method !== 'POST') return res.status(405).end();
 
         const signature = req.headers['x-signature-ed25519'];
@@ -172,7 +180,7 @@ export default async function handler(req, res) {
     // =========================================================================
     // 2. GET ROLES (Human Members & Server Roster)
     // =========================================================================
-    if (pathname.endsWith('/getroles') || action === 'getroles') {
+    if (isRoute('getroles')) {
         try {
             const response = await fetch(`https://discord.com/api/v10/guilds/${GUILD_ID}/members?limit=1000`, {
                 method: 'GET',
@@ -192,7 +200,7 @@ export default async function handler(req, res) {
     // =========================================================================
     // 3. CATALOG (Releases CRUD)
     // =========================================================================
-    if (pathname.endsWith('/catalog') || action === 'catalog') {
+    if (isRoute('catalog')) {
         if (!UPSTASH_URL || !UPSTASH_TOKEN) return res.status(500).json({ error: "No DB credentials" });
 
         if (req.method === 'POST') {
@@ -233,7 +241,7 @@ export default async function handler(req, res) {
     // =========================================================================
     // 4. ARTISTS (Roster CRUD)
     // =========================================================================
-    if (pathname.endsWith('/artists') || action === 'artists') {
+    if (isRoute('artists')) {
         if (!UPSTASH_URL || !UPSTASH_TOKEN) return res.status(500).json({ error: "No DB credentials" });
 
         if (req.method === 'POST') {
@@ -274,7 +282,7 @@ export default async function handler(req, res) {
     // =========================================================================
     // 5. ADMIN SEARCH (Submission ID Lookup)
     // =========================================================================
-    if (pathname.endsWith('/adminsearch') || action === 'adminsearch') {
+    if (isRoute('adminsearch')) {
         if (req.method !== 'GET') return res.status(405).send('Method Not Allowed');
 
         const searchId = req.query.id;
@@ -300,7 +308,7 @@ export default async function handler(req, res) {
     // =========================================================================
     // 6. SUBMIT DEMO (Ticket creation & A&R database logging)
     // =========================================================================
-    if (pathname.endsWith('/submitdemo') || action === 'submitdemo') {
+    if (isRoute('submitdemo')) {
         if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
         const CATEGORY_ID = '1554160433722691594'; 
@@ -425,7 +433,7 @@ export default async function handler(req, res) {
     // =========================================================================
     // 7. PROFILE (Customizer, Badges, and Live Leaderboard Datastore Tracker)
     // =========================================================================
-    if (pathname.endsWith('/profile') || action === 'profile') {
+    if (isRoute('profile')) {
         const headers = { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' };
 
         // GET PROFILE
@@ -517,7 +525,7 @@ export default async function handler(req, res) {
     // =========================================================================
     // 8. REAL DATASTORE LEADERBOARD (No Placeholders)
     // =========================================================================
-    if (pathname.endsWith('/leaderboard') || action === 'leaderboard') {
+    if (isRoute('leaderboard')) {
         const headers = { 'Authorization': `Bearer ${UPSTASH_TOKEN}` };
 
         try {
@@ -560,9 +568,9 @@ export default async function handler(req, res) {
     // =========================================================================
     // 9. MASTERBOT (Spotify Automator & Discord Admin Suite)
     // =========================================================================
-    if (pathname.endsWith('/masterbot') || action === 'masterbot' || action === 'spotifysync') {
-        // Spotify Sync
-        if (req.method === 'GET' || action === 'spotifysync') {
+    if (isRoute('masterbot') || isRoute('spotifysync')) {
+        // Spotify Sync (Triggers on GET requests from cron-job.org or action=spotifysync)
+        if (req.method === 'GET' || action.includes('spotifysync')) {
             const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
             const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
             const PLAYLIST_ID = process.env.SPOTIFY_PLAYLIST_ID;
