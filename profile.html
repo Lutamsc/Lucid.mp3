@@ -79,6 +79,18 @@
         .audio-slider::-webkit-slider-thumb {
             -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #ffffff; cursor: pointer;
         }
+
+        .glow-active {
+            text-shadow: 0 0 16px rgba(255, 255, 255, 0.85), 0 0 32px rgba(255, 255, 255, 0.35);
+        }
+        .effect-chromatic {
+            animation: chromaticShift 2.5s infinite alternate ease-in-out;
+        }
+        @keyframes chromaticShift {
+            0% { text-shadow: -2px 0 red, 2px 0 cyan; }
+            50% { text-shadow: 2px 0 red, -2px 0 cyan; }
+            100% { text-shadow: -1px 0 magenta, 1px 0 green; }
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 relative">
@@ -86,7 +98,7 @@
     <div id="bgContainer"></div>
     <audio id="bgAudio" loop></audio>
 
-    <!-- Autoplay Gate -->
+    <!-- Autoplay Gate Modal -->
     <div id="gateOverlay" class="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center cursor-pointer">
         <span class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white mb-3 animate-pulse">
             <i class="fa-solid fa-volume-high"></i>
@@ -116,12 +128,15 @@
         </div>
 
         <div class="flex flex-col items-center px-6 pb-6 text-center">
+            <!-- Overlapping Avatar -->
             <div class="avatar-overlap overflow-hidden shadow-2xl">
                 <img id="profileAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-full h-full object-cover">
                 <span id="discordStatusDot" class="w-4 h-4 bg-gray-600 border-2 border-black rounded-full absolute bottom-1 right-1"></span>
             </div>
 
             <h1 id="profileUsername" class="font-bold text-2xl tracking-tight text-white mt-3 flex items-center gap-2">wn3bula</h1>
+            
+            <!-- Badges Row -->
             <div id="profileBadgesRow" class="flex items-center justify-center gap-2 mt-1.5 text-sm text-gray-400"></div>
 
             <span id="profileHandleText" class="text-xs font-mono text-gray-400 mt-2 block">@wn3bula</span>
@@ -133,6 +148,7 @@
                 <span id="profileLocationText">Austria</span>
             </div>
 
+            <!-- Socials -->
             <div id="profileSocialsGrid" class="flex items-center justify-center gap-2.5 mt-4"></div>
 
             <!-- Discord Presence Dock -->
@@ -146,7 +162,7 @@
                             <span id="dockUsername" class="text-xs font-bold text-white truncate font-sans">freaky WN3bula | OWNER</span>
                             <span class="text-[9px] border border-[#333] px-1 py-0.5 rounded text-gray-400 font-mono">STATUS</span>
                         </div>
-                        <p id="dockActivity" class="text-[10px] font-mono text-gray-500 truncate mt-0.5">Connecting...</p>
+                        <p id="dockActivity" class="text-[10px] font-mono text-gray-500 truncate mt-0.5">Connecting to Discord...</p>
                     </div>
                 </div>
                 <button onclick="copyDiscordTag()" class="border border-[#333] hover:border-white text-[10px] font-mono uppercase px-3 py-1.5 rounded-lg text-gray-300 hover:text-white transition flex-shrink-0 ml-2">
@@ -154,7 +170,7 @@
                 </button>
             </div>
 
-            <!-- Music Player Dock (Matching Image 3) -->
+            <!-- Music Player Dock -->
             <div id="audioPlayerCard" class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-4 mt-3 flex flex-col gap-3">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3 truncate">
@@ -177,7 +193,7 @@
                         <i id="playIcon" class="fa-solid fa-play"></i>
                     </button>
                     <input type="range" id="seekSlider" min="0" max="100" value="0" class="audio-slider flex-1 accent-white">
-                    <span id="timeDisplay" class="text-[9px] font-mono text-gray-500">0:00 / 0:25</span>
+                    <span id="timeDisplay" class="text-[9px] font-mono text-gray-500">0:00 / 0:00</span>
                 </div>
             </div>
 
@@ -234,7 +250,7 @@
                 if (d.joinedDate) document.getElementById('statJoined').textContent = d.joinedDate;
                 if (d.location) document.getElementById('profileLocationText').textContent = d.location;
 
-                // FIX: Global Custom Cursor Engine
+                // Fix: Global Cursor Injection (Applies to all elements)
                 if (d.cursor && d.cursor.trim()) {
                     let cursorStyle = document.getElementById('globalCursorStyle');
                     if (!cursorStyle) {
@@ -245,13 +261,13 @@
                     cursorStyle.innerHTML = `* , *:hover, a, button, input, div, span, p, h1, h2, h3, h4 { cursor: url('${d.cursor.trim()}'), auto !important; }`;
                 }
 
-                // Avatar & Banner
+                // Avatars & Covers
                 const pfp = d.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
                 document.getElementById('profileAvatar').src = pfp;
                 document.getElementById('dockAvatar').src = pfp;
                 document.getElementById('trackCover').src = d.trackCover || pfp;
 
-                // Video vs Image Background
+                // Video vs Image Background Engine
                 const bgUrl = d.background || '';
                 const bgBox = document.getElementById('bgContainer');
                 if (bgUrl.endsWith('.mp4') || bgUrl.endsWith('.webm')) {
@@ -271,7 +287,11 @@
                     document.getElementById('trackArtist').textContent = d.trackArtist || d.username || "WN3bula";
                 }
 
-                // Badges
+                // Shaders & Glow
+                if (d.glowUsername) document.getElementById('profileUsername').classList.add('glow-active');
+                if (d.userEffect === 'chromatic') document.getElementById('profileUsername').classList.add('effect-chromatic');
+
+                // Custom Badges
                 const badgesRow = document.getElementById('profileBadgesRow');
                 badgesRow.innerHTML = '';
                 const iconMap = {
@@ -312,7 +332,7 @@
                     }
                 }
 
-                // Dynamic Tabs
+                // Dynamic Tabs Rendering
                 const customTabs = Array.isArray(d.customTabs) && d.customTabs.length > 0 
                     ? d.customTabs 
                     : [
