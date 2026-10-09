@@ -151,7 +151,7 @@
             <!-- Social Links Grid -->
             <div id="profileSocialsGrid" class="flex items-center justify-center gap-2.5 mt-4"></div>
 
-            <!-- Discord Presence Dock (Dynamic User Data) -->
+            <!-- Discord Presence Dock -->
             <div class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-3.5 mt-6 flex items-center justify-between text-left">
                 <div class="flex items-center gap-3 truncate">
                     <div class="w-11 h-11 rounded-full bg-[#181818] overflow-hidden border border-[#262626] flex-shrink-0">
@@ -170,7 +170,7 @@
                 </button>
             </div>
 
-            <!-- Music Player Dock (Only Displays When User Has Audio Configured) -->
+            <!-- Music Player Dock -->
             <div id="audioPlayerCard" class="w-full bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-4 mt-3 flex flex-col gap-3 hidden">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3 truncate">
@@ -283,8 +283,8 @@
                     document.getElementById('statJoined').textContent = d.joinedDate.trim();
                 }
 
-                // Global Custom Cursor Injection
-                if (d.cursor && d.cursor.trim()) {
+                // Global Custom Cursor Injection (Only injects if it's a real direct file link)
+                if (d.cursor && d.cursor.trim().startsWith('http') && !d.cursor.includes('gofile.io')) {
                     let cursorStyle = document.getElementById('globalCursorStyle');
                     if (!cursorStyle) {
                         cursorStyle = document.createElement('style');
@@ -294,14 +294,20 @@
                     cursorStyle.innerHTML = `* , *:hover, a, button, input, div, span, p, h1, h2, h3, h4 { cursor: url('${d.cursor.trim()}'), auto !important; }`;
                 }
 
-                // Avatars & Presence Defaults
-                const pfp = (d.avatar && d.avatar.startsWith('http')) ? d.avatar : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                document.getElementById('profileAvatar').src = pfp;
-                document.getElementById('dockAvatar').src = pfp;
-                document.getElementById('dockUsername').textContent = d.discordTag || displayName;
+                // Intelligent PFP Fallback: If custom avatar is a broken link/gofile/filewire, fall back to Discord PFP!
+                let resolvedPfp = 'https://cdn.discordapp.com/embed/avatars/0.png';
+                if (d.avatar && d.avatar.startsWith('http') && !d.avatar.includes('gofile.io') && !d.avatar.includes('filewire.com')) {
+                    resolvedPfp = d.avatar;
+                } else if (d.discordAvatar && d.discordAvatar.startsWith('http')) {
+                    resolvedPfp = d.discordAvatar;
+                }
+
+                document.getElementById('profileAvatar').src = resolvedPfp;
+                document.getElementById('dockAvatar').src = d.discordAvatar || resolvedPfp;
+                document.getElementById('dockUsername').textContent = d.discordTag || d.discordUsername || displayName;
 
                 // Background Video or Image
-                const bgUrl = d.background || '';
+                const bgUrl = (d.background && d.background.trim().startsWith('http') && !d.background.includes('gofile.io')) ? d.background.trim() : '';
                 const bgBox = document.getElementById('bgContainer');
                 if (bgUrl.endsWith('.mp4') || bgUrl.endsWith('.webm')) {
                     bgBox.innerHTML = `<video id="pageBgMedia" autoplay loop muted playsinline src="${bgUrl}"></video>`;
@@ -311,11 +317,11 @@
                 }
 
                 // Audio Player: Only renders if user uploaded a song
-                if (d.audio && d.audio.trim()) {
+                if (d.audio && d.audio.trim().startsWith('http') && !d.audio.includes('gofile.io') && !d.audio.includes('filewire.com')) {
                     audioEl.src = d.audio.trim();
                     document.getElementById('trackTitle').textContent = d.trackTitle || "Audio Track";
                     document.getElementById('trackArtist').textContent = d.trackArtist || displayName;
-                    document.getElementById('trackCover').src = (d.trackCover && d.trackCover.startsWith('http')) ? d.trackCover : pfp;
+                    document.getElementById('trackCover').src = (d.trackCover && d.trackCover.startsWith('http')) ? d.trackCover : resolvedPfp;
                     document.getElementById('audioPlayerCard').classList.remove('hidden');
                 } else {
                     document.getElementById('audioPlayerCard').classList.add('hidden');
@@ -415,6 +421,8 @@
                     const msg = JSON.parse(event.data);
                     if (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE') {
                         const data = msg.d;
+                        if (!data) return;
+
                         const statusColors = { online: 'bg-green-500', idle: 'bg-yellow-500', dnd: 'bg-red-500', offline: 'bg-gray-600' };
                         document.getElementById('discordStatusDot').className = `w-4 h-4 border-2 border-black rounded-full absolute bottom-1 right-1 ${statusColors[data.discord_status] || 'bg-gray-600'}`;
 
@@ -422,7 +430,11 @@
                             const name = data.discord_user.global_name || data.discord_user.username;
                             document.getElementById('dockUsername').textContent = name;
                             if (data.discord_user.avatar) {
-                                document.getElementById('dockAvatar').src = `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}.png`;
+                                const realDcAvatar = `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}.png?size=256`;
+                                document.getElementById('dockAvatar').src = realDcAvatar;
+                                if (!PROFILE_DATA.avatar || PROFILE_DATA.avatar.includes('gofile') || PROFILE_DATA.avatar.includes('filewire')) {
+                                    document.getElementById('profileAvatar').src = realDcAvatar;
+                                }
                             }
                         }
 
@@ -431,7 +443,7 @@
                         } else if (data.activities && data.activities[0]) {
                             document.getElementById('dockActivity').textContent = data.activities[0].name;
                         } else {
-                            document.getElementById('dockActivity').textContent = data.discord_status ? data.discord_status.toUpperCase() : 'OFFLINE';
+                            document.getElementById('dockActivity').textContent = data.discord_status === 'offline' ? 'Offline on Discord' : data.discord_status.toUpperCase();
                         }
                     }
                 };
@@ -452,13 +464,6 @@
                 icon.className = 'fa-solid fa-play';
             }
         }
-
-        audioEl.addEventListener('loadedmetadata', () => {
-            if (audioEl.duration && !isNaN(audioEl.duration)) {
-                const formatTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-                document.getElementById('timeDisplay').textContent = `0:00 / ${formatTime(audioEl.duration)}`;
-            }
-        });
 
         audioEl.addEventListener('timeupdate', () => {
             if (audioEl.duration && !isNaN(audioEl.duration)) {
