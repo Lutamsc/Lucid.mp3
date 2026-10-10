@@ -12,85 +12,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #030303; color: #ffffff;
-            font-family: 'Space Grotesk', sans-serif;
-            overflow-x: hidden;
-        }
-
-        .noise-layer {
-            position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0.035;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
-
-        #pageBgMedia {
-            position: fixed; inset: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: -10; filter: brightness(0.65);
-        }
-
-        .card-container {
-            max-width: 580px; width: 100%;
-            background: rgba(10, 10, 10, 0.88);
-            backdrop-filter: blur(28px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.95);
-        }
-
-        .bg-banner {
-            width: 100%; height: 190px;
-            background-size: cover; background-position: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            position: relative;
-        }
-
-        .avatar-overlap {
-            margin-top: -60px; width: 115px; height: 115px;
-            border-radius: 9999px; border: 4px solid #0a0a0a;
-            position: relative; background: #111;
-        }
-
-        .social-pill {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px; border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ccc; transition: all 0.2s ease;
-        }
-        .social-pill:hover {
-            background: #ffffff; color: #000000; transform: translateY(-2px);
-        }
-
-        .custom-tab-btn {
-            font-size: 11px; font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase; letter-spacing: 0.15em;
-            color: #777; padding: 10px 16px;
-            border-bottom: 2px solid transparent; transition: all 0.2s;
-        }
-        .custom-tab-btn.active {
-            color: #ffffff; border-bottom-color: #ffffff; font-weight: 700;
-        }
-
-        .audio-slider {
-            -webkit-appearance: none; height: 4px; border-radius: 2px; background: #222; outline: none;
-        }
-        .audio-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #ffffff; cursor: pointer;
-        }
-
-        .glow-active {
-            text-shadow: 0 0 16px rgba(255, 255, 255, 0.85), 0 0 32px rgba(255, 255, 255, 0.35);
-        }
-        .effect-chromatic {
-            animation: chromaticShift 2.5s infinite alternate ease-in-out;
-        }
-        @keyframes chromaticShift {
-            0% { text-shadow: -2px 0 red, 2px 0 cyan; }
-            50% { text-shadow: 2px 0 red, -2px 0 cyan; }
-            100% { text-shadow: -1px 0 magenta, 1px 0 green; }
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #030303; color: #ffffff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
+        .noise-layer { position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        #pageBgMedia { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -10; filter: brightness(0.65); }
+        .card-container { max-width: 580px; width: 100%; background: rgba(10, 10, 10, 0.88); backdrop-filter: blur(28px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; overflow: hidden; box-shadow: 0 0 60px rgba(0, 0, 0, 0.95); }
+        .bg-banner { width: 100%; height: 190px; background-size: cover; background-position: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); position: relative; }
+        .avatar-overlap { margin-top: -60px; width: 115px; height: 115px; border-radius: 9999px; border: 4px solid #0a0a0a; position: relative; background: #111; }
+        .social-pill { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 9999px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #ccc; transition: all 0.2s ease; }
+        .social-pill:hover { background: #ffffff; color: #000000; transform: translateY(-2px); }
+        .custom-tab-btn { font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.15em; color: #777; padding: 10px 16px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .custom-tab-btn.active { color: #ffffff; border-bottom-color: #ffffff; font-weight: 700; }
+        .audio-slider { -webkit-appearance: none; height: 4px; border-radius: 2px; background: #222; outline: none; }
+        .audio-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #ffffff; cursor: pointer; }
+        .glow-active { text-shadow: 0 0 16px rgba(255, 255, 255, 0.85), 0 0 32px rgba(255, 255, 255, 0.35); }
+        .effect-chromatic { animation: chromaticShift 2.5s infinite alternate ease-in-out; }
+        @keyframes chromaticShift { 0% { text-shadow: -2px 0 red, 2px 0 cyan; } 50% { text-shadow: 2px 0 red, -2px 0 cyan; } 100% { text-shadow: -1px 0 magenta, 1px 0 green; } }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 relative">
@@ -98,7 +34,6 @@
     <div id="bgContainer"></div>
     <audio id="bgAudio" loop preload="auto" crossorigin="anonymous"></audio>
 
-    <!-- Autoplay Gate Overlay -->
     <div id="gateOverlay" class="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center cursor-pointer">
         <span class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white mb-3 animate-pulse">
             <i class="fa-solid fa-volume-high"></i>
@@ -107,40 +42,32 @@
         <span class="text-[10px] font-mono text-gray-500 uppercase mt-1">Lucid.mp3 Profile Network</span>
     </div>
 
-    <!-- Main Card -->
     <div class="card-container relative my-8">
         <div id="profileBanner" class="bg-banner bg-[#111]">
             <div class="absolute top-3 left-4 text-[10px] font-mono uppercase tracking-widest text-white/80 flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10">
                 <i class="fa-regular fa-calendar"></i>
-                <span id="statJoined">Member</span>
+                <span id="statJoined">MEMBER</span>
             </div>
-
             <div class="absolute top-3 right-4 flex items-center gap-2">
                 <div class="text-[10px] font-mono uppercase tracking-widest text-white/80 flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10">
                     <i class="fa-regular fa-eye"></i>
-                    <span id="statViews">0 Views</span>
-                </div>
-                <div class="text-[10px] font-mono uppercase tracking-widest text-white/80 flex items-center gap-1 bg-black/40 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10 font-bold">
-                    <i class="fa-solid fa-ranking-star text-yellow-400"></i>
-                    <span id="statRank">#1</span>
+                    <span id="statViews">0 VIEWS</span>
                 </div>
             </div>
         </div>
 
         <div class="flex flex-col items-center px-6 pb-6 text-center">
-            <!-- Overlapping Avatar -->
             <div class="avatar-overlap overflow-hidden shadow-2xl">
                 <img id="profileAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" onerror="this.onerror=null;this.src='https://cdn.discordapp.com/embed/avatars/0.png';" class="w-full h-full object-cover">
                 <span id="discordStatusDot" class="w-4 h-4 bg-gray-600 border-2 border-black rounded-full absolute bottom-1 right-1"></span>
             </div>
 
             <h1 id="profileUsername" class="font-bold text-2xl tracking-tight text-white mt-3 flex items-center gap-2">Loading...</h1>
-            
-            <!-- Badges Row -->
-            <div id="profileBadgesRow" class="flex items-center justify-center gap-2 mt-1.5 text-sm text-gray-400"></div>
-
             <span id="profileHandleText" class="text-xs font-mono text-gray-400 mt-2 block"></span>
-            <p id="profileTagline" class="text-xs font-bold text-gray-200 uppercase tracking-widest mt-1 hidden"></p>
+            
+            <div id="profileBadgesRow" class="flex items-center justify-center gap-2 mt-2 text-sm text-gray-400"></div>
+
+            <p id="profileTagline" class="text-xs font-bold text-gray-200 uppercase tracking-widest mt-3 hidden"></p>
             <p id="profileSubBio" class="text-xs text-gray-400 font-mono mt-0.5 hidden"></p>
 
             <div id="profileLocationBox" class="flex items-center gap-1 text-[11px] font-mono text-gray-400 mt-2 hidden">
@@ -148,7 +75,7 @@
                 <span id="profileLocationText"></span>
             </div>
 
-            <!-- Social Links Grid -->
+            <!-- Socials -->
             <div id="profileSocialsGrid" class="flex items-center justify-center gap-2.5 mt-4"></div>
 
             <!-- Discord Presence Dock -->
@@ -162,12 +89,11 @@
                             <span id="dockUsername" class="text-xs font-bold text-white truncate font-sans">Discord User</span>
                             <span class="text-[9px] border border-[#333] px-1 py-0.5 rounded text-gray-400 font-mono">STATUS</span>
                         </div>
-                        <p id="dockActivity" class="text-[10px] font-mono text-gray-500 truncate mt-0.5">Offline on Discord</p>
+                        <p id="dockActivity" class="text-[10px] font-mono text-gray-500 truncate mt-0.5">
+                            <span id="lanyardStatus">Connecting to Discord...</span>
+                        </p>
                     </div>
                 </div>
-                <button onclick="copyDiscordTag()" class="border border-[#333] hover:border-white text-[10px] font-mono uppercase px-3 py-1.5 rounded-lg text-gray-300 hover:text-white transition flex-shrink-0 ml-2">
-                    Add Friend
-                </button>
             </div>
 
             <!-- Music Player Dock -->
@@ -187,7 +113,6 @@
                         <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.8" class="audio-slider w-16 accent-white">
                     </div>
                 </div>
-
                 <div class="flex items-center gap-3">
                     <button onclick="togglePlayAudio()" class="text-white hover:text-gray-300 transition text-sm">
                         <i id="playIcon" class="fa-solid fa-play"></i>
@@ -212,29 +137,6 @@
 
         let audioEl = document.getElementById('bgAudio');
         let profileUserId = null;
-        let PROFILE_DATA = null;
-
-        async function sendAnalyticsEvent(type) {
-            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-            let ref = 'direct';
-            if (document.referrer.includes('discord')) ref = 'discord';
-            else if (document.referrer.includes('tiktok')) ref = 'tiktok';
-
-            try {
-                await fetch('/api/master', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'track_event',
-                        handle: targetHandle,
-                        userId: profileUserId,
-                        type,
-                        device: isMobile ? 'mobile' : 'desktop',
-                        referrer: ref
-                    })
-                });
-            } catch(e) {}
-        }
 
         async function loadProfile() {
             try {
@@ -246,7 +148,6 @@
                 }
 
                 const d = await res.json();
-                PROFILE_DATA = d;
                 profileUserId = d.userId;
 
                 const displayName = d.username || targetHandle;
@@ -254,144 +155,97 @@
                 document.getElementById('profileUsername').textContent = displayName;
                 document.getElementById('profileHandleText').textContent = `@${targetHandle}`;
 
-                // Dynamic Tagline & Sub-bio (Hides completely if empty, no placeholders)
-                const taglineEl = document.getElementById('profileTagline');
                 if (d.description && d.description.trim()) {
-                    taglineEl.textContent = d.description.trim();
-                    taglineEl.classList.remove('hidden');
-                } else {
-                    taglineEl.classList.add('hidden');
+                    document.getElementById('profileTagline').textContent = d.description.trim();
+                    document.getElementById('profileTagline').classList.remove('hidden');
                 }
-
-                const subBioEl = document.getElementById('profileSubBio');
                 if (d.subBio && d.subBio.trim()) {
-                    subBioEl.textContent = d.subBio.trim();
-                    subBioEl.classList.remove('hidden');
-                } else {
-                    subBioEl.classList.add('hidden');
+                    document.getElementById('profileSubBio').textContent = d.subBio.trim();
+                    document.getElementById('profileSubBio').classList.remove('hidden');
                 }
-
-                const locBox = document.getElementById('profileLocationBox');
                 if (d.location && d.location.trim()) {
                     document.getElementById('profileLocationText').textContent = d.location.trim();
-                    locBox.classList.remove('hidden');
-                } else {
-                    locBox.classList.add('hidden');
+                    document.getElementById('profileLocationBox').classList.remove('hidden');
                 }
-
                 if (d.joinedDate && d.joinedDate.trim()) {
                     document.getElementById('statJoined').textContent = d.joinedDate.trim();
                 }
 
-                // Global Custom Cursor Injection (Only injects if it's a real direct file link)
-                if (d.cursor && d.cursor.trim().startsWith('http') && !d.cursor.includes('gofile.io')) {
-                    let cursorStyle = document.getElementById('globalCursorStyle');
-                    if (!cursorStyle) {
-                        cursorStyle = document.createElement('style');
-                        cursorStyle.id = 'globalCursorStyle';
-                        document.head.appendChild(cursorStyle);
-                    }
-                    cursorStyle.innerHTML = `* , *:hover, a, button, input, div, span, p, h1, h2, h3, h4 { cursor: url('${d.cursor.trim()}'), auto !important; }`;
+                // FIX: Aggressive Global Cursor Override
+                if (d.cursor && d.cursor.trim().startsWith('http')) {
+                    let cursorStyle = document.createElement('style');
+                    cursorStyle.innerHTML = `*, *:hover, a, button, input { cursor: url('${d.cursor.trim()}'), auto !important; }`;
+                    document.head.appendChild(cursorStyle);
                 }
 
-                // Intelligent PFP Fallback: If custom avatar is a broken link/gofile/filewire, fall back to Discord PFP!
-                let resolvedPfp = 'https://cdn.discordapp.com/embed/avatars/0.png';
-                if (d.avatar && d.avatar.startsWith('http') && !d.avatar.includes('gofile.io') && !d.avatar.includes('filewire.com')) {
-                    resolvedPfp = d.avatar;
-                } else if (d.discordAvatar && d.discordAvatar.startsWith('http')) {
-                    resolvedPfp = d.discordAvatar;
-                }
-
-                document.getElementById('profileAvatar').src = resolvedPfp;
-                document.getElementById('dockAvatar').src = d.discordAvatar || resolvedPfp;
+                // Avatars
+                const pfp = (d.avatar && d.avatar.startsWith('http')) ? d.avatar : (d.discordAvatar || 'https://cdn.discordapp.com/embed/avatars/0.png');
+                document.getElementById('profileAvatar').src = pfp;
+                document.getElementById('dockAvatar').src = d.discordAvatar || pfp;
                 document.getElementById('dockUsername').textContent = d.discordTag || d.discordUsername || displayName;
 
-                // Background Video or Image
-                const bgUrl = (d.background && d.background.trim().startsWith('http') && !d.background.includes('gofile.io')) ? d.background.trim() : '';
+                // Backgrounds
+                const bgUrl = d.background || '';
                 const bgBox = document.getElementById('bgContainer');
                 if (bgUrl.endsWith('.mp4') || bgUrl.endsWith('.webm')) {
                     bgBox.innerHTML = `<video id="pageBgMedia" autoplay loop muted playsinline src="${bgUrl}"></video>`;
                 } else if (bgUrl) {
                     bgBox.innerHTML = `<div id="pageBgMedia" style="background-image: url('${bgUrl}'); background-size: cover; background-position: center;"></div>`;
-                    document.getElementById('profileBanner').style.backgroundImage = `url('${bgUrl}')`;
                 }
 
-                // Audio Player: Only renders if user uploaded a song
-                if (d.audio && d.audio.trim().startsWith('http') && !d.audio.includes('gofile.io') && !d.audio.includes('filewire.com')) {
+                // FIX: Music Player
+                if (d.audio && d.audio.trim().startsWith('http')) {
                     audioEl.src = d.audio.trim();
                     document.getElementById('trackTitle').textContent = d.trackTitle || "Audio Track";
                     document.getElementById('trackArtist').textContent = d.trackArtist || displayName;
-                    document.getElementById('trackCover').src = (d.trackCover && d.trackCover.startsWith('http')) ? d.trackCover : resolvedPfp;
+                    document.getElementById('trackCover').src = (d.trackCover && d.trackCover.startsWith('http')) ? d.trackCover : pfp;
                     document.getElementById('audioPlayerCard').classList.remove('hidden');
                 } else {
-                    document.getElementById('audioPlayerCard').classList.add('hidden');
                     document.getElementById('gateOverlay').style.display = 'none';
                 }
 
-                // Shaders & Glow
+                // Shaders
                 if (d.glowUsername) document.getElementById('profileUsername').classList.add('glow-active');
                 if (d.userEffect === 'chromatic') document.getElementById('profileUsername').classList.add('effect-chromatic');
 
-                // Custom Badges
-                const badgesRow = document.getElementById('profileBadgesRow');
-                badgesRow.innerHTML = '';
-                const iconMap = {
-                    crown: 'fa-solid fa-crown text-yellow-400',
-                    star: 'fa-solid fa-star text-purple-400',
-                    heart: 'fa-solid fa-heart text-pink-500',
-                    paw: 'fa-solid fa-paw text-gray-300',
-                    skull: 'fa-solid fa-skull text-gray-200',
-                    sparkles: 'fa-solid fa-wand-magic-sparkles text-cyan-400',
-                    fire: 'fa-solid fa-fire text-red-500',
-                    gamepad: 'fa-solid fa-gamepad text-indigo-400'
-                };
-                if (Array.isArray(d.iconBadges) && d.iconBadges.length > 0) {
-                    d.iconBadges.forEach(b => {
-                        badgesRow.innerHTML += `<i class="${iconMap[b] || 'fa-solid fa-tag'} text-xs"></i>`;
-                    });
-                }
-
-                // Social Links
+                // Socials
                 const s = d.socials || {};
                 const sGrid = document.getElementById('profileSocialsGrid');
                 sGrid.innerHTML = '';
-                const icons = {
-                    spotify: 'fa-brands fa-spotify', instagram: 'fa-brands fa-instagram',
-                    youtube: 'fa-brands fa-youtube', discord: 'fa-brands fa-discord',
-                    tiktok: 'fa-brands fa-tiktok', soundcloud: 'fa-brands fa-soundcloud',
-                    custom: 'fa-solid fa-link'
-                };
+                const icons = { spotify: 'fa-brands fa-spotify', instagram: 'fa-brands fa-instagram', youtube: 'fa-brands fa-youtube', discord: 'fa-brands fa-discord', tiktok: 'fa-brands fa-tiktok', soundcloud: 'fa-brands fa-soundcloud', custom: 'fa-solid fa-link' };
                 for (const [key, link] of Object.entries(s)) {
-                    if (link) {
-                        sGrid.innerHTML += `
-                            <a href="${link}" target="_blank" onclick="sendAnalyticsEvent('click')" class="social-pill">
-                                <i class="${icons[key] || 'fa-solid fa-link'}"></i>
-                            </a>
-                        `;
-                    }
+                    if (link) sGrid.innerHTML += `<a href="${link}" target="_blank" class="social-pill"><i class="${icons[key] || 'fa-solid fa-link'}"></i></a>`;
+                }
+
+                // Badges
+                const badgesRow = document.getElementById('profileBadgesRow');
+                badgesRow.innerHTML = '';
+                const iconMap = { crown: 'fa-solid fa-crown text-yellow-400', star: 'fa-solid fa-star text-purple-400', heart: 'fa-solid fa-heart text-pink-500', paw: 'fa-solid fa-paw text-gray-300', skull: 'fa-solid fa-skull text-gray-200', sparkles: 'fa-solid fa-wand-magic-sparkles text-cyan-400', fire: 'fa-solid fa-fire text-red-500', gamepad: 'fa-solid fa-gamepad text-indigo-400' };
+                if (Array.isArray(d.iconBadges)) {
+                    d.iconBadges.forEach(b => { badgesRow.innerHTML += `<i class="${iconMap[b] || 'fa-solid fa-tag'} text-xs"></i>`; });
                 }
 
                 // Dynamic Tabs
-                const customTabs = Array.isArray(d.customTabs) && d.customTabs.length > 0 
-                    ? d.customTabs 
-                    : [
-                        { title: 'Main', content: d.description || 'Welcome to my official profile page.' }
-                    ];
-
+                const customTabs = Array.isArray(d.customTabs) && d.customTabs.length > 0 ? d.customTabs : [{ title: 'Main', content: d.description || 'Welcome to my official profile page.' }];
                 renderCustomTabs(customTabs);
-                sendAnalyticsEvent('view');
+
+                // FIX: Fire Page View Tracking
+                if (profileUserId) {
+                    await fetch('/api/master', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'track_event', handle: targetHandle, userId: profileUserId, type: 'view' })
+                    });
+                }
 
                 if (d.userId) connectLanyard(d.userId);
-            } catch (err) {
-                console.error("Profile load error:", err);
-            }
+            } catch (err) { console.error("Profile load error:", err); }
         }
 
         function renderCustomTabs(tabs) {
             const headersRow = document.getElementById('tabHeadersRow');
             const bodiesCol = document.getElementById('tabBodiesContainer');
-            headersRow.innerHTML = '';
-            bodiesCol.innerHTML = '';
+            headersRow.innerHTML = ''; bodiesCol.innerHTML = '';
 
             tabs.forEach((tab, i) => {
                 const btn = document.createElement('button');
@@ -413,6 +267,7 @@
             });
         }
 
+        // FIX: Lanyard Status Tracker
         function connectLanyard(uid) {
             try {
                 const ws = new WebSocket('wss://api.lanyard.rest/socket');
@@ -421,29 +276,19 @@
                     const msg = JSON.parse(event.data);
                     if (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE') {
                         const data = msg.d;
-                        if (!data) return;
-
                         const statusColors = { online: 'bg-green-500', idle: 'bg-yellow-500', dnd: 'bg-red-500', offline: 'bg-gray-600' };
                         document.getElementById('discordStatusDot').className = `w-4 h-4 border-2 border-black rounded-full absolute bottom-1 right-1 ${statusColors[data.discord_status] || 'bg-gray-600'}`;
 
-                        if (data.discord_user) {
-                            const name = data.discord_user.global_name || data.discord_user.username;
-                            document.getElementById('dockUsername').textContent = name;
-                            if (data.discord_user.avatar) {
-                                const realDcAvatar = `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}.png?size=256`;
-                                document.getElementById('dockAvatar').src = realDcAvatar;
-                                if (!PROFILE_DATA.avatar || PROFILE_DATA.avatar.includes('gofile') || PROFILE_DATA.avatar.includes('filewire')) {
-                                    document.getElementById('profileAvatar').src = realDcAvatar;
-                                }
-                            }
-                        }
-
-                        if (data.listening_to_spotify && data.spotify) {
-                            document.getElementById('dockActivity').textContent = `Listening to ${data.spotify.song} by ${data.spotify.artist}`;
-                        } else if (data.activities && data.activities[0]) {
-                            document.getElementById('dockActivity').textContent = data.activities[0].name;
+                        if (data.discord_status === 'offline') {
+                            document.getElementById('lanyardStatus').innerHTML = `Offline (Join <a href="https://discord.gg/lanyard" target="_blank" class="underline">Lanyard Discord</a> to sync)`;
                         } else {
-                            document.getElementById('dockActivity').textContent = data.discord_status === 'offline' ? 'Offline on Discord' : data.discord_status.toUpperCase();
+                            if (data.listening_to_spotify && data.spotify) {
+                                document.getElementById('lanyardStatus').textContent = `Listening to ${data.spotify.song} by ${data.spotify.artist}`;
+                            } else if (data.activities && data.activities[0]) {
+                                document.getElementById('lanyardStatus').textContent = data.activities[0].name;
+                            } else {
+                                document.getElementById('lanyardStatus').textContent = data.discord_status.toUpperCase();
+                            }
                         }
                     }
                 };
@@ -454,14 +299,9 @@
             const icon = document.getElementById('playIcon');
             if (!audioEl.src) return;
             if (audioEl.paused) {
-                audioEl.play().then(() => {
-                    icon.className = 'fa-solid fa-pause';
-                }).catch(() => {
-                    alert("Audio playback failed. Please verify that the audio file URL is directly accessible.");
-                });
+                audioEl.play().then(() => { icon.className = 'fa-solid fa-pause'; }).catch(() => { alert("Audio playback blocked. Check if the link is a valid .mp3 file."); });
             } else {
-                audioEl.pause();
-                icon.className = 'fa-solid fa-play';
+                audioEl.pause(); icon.className = 'fa-solid fa-play';
             }
         }
 
@@ -474,34 +314,14 @@
             }
         });
 
-        document.getElementById('volumeSlider').addEventListener('input', (e) => {
-            audioEl.volume = e.target.value;
-            const vIcon = document.getElementById('volumeIcon');
-            if (audioEl.volume === 0) vIcon.className = "fa-solid fa-volume-xmark text-xs text-gray-400";
-            else if (audioEl.volume < 0.5) vIcon.className = "fa-solid fa-volume-low text-xs text-gray-400";
-            else vIcon.className = "fa-solid fa-volume-high text-xs text-gray-400";
-        });
-
+        document.getElementById('volumeSlider').addEventListener('input', (e) => audioEl.volume = e.target.value);
         document.getElementById('seekSlider').addEventListener('input', (e) => {
-            if (audioEl.duration && !isNaN(audioEl.duration)) {
-                audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
-            }
+            if (audioEl.duration && !isNaN(audioEl.duration)) audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
         });
-
-        function copyDiscordTag() {
-            const tag = (PROFILE_DATA && (PROFILE_DATA.discordTag || PROFILE_DATA.username)) || targetHandle;
-            navigator.clipboard.writeText(tag).then(() => {
-                alert(`Copied Discord username: @${tag}`);
-            });
-        }
 
         document.getElementById('gateOverlay').addEventListener('click', function() {
             this.style.display = 'none';
-            if (audioEl.src) {
-                audioEl.play().then(() => {
-                    document.getElementById('playIcon').className = 'fa-solid fa-pause';
-                }).catch(() => {});
-            }
+            if (audioEl.src) audioEl.play().then(() => { document.getElementById('playIcon').className = 'fa-solid fa-pause'; }).catch(() => {});
         });
 
         document.addEventListener('DOMContentLoaded', loadProfile);
