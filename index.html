@@ -46,6 +46,7 @@
             scroll-behavior: smooth;
         }
 
+        /* Subtle analog noise texture */
         .noise-overlay {
             position: fixed;
             inset: 0;
@@ -55,15 +56,18 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
+        /* Clean Brutalist Hover Transitions */
         .clean-invert {
             transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
             cursor: pointer;
         }
+        
         .clean-invert:hover:not(:disabled) {
             background-color: #ffffff !important;
             color: #000000 !important;
             border-color: #ffffff !important;
         }
+        
         .clean-invert:disabled {
             opacity: 0.4;
             cursor: not-allowed;
@@ -75,6 +79,7 @@
             position: relative;
             display: inline-block;
         }
+        
         .strike-hover::after {
             content: '';
             position: absolute;
@@ -85,6 +90,7 @@
             background-color: #ffffff;
             transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        
         .strike-hover:hover::after {
             width: 100%;
         }
@@ -100,21 +106,26 @@
             flex-direction: column;
             z-index: 100;
         }
+        
         .socials-container:hover .socials-dropdown {
             display: flex;
         }
+        
         .socials-dropdown a {
             padding: 10px 16px;
             border-bottom: 1px solid #222;
             transition: background-color 0.2s;
         }
+        
         .socials-dropdown a:hover {
             background-color: #111;
         }
+        
         .socials-dropdown a:last-child {
             border-bottom: none;
         }
 
+        /* Form Inputs */
         .clean-input {
             background: transparent;
             border: none;
@@ -124,13 +135,16 @@
             transition: border-color 0.25s ease;
             outline: none;
         }
+        
         .clean-input:focus {
             border-bottom: 1px solid #ffffff;
         }
+        
         .clean-input::placeholder {
             color: #555555;
         }
 
+        /* Horizontal Carousel Containers */
         .catalog-scroll-container {
             display: flex;
             flex-wrap: nowrap;
@@ -142,15 +156,19 @@
             scrollbar-width: thin;
             scrollbar-color: #444 #000;
         }
+        
         .catalog-scroll-container::-webkit-scrollbar {
             height: 5px;
         }
+        
         .catalog-scroll-container::-webkit-scrollbar-track {
             background: #000;
         }
+        
         .catalog-scroll-container::-webkit-scrollbar-thumb {
             background: #333;
         }
+        
         .catalog-scroll-container::-webkit-scrollbar-thumb:hover {
             background: #fff;
         }
@@ -163,29 +181,36 @@
             background: #050505;
             transition: border-color 0.25s ease;
         }
+        
         .catalog-item:hover {
             border-color: #ffffff;
         }
 
+        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
             height: 4px;
         }
+        
         .custom-scrollbar::-webkit-scrollbar-track {
             background: #000;
         }
+        
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #333;
         }
+        
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #666;
         }
 
+        /* Fade-up animations */
         .fade-up {
             opacity: 0;
             transform: translateY(35px);
             transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        
         .fade-up.visible {
             opacity: 1;
             transform: translateY(0);
@@ -216,6 +241,7 @@
             <a href="#community" class="strike-hover hover:text-white transition-colors duration-300">Community</a>
             <a href="#submit" class="strike-hover hover:text-white transition-colors duration-300">Submit</a>
             
+            <!-- Socials Dropdown -->
             <div class="relative socials-container py-2 cursor-pointer">
                 <span class="strike-hover hover:text-white transition-colors duration-300 flex items-center gap-1">
                     Socials <span class="text-[8px]">▼</span>
@@ -227,10 +253,12 @@
                 </div>
             </div>
 
+            <!-- Profile Dashboard Trigger -->
             <button id="navDashboardBtn" onclick="openDashboardModal()" class="border border-white px-3 py-1.5 text-white font-oswald tracking-widest hover:bg-white hover:text-black transition-colors hidden">
                 My Link ↗
             </button>
 
+            <!-- Admin Link (Only for Founders) -->
             <a href="#admin" id="navAdminLink" class="strike-hover text-red-500 hidden font-bold">Admin Console</a>
         </div>
     </nav>
@@ -245,7 +273,7 @@
         </p>
     </header>
 
-    <!-- About Section -->
+    <!-- About Imprint -->
     <section id="about" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
             <div class="lg:col-span-4 fade-up">
@@ -259,7 +287,7 @@
         </div>
     </section>
 
-    <!-- Releases Section -->
+    <!-- Releases Catalog Section -->
     <section id="releases" class="w-full max-w-[100vw] overflow-hidden py-24 md:py-32 border-b border-[#111]">
         <div class="px-6 mx-auto max-w-7xl w-full mb-12 fade-up">
             <div class="flex justify-between items-end border-b border-[#333] pb-6">
@@ -272,7 +300,7 @@
         </div>
     </section>
 
-    <!-- Artists Section -->
+    <!-- Artists Roster Section -->
     <section id="artists" class="w-full max-w-[100vw] overflow-hidden py-24 md:py-32 border-b border-[#111]">
         <div class="px-6 mx-auto max-w-7xl w-full mb-12 fade-up">
             <div class="flex justify-between items-end border-b border-[#333] pb-6">
@@ -285,7 +313,9 @@
         </div>
     </section>
 
-    <!-- Lucid Links Showcase Section -->
+    <!-- ======================================================== -->
+    <!-- 02. LUCID LINKS (D3LTA & Guns.lol Hub Showcase)          -->
+    <!-- ======================================================== -->
     <section id="lucid-links" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
         <div class="mb-12 border-b border-[#333] pb-6 fade-up">
             <span class="font-oswald text-2xl text-gray-500 block mb-1">02</span>
@@ -310,17 +340,53 @@
                     </div>
                 </div>
 
+                <!-- Live Profile Simulator Dock -->
                 <div class="lg:col-span-5 flex justify-center">
                     <div id="heroCardPreview" class="w-full max-w-sm border border-[#333] bg-black/85 backdrop-blur-md p-6 rounded-2xl relative shadow-2xl transition-all">
                         <div class="flex flex-col items-center text-center">
                             <div class="w-24 h-24 rounded-full border-2 border-white/20 mb-3 overflow-hidden relative">
                                 <img src="https://cdn.discordapp.com/embed/avatars/0.png" id="heroPfp" class="w-full h-full object-cover">
                             </div>
-                            <h4 id="heroUsername" class="font-bold text-xl text-white tracking-wide">Creator</h4>
-                            <p id="heroBio" class="text-xs text-gray-400 mt-1 font-mono">Underground sound designer</p>
+                            <h4 id="heroUsername" class="font-bold text-xl text-white tracking-wide flex items-center gap-2">
+                                <span>Creator</span>
+                            </h4>
+                            <div id="heroBadgesRow" class="flex flex-wrap justify-center gap-1.5 my-3">
+                                <span class="text-[9px] font-mono px-2 py-0.5 border border-white text-black bg-white uppercase font-bold">FOUNDER</span>
+                                <span class="text-[9px] font-mono px-2 py-0.5 border border-[#333] bg-[#111] uppercase tracking-wider">ARTIST</span>
+                            </div>
+                            <p id="heroBio" class="text-xs text-gray-400 mb-4 font-mono">Underground sound designer</p>
+                            
+                            <!-- Live Discord Presence Dock -->
+                            <div class="w-full bg-[#0a0a0a] border border-[#222] p-3 rounded-xl flex items-center gap-3 text-left">
+                                <div class="relative flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-full bg-[#151515] overflow-hidden">
+                                        <img src="https://cdn.discordapp.com/embed/avatars/1.png" class="w-full h-full object-cover">
+                                    </div>
+                                    <span class="w-3 h-3 bg-red-500 border-2 border-black rounded-full absolute bottom-0 right-0"></span>
+                                </div>
+                                <div class="flex-1 truncate">
+                                    <p class="text-xs font-bold text-white truncate font-sans">Discord User <span class="text-[9px] border border-[#333] px-1 py-0.5 rounded text-gray-400">KEY</span></p>
+                                    <p class="text-[10px] text-gray-500 font-mono truncate">Connecting to gateway...</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up">
+            <div class="border border-[#222] bg-[#050505] p-6">
+                <h4 class="font-oswald text-xl uppercase tracking-wider mb-2">Free Forever</h4>
+                <p class="text-xs text-gray-500 uppercase tracking-widest leading-relaxed">No hidden subscriptions, no fees, no lockouts for collective producers.</p>
+            </div>
+            <div class="border border-[#222] bg-[#050505] p-6">
+                <h4 class="font-oswald text-xl uppercase tracking-wider mb-2">Customizable</h4>
+                <p class="text-xs text-gray-500 uppercase tracking-widest leading-relaxed">Full control over your audio, glow, opacity, blur, fonts, and custom cursors.</p>
+            </div>
+            <div class="border border-[#222] bg-[#050505] p-6">
+                <h4 class="font-oswald text-xl uppercase tracking-wider mb-2">Fast & Reliable</h4>
+                <p class="text-xs text-gray-500 uppercase tracking-widest leading-relaxed">Built directly on Upstash datastores with sub-second response times.</p>
             </div>
         </div>
     </section>
@@ -343,7 +409,7 @@
         </div>
     </section>
 
-    <!-- Community Section -->
+    <!-- Community & Server Interface -->
     <section id="community" class="w-full max-w-7xl mx-auto px-6 py-24 md:py-32 border-b border-[#111]">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
             <div class="lg:col-span-4 fade-up">
@@ -442,7 +508,7 @@
                         <i class="fa-solid fa-magnifying-glass"></i> Submission Lookup
                     </h3>
                     <div class="flex flex-col gap-4 mb-4">
-                        <input type="text" id="adminSearchInput" class="clean-input pb-2 text-sm" placeholder="lcd-demo-0001">
+                        <input type="text" id="adminSearchInput" class="clean-input pb-2 text-sm" placeholder="Enter Submission ID (lcd-demo-...)">
                         <button type="button" id="adminSearchBtn" class="font-oswald text-xs uppercase tracking-widest border border-white px-4 py-2.5 clean-invert w-full">Search DB</button>
                     </div>
                     <div id="adminSearchResult" class="bg-black border border-[#222] p-4 text-xs font-mono text-gray-400 tracking-wider">Awaiting query...</div>
@@ -626,7 +692,7 @@
                     </button>
                 </div>
 
-                <!-- Assets Uploader (Multi-CDN Direct Upload) -->
+                <!-- Assets Uploader (Direct Base64 File Upload to API Proxy) -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Assets Uploader</h3>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -661,7 +727,7 @@
                     </div>
                 </div>
 
-                <!-- Music Player Metadata (Fixes 'Background audio' bug) -->
+                <!-- Music Player Metadata -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Music Player Track Metadata</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -684,7 +750,7 @@
                     </div>
                 </div>
 
-                <!-- Identity Details (Sub-bio, Location, Joined Date, Discord Tag) -->
+                <!-- Identity Details -->
                 <div class="border border-[#222] bg-[#050505] p-6">
                     <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-white mb-6 border-b border-[#222] pb-3">Identity & Bio Details</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -945,11 +1011,11 @@
                 if (res.ok) {
                     CURRENT_USER = await res.json();
                     const avatarUrl = CURRENT_USER.avatar 
-                        ? (CURRENT_USER.avatar.startsWith('http') ? CURRENT_USER.avatar : `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png`) 
+                        ? `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png` 
                         : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
                     document.getElementById('discordUserContent').innerHTML = `
-                        <img src="${escapeHtml(avatarUrl)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" class="w-8 h-8 rounded-full border border-[#333]">
+                        <img src="${escapeHtml(avatarUrl)}" class="w-8 h-8 rounded-full border border-[#333]">
                         <span class="text-white font-bold">${escapeHtml(CURRENT_USER.username)}</span>
                         <a href="/api/master?action=logout" class="text-[10px] text-gray-500 hover:text-white underline ml-2">Logout</a>
                     `;
@@ -993,7 +1059,7 @@
             if (tabId === 'customize') renderTabsEditor();
         }
 
-        // Direct Multi-Provider Client-Side Upload (No 4.5MB Vercel Limits & Safe Text Parsing)
+        // Direct Backend Proxy Uploader (Bypasses Vercel Payload Limit & Catbox Browser CORS)
         async function uploadAssetFile(input, targetInputId) {
             const file = input.files[0];
             if (!file) return;
@@ -1002,71 +1068,42 @@
             const originalText = btn ? btn.textContent : "Upload File";
             if (btn) btn.textContent = "Uploading...";
 
-            try {
-                let uploadedUrl = null;
-
-                // Provider 1: qu.ax (Official upload endpoint is https://qu.ax/upload.php)
+            const reader = new FileReader();
+            reader.onload = async function(e) {
                 try {
-                    const fd = new FormData();
-                    fd.append('files[]', file);
-                    const res = await fetch('https://qu.ax/upload.php', {
+                    const res = await fetch('/api/master?action=upload', {
                         method: 'POST',
-                        body: fd
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fileData: e.target.result,
+                            fileName: file.name
+                        })
                     });
-                    const text = await res.text();
-                    if (text.startsWith('{')) {
-                        const data = JSON.parse(text);
-                        if (data && data.success && data.files && data.files[0] && data.files[0].url) {
-                            uploadedUrl = data.files[0].url;
+
+                    const data = await res.json();
+                    
+                    if (data.success && data.url) {
+                        document.getElementById(targetInputId).value = data.url;
+
+                        if (targetInputId === 'custAudio') {
+                            const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+                            const titleField = document.getElementById('custTrackTitle');
+                            const artistField = document.getElementById('custTrackArtist');
+                            if (titleField && !titleField.value) titleField.value = cleanName;
+                            if (artistField && !artistField.value && CURRENT_USER) artistField.value = CURRENT_USER.username;
                         }
+                        if (btn) btn.textContent = "Uploaded!";
+                    } else {
+                        alert("Upload failed: " + (data.error || "Please try pasting a direct file URL instead."));
+                        if (btn) btn.textContent = "Failed";
                     }
-                } catch(e) {}
-
-                // Provider 2: pomf2.lain.la fallback
-                if (!uploadedUrl) {
-                    try {
-                        const fd = new FormData();
-                        fd.append('files[]', file);
-                        const res = await fetch('https://pomf2.lain.la/upload.php', {
-                            method: 'POST',
-                            body: fd
-                        });
-                        const txt = await res.text();
-                        if (txt.startsWith('{')) {
-                            const data = JSON.parse(txt);
-                            if (data && data.success && data.files && data.files[0] && data.files[0].url) {
-                                uploadedUrl = data.files[0].url;
-                            }
-                        }
-                    } catch(e) {}
-                }
-
-                if (uploadedUrl) {
-                    document.getElementById(targetInputId).value = uploadedUrl;
-
-                    // Automatically pre-fill track metadata when uploading an audio file
-                    if (targetInputId === 'custAudio') {
-                        const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
-                        const titleField = document.getElementById('custTrackTitle');
-                        const artistField = document.getElementById('custTrackArtist');
-                        if (titleField && (!titleField.value || titleField.value === 'VOLTA')) {
-                            titleField.value = cleanName;
-                        }
-                        if (artistField && (!artistField.value || artistField.value === 'WN3bula') && CURRENT_USER) {
-                            artistField.value = CURRENT_USER.username;
-                        }
-                    }
-
-                    if (btn) btn.textContent = "Uploaded!";
-                } else {
-                    alert("Upload services are busy. Please paste a direct streamable file URL (.mp3, .png, .mp4).");
+                } catch(err) {
+                    alert("Upload error: " + err.message);
                     if (btn) btn.textContent = "Failed";
                 }
-            } catch(err) {
-                alert("Upload failed: " + err.message);
-                if (btn) btn.textContent = "Failed";
-            }
-            setTimeout(() => { if (btn) btn.textContent = originalText; }, 2500);
+                setTimeout(() => { if (btn) btn.textContent = originalText; }, 2500);
+            };
+            reader.readAsDataURL(file);
         }
 
         // Dynamic Custom Tabs Editor
@@ -1224,8 +1261,8 @@
                 if (c.trackTitle) document.getElementById('custTrackTitle').value = c.trackTitle;
                 if (c.trackArtist) document.getElementById('custTrackArtist').value = c.trackArtist;
                 if (c.trackCover) document.getElementById('custTrackCover').value = c.trackCover;
-                if (c.subBio) document.getElementById('custSubBio').value = c.subBio;
                 if (c.description) document.getElementById('custBioText').value = c.description;
+                if (c.subBio) document.getElementById('custSubBio').value = c.subBio;
                 if (c.location) document.getElementById('custLocationText').value = c.location;
                 if (c.discordTag) document.getElementById('custDiscordTag').value = c.discordTag;
                 if (c.bgEffect) document.getElementById('custBgEffect').value = c.bgEffect;
@@ -1273,8 +1310,8 @@
                     document.getElementById('custTrackTitle').value = data.trackTitle || '';
                     document.getElementById('custTrackArtist').value = data.trackArtist || '';
                     document.getElementById('custTrackCover').value = data.trackCover || '';
-                    document.getElementById('custSubBio').value = data.subBio || '';
                     document.getElementById('custBioText').value = data.description || '';
+                    document.getElementById('custSubBio').value = data.subBio || '';
                     document.getElementById('custLocationText').value = data.location || '';
                     document.getElementById('custDiscordTag').value = data.discordTag || data.discordUsername || CURRENT_USER.username;
 
@@ -1301,32 +1338,16 @@
             if (!CURRENT_USER) return;
             const selectedIconBadges = Array.from(document.querySelectorAll('input[name="iconBadgeCheck"]:checked')).map(cb => cb.value);
 
-            // Clean invalid download links (e.g. gofile / filewire HTML links)
-            let enteredAvatar = document.getElementById('custAvatar').value.trim();
-            if (enteredAvatar.includes('gofile.io') || enteredAvatar.includes('filewire.com')) {
-                alert("Please do not paste Gofile or Filewire landing page links for your avatar. It has been automatically reset to your Discord avatar.");
-                enteredAvatar = '';
-            }
-
-            let enteredAudio = document.getElementById('custAudio').value.trim();
-            if (enteredAudio.includes('gofile.io') || enteredAudio.includes('filewire.com')) {
-                alert("Please do not paste Gofile or Filewire download page links for audio. Use the 'Upload File' button instead.");
-                enteredAudio = '';
-            }
-
-            const fallbackDcAvatar = CURRENT_USER.avatar ? (CURRENT_USER.avatar.startsWith('http') ? CURRENT_USER.avatar : `https://cdn.discordapp.com/avatars/${CURRENT_USER.id}/${CURRENT_USER.avatar}.png?size=256`) : 'https://cdn.discordapp.com/embed/avatars/0.png';
-            const resolvedAvatar = enteredAvatar || fallbackDcAvatar;
-
             const payload = {
                 userId: CURRENT_USER.id,
                 username: document.getElementById('accountHandleField').value.trim() || CURRENT_USER.username,
                 background: document.getElementById('custBackground').value.trim(),
-                audio: enteredAudio,
-                avatar: resolvedAvatar,
+                audio: document.getElementById('custAudio').value.trim(),
+                avatar: document.getElementById('custAvatar').value.trim(),
                 cursor: document.getElementById('custCursor').value.trim(),
                 trackTitle: document.getElementById('custTrackTitle').value.trim(),
                 trackArtist: document.getElementById('custTrackArtist').value.trim() || CURRENT_USER.username,
-                trackCover: document.getElementById('custTrackCover').value.trim() || resolvedAvatar,
+                trackCover: document.getElementById('custTrackCover').value.trim(),
                 subBio: document.getElementById('custSubBio').value.trim(),
                 description: document.getElementById('custBioText').value.trim(),
                 location: document.getElementById('custLocationText').value.trim(),
@@ -1429,7 +1450,7 @@
             } catch(e) {}
         }
 
-        // Demo Submission Pipeline
+        // Demo Submission via Direct Base64 Media Upload
         document.getElementById('automatedSubmitForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -1439,38 +1460,44 @@
             btn.innerText = 'UPLOADING TO SECURE STORAGE...';
             btn.disabled = true;
 
-            try {
-                let directUrl = null;
-                const fd = new FormData();
-                fd.append('files[]', file);
-                const qRes = await fetch('https://qu.ax/upload.php', { method: 'POST', body: fd });
-                const qText = await qRes.text();
-                if (qText.startsWith('{')) {
-                    const qData = JSON.parse(qText);
-                    if (qData.success && qData.files && qData.files[0]?.url) directUrl = qData.files[0].url;
-                }
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                try {
+                    const upRes = await fetch('/api/master?action=upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fileData: evt.target.result,
+                            fileName: file.name
+                        })
+                    });
+                    const upData = await upRes.json();
 
-                const subRes = await fetch('/api/master?action=submitdemo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: document.getElementById('track_title').value.trim(),
-                        artist: document.getElementById('artist').value.trim(),
-                        email: document.getElementById('email').value.trim(),
-                        fileUrl: directUrl || 'Direct Upload'
-                    })
-                });
+                    if (!upData.success || !upData.url) throw new Error("Upload failed");
 
-                if (subRes.ok) {
-                    const result = await subRes.json();
-                    document.getElementById('displaySubmissionId').textContent = result.submissionId;
-                    document.getElementById('submissionResultBox').classList.remove('hidden');
-                    btn.innerText = 'SUCCESS';
+                    const subRes = await fetch('/api/master?action=submitdemo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: document.getElementById('track_title').value.trim(),
+                            artist: document.getElementById('artist').value.trim(),
+                            email: document.getElementById('email').value.trim(),
+                            fileUrl: upData.url
+                        })
+                    });
+
+                    if (subRes.ok) {
+                        const result = await subRes.json();
+                        document.getElementById('displaySubmissionId').textContent = result.submissionId;
+                        document.getElementById('submissionResultBox').classList.remove('hidden');
+                        btn.innerText = 'SUCCESS';
+                    }
+                } catch(err) {
+                    btn.innerText = 'FAILED TO SUBMIT';
+                    alert("Submission error: " + err.message);
                 }
-            } catch(err) {
-                btn.innerText = 'FAILED TO SUBMIT';
-                alert("Submission error: " + err.message);
-            }
+            };
+            reader.readAsDataURL(file);
         });
 
         document.getElementById('copyIdBtn')?.addEventListener('click', function() {
