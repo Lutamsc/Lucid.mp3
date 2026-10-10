@@ -1,6 +1,11 @@
 {
+  "crons": [
+    {
+      "path": "/api/bot?action=spotifysync",
+      "schedule": "*/15 * * * *"
+    }
+  ],
   "rewrites": [
-    { "source": "/api/:match*", "destination": "/api/master" },
     { "source": "/@:handle", "destination": "/profile.html?handle=:handle" }
   ]
 }
